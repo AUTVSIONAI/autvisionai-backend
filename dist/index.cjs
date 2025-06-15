@@ -392,6 +392,19 @@ var askLLMSchema = import_zod2.z.object({
     metadata: import_zod2.z.record(import_zod2.z.any()).optional()
   }).optional()
 });
+var invokeLLMSchema = import_zod2.z.object({
+  prompt: import_zod2.z.string().min(1, "Prompt n\xE3o pode estar vazio"),
+  options: import_zod2.z.object({
+    systemPrompt: import_zod2.z.string().optional(),
+    temperature: import_zod2.z.number().min(0).max(2).optional(),
+    maxTokens: import_zod2.z.number().min(1).max(4e3).optional(),
+    modelKey: import_zod2.z.string().optional()
+  }).optional(),
+  context: import_zod2.z.object({
+    source: import_zod2.z.string().optional(),
+    timestamp: import_zod2.z.string().optional()
+  }).optional()
+});
 async function llmRoutes(fastify2) {
   const openRouter = new OpenRouterService();
   fastify2.post("/ask", async (request, reply) => {
@@ -441,6 +454,77 @@ async function llmRoutes(fastify2) {
       return reply.code(500).send({
         success: false,
         error: "Erro interno do servidor",
+        code: "INTERNAL_ERROR"
+      });
+    }
+  });
+  fastify2.post("/invoke", async (request, reply) => {
+    try {
+      const { prompt, options = {}, context } = invokeLLMSchema.parse(request.body);
+      fastify2.log.info(`\u{1F525} Nova invoca\xE7\xE3o LLM: "${prompt.substring(0, 100)}..."`);
+      const startTime = Date.now();
+      const finalSystemPrompt = options.systemPrompt || "Voc\xEA \xE9 o AUTVISION, um assistente de IA avan\xE7ado. Responda de forma \xFAtil e precisa.";
+      const result = await openRouter.askWithFallback(prompt, finalSystemPrompt, {
+        temperature: options.temperature,
+        maxTokens: options.maxTokens,
+        modelKey: options.modelKey
+      });
+      const processingTime = Date.now() - startTime;
+      await fastify2.supabase.from("llm_requests").insert({
+        model_key: result.modelUsed,
+        model_name: result.modelUsed,
+        prompt: prompt.substring(0, 1e3),
+        response: result.response.substring(0, 2e3),
+        status: "completed",
+        tokens_used: result.tokensUsed || 0,
+        response_time: processingTime,
+        created_at: (/* @__PURE__ */ new Date()).toISOString(),
+        updated_at: (/* @__PURE__ */ new Date()).toISOString()
+      });
+      fastify2.log.info(`\u2705 LLM invoke respondeu via ${result.modelUsed} (${processingTime}ms)`);
+      return reply.send({
+        success: true,
+        data: {
+          content: result.response,
+          model: result.modelUsed,
+          modelKey: result.modelUsed,
+          processing_time: processingTime,
+          usage: {
+            total_tokens: result.tokensUsed || 0,
+            prompt_tokens: 0,
+            completion_tokens: result.tokensUsed || 0
+          },
+          timestamp: (/* @__PURE__ */ new Date()).toISOString()
+        }
+      });
+    } catch (error) {
+      fastify2.log.error("Erro na rota /llm/invoke:", error);
+      const processingTime = Date.now() - Date.now();
+      try {
+        await fastify2.supabase.from("llm_requests").insert({
+          model_key: "unknown",
+          model_name: "unknown",
+          prompt: request.body?.prompt?.substring(0, 1e3) || "",
+          error_message: error.message,
+          status: "failed",
+          response_time: processingTime,
+          created_at: (/* @__PURE__ */ new Date()).toISOString(),
+          updated_at: (/* @__PURE__ */ new Date()).toISOString()
+        });
+      } catch (logError) {
+        fastify2.log.error("Erro ao gravar log de erro:", logError);
+      }
+      if (error instanceof import_zod2.z.ZodError) {
+        return reply.code(400).send({
+          success: false,
+          error: "Dados inv\xE1lidos",
+          details: error.errors,
+          code: "VALIDATION_ERROR"
+        });
+      }
+      return reply.code(500).send({
+        success: false,
+        error: error.message || "Erro interno do servidor",
         code: "INTERNAL_ERROR"
       });
     }
