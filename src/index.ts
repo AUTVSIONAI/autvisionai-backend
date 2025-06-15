@@ -64,7 +64,8 @@ fastify.addHook('preHandler', async (request, reply) => {
 /**
  * 🛡️ CONFIGURAÇÃO DE SEGURANÇA
  */
-async function setupSecurity() {  // CORS
+async function setupSecurity() {
+  // CORS - DEVE SER O PRIMEIRO!
   await fastify.register(cors, {
     origin: [
       'http://localhost:5173',
@@ -78,12 +79,15 @@ async function setupSecurity() {  // CORS
       /\.autvisionai\.com$/,
       /\.vercel\.app$/
     ],
-    credentials: true
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key', 'Origin']
   });
 
   // Helmet para headers de segurança
   await fastify.register(helmet, {
-    contentSecurityPolicy: false
+    contentSecurityPolicy: false,
+    crossOriginEmbedderPolicy: false
   });
 
   // Rate limiting

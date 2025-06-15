@@ -1563,10 +1563,13 @@ async function setupSecurity() {
       /\.autvisionai\.com$/,
       /\.vercel\.app$/
     ],
-    credentials: true
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "x-api-key", "Origin"]
   });
   await fastify.register(import_helmet.default, {
-    contentSecurityPolicy: false
+    contentSecurityPolicy: false,
+    crossOriginEmbedderPolicy: false
   });
   await fastify.register(import_rate_limit.default, {
     max: 100,
