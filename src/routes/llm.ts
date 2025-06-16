@@ -885,4 +885,43 @@ export default async function llmRoutes(fastify: FastifyInstance) {
       });
     }
   });
+
+  /**
+   * 🔥 POST /llm/dispatcher/force-init
+   * Força reinicialização completa do dispatcher
+   */
+  fastify.post('/dispatcher/force-init', async (request, reply) => {
+    try {
+      // Força reinicialização completa
+      await llmDispatcher.forceRefresh();
+      
+      // Espera um pouco e pega stats atualizadas
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      const stats = llmDispatcher.getProviderStats();
+      
+      return reply.send({
+        success: true,
+        data: {
+          message: 'Dispatcher reinicializado com sucesso',
+          providers: stats,
+          activeProviders: stats.filter(p => p.isActive).length,
+          totalProviders: stats.length,
+          envDebug: {
+            hasOpenRouter: !!process.env.OPENROUTER_API_KEY,
+            hasGroq: !!process.env.GROQ_API_KEY,
+            hasTogether: !!process.env.TOGETHER_API_KEY,
+            hasGemini: !!process.env.GEMINI_API_KEY
+          }
+        },
+        message: 'Força reinicialização executada'
+      });
+    } catch (error: any) {
+      fastify.log.error('Erro na força reinicialização:', error);
+      return reply.code(500).send({
+        success: false,
+        error: error.message,
+        code: 'FORCE_INIT_ERROR'
+      });
+    }
+  });
 }

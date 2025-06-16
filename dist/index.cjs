@@ -71217,6 +71217,36 @@ async function llmRoutes(fastify2) {
       });
     }
   });
+  fastify2.post("/dispatcher/force-init", async (request, reply) => {
+    try {
+      await llmDispatcher.forceRefresh();
+      await new Promise((resolve) => setTimeout(resolve, 1e3));
+      const stats = llmDispatcher.getProviderStats();
+      return reply.send({
+        success: true,
+        data: {
+          message: "Dispatcher reinicializado com sucesso",
+          providers: stats,
+          activeProviders: stats.filter((p) => p.isActive).length,
+          totalProviders: stats.length,
+          envDebug: {
+            hasOpenRouter: !!process.env.OPENROUTER_API_KEY,
+            hasGroq: !!process.env.GROQ_API_KEY,
+            hasTogether: !!process.env.TOGETHER_API_KEY,
+            hasGemini: !!process.env.GEMINI_API_KEY
+          }
+        },
+        message: "For\xE7a reinicializa\xE7\xE3o executada"
+      });
+    } catch (error) {
+      fastify2.log.error("Erro na for\xE7a reinicializa\xE7\xE3o:", error);
+      return reply.code(500).send({
+        success: false,
+        error: error.message,
+        code: "FORCE_INIT_ERROR"
+      });
+    }
+  });
 }
 
 // src/routes/n8n.ts
