@@ -135,14 +135,60 @@ export class OpenRouterService {
 
     return response.data;
   }
+  /**
+   * 🧪 Chama um modelo específico com API key personalizada (para testes)
+   */
+  async callModel(
+    modelKey: string,
+    prompt: string,
+    apiKey: string,
+    options?: {
+      systemPrompt?: string;
+      temperature?: number;
+      max_tokens?: number;
+    }
+  ): Promise<{ response: string; tokens_used?: number }> {
+    const messages = [];
+    
+    if (options?.systemPrompt) {
+      messages.push({ role: 'system', content: options.systemPrompt });
+    }
+    
+    messages.push({ role: 'user', content: prompt });
+
+    const response = await axios.post(
+      'https://openrouter.ai/api/v1/chat/completions',
+      {
+        model: modelKey,
+        messages,
+        max_tokens: options?.max_tokens || 1000,
+        temperature: options?.temperature || 0.7
+      },
+      {
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+          'HTTP-Referer': 'https://autvision.ai',
+          'X-Title': 'AUTVISION Backend'
+        },
+        timeout: 30000
+      }
+    );
+
+    const data = response.data;
+    return {
+      response: data.choices[0]?.message?.content || 'Sem resposta',
+      tokens_used: data.usage?.total_tokens
+    };
+  }
 
   /**
    * 📋 Retorna lista de modelos disponíveis
    */
-  getAvailableModels(): Array<{name: string; model: string; configured: boolean}> {
+  getAvailableModels(): Array<{name: string; model_key: string; configured: boolean}> {
     return this.models.map(model => ({
       name: model.name,
-      model: model.model,
+      model_key: model.model,
       configured: !!(model.apiKey && model.apiKey !== 'CONFIGURE_SUA_CHAVE_OPENROUTER_AQUI')
     }));
   }

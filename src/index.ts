@@ -5,18 +5,21 @@ import rateLimit from '@fastify/rate-limit';
 import { config } from 'dotenv';
 import { dirname, join } from 'path';
 
-// Configuração para CommonJS (compatível com .cjs)
-const __dirname = process.cwd();
+// Para bundle CJS, usar o diretório atual do processo e subir uma pasta
+const projectRoot = process.cwd().includes('backend-autvision') ? 
+  process.cwd() : 
+  join(process.cwd(), 'backend-autvision');
 
-// Carrega variáveis de ambiente do arquivo correto
-config({ path: join(__dirname, '.env.server') });
+// Carrega variáveis de ambiente do arquivo correto  
+config({ path: join(projectRoot, '.env.server') });
 
 // Debug: verificar se as variáveis foram carregadas
 console.log('🔍 DEBUG - Variáveis de ambiente:');
 console.log('- SUPABASE_URL:', process.env.SUPABASE_URL ? '✅ Definida' : '❌ Não encontrada');
 console.log('- SUPABASE_SERVICE_ROLE_KEY:', process.env.SUPABASE_SERVICE_ROLE_KEY ? '✅ Definida' : '❌ Não encontrada');
+console.log('- OPENROUTER_API_KEY:', process.env.OPENROUTER_API_KEY ? '✅ Definida' : '❌ Não encontrada');
 console.log('- PORT:', process.env.PORT || 'Usando padrão');
-console.log('- Arquivo .env.server path:', join(__dirname, '.env.server'));
+console.log('- Arquivo .env.server path:', join(projectRoot, '.env.server'));
 
 // Plugins
 import supabasePlugin from './plugins/supabaseClient.js';

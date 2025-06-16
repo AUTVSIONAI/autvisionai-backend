@@ -3,11 +3,10 @@
   "version": "1.0.0",
   "description": "Backend modular para AUTVISION AI com TypeScript e Fastify",
   "type": "module",
-  "main": "dist/index.js",
-  "scripts": {
-    "dev": "tsup src/index.ts --watch --onSuccess \"node dist/index.js\"",
+  "main": "dist/index.js",  "scripts": {
+    "dev": "tsup src/index.ts --watch --onSuccess \"node dist/index.cjs\"",
     "build": "tsup src/index.ts",
-    "start": "node dist/index.js",
+    "start": "node dist/index.cjs",
     "docker:build": "docker build -t autvision-backend .",
     "docker:run": "docker run -p 3001:3001 --env-file .env.server autvision-backend"
   },
