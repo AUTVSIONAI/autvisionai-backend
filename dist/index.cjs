@@ -1657,7 +1657,7 @@ async function setupSecurity() {
     ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-    allowedHeaders: ["Content-Type", "Authorization", "x-api-key", "Origin", "Accept", "Access-Control-Allow-Methods", "access-control-allow-methods"],
+    allowedHeaders: ["Content-Type", "Authorization", "x-api-key", "Origin", "Accept"],
     optionsSuccessStatus: 200,
     preflightContinue: false
   });
