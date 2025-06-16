@@ -851,4 +851,38 @@ export default async function llmRoutes(fastify: FastifyInstance) {
       });
     }
   });
+
+  /**
+   * 🔍 GET /llm/debug/env
+   * Debug das variáveis de ambiente (apenas para desenvolvimento)
+   */
+  fastify.get('/debug/env', async (request, reply) => {
+    try {
+      const envVars = {
+        hasOpenRouter: !!process.env.OPENROUTER_API_KEY,
+        hasGroq: !!process.env.GROQ_API_KEY,
+        hasTogether: !!process.env.TOGETHER_API_KEY,
+        hasGemini: !!process.env.GEMINI_API_KEY,
+        hasSupabase: !!process.env.SUPABASE_URL && !!process.env.SUPABASE_SERVICE_ROLE_KEY,
+        nodeEnv: process.env.NODE_ENV,
+        openRouterKeyLength: process.env.OPENROUTER_API_KEY?.length || 0,
+        groqKeyLength: process.env.GROQ_API_KEY?.length || 0,
+        togetherKeyLength: process.env.TOGETHER_API_KEY?.length || 0,
+        geminiKeyLength: process.env.GEMINI_API_KEY?.length || 0
+      };
+      
+      return reply.send({
+        success: true,
+        data: envVars,
+        message: 'Debug das variáveis de ambiente'
+      });
+    } catch (error: any) {
+      fastify.log.error('Erro no debug de ambiente:', error);
+      return reply.code(500).send({
+        success: false,
+        error: error.message,
+        code: 'DEBUG_ENV_ERROR'
+      });
+    }
+  });
 }
