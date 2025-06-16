@@ -67,21 +67,26 @@ export default async function llmRoutes(fastify: FastifyInstance) {
         systemMessage: finalSystemPrompt,
         temperature: 0.7,
         maxTokens: 2048
-      });      // Grava a consulta no log
-      await fastify.supabase
-        .from('llm_interactions')
-        .insert({
-          prompt: prompt.substring(0, 1000),
-          response: result.response.substring(0, 2000),
-          model_used: result.modelUsed,
-          provider_used: result.provider, // 🔥 NOVO CAMPO PARA RASTREAR PROVEDOR
-          agent_id: agentId,
-          tokens_used: result.tokensUsed?.total || 0,
-          attempt_count: result.attemptCount,
-          response_time: result.latency,
-          context: JSON.stringify(context),
-          created_at: new Date().toISOString()
-        });      fastify.log.info(`✅ LLM respondeu via ${result.provider}/${result.modelUsed} (${result.attemptCount} tentativas, ${result.latency}ms)`);
+      });      // Grava a consulta no log (OPCIONAL)
+      try {
+        await fastify.supabase
+          .from('llm_interactions')
+          .insert({
+            prompt: prompt.substring(0, 1000),
+            response: result.response.substring(0, 2000),
+            model_used: result.modelUsed,
+            provider_used: result.provider,
+            agent_id: agentId,
+            tokens_used: result.tokensUsed?.total || 0,
+            attempt_count: result.attemptCount,
+            response_time: result.latency,
+            context: JSON.stringify(context),
+            created_at: new Date().toISOString()
+          });
+      } catch (dbError) {
+        // Log DB é opcional
+        fastify.log.warn('Tabela llm_interactions não existe, continuando sem log DB');
+      }fastify.log.info(`✅ LLM respondeu via ${result.provider}/${result.modelUsed} (${result.attemptCount} tentativas, ${result.latency}ms)`);
 
       return reply.send({
         success: true,
@@ -141,22 +146,27 @@ export default async function llmRoutes(fastify: FastifyInstance) {
         systemMessage: finalSystemPrompt,
         temperature: options.temperature || 0.7,
         maxTokens: options.maxTokens || 2048
-      });const processingTime = result.latency;      // Gravar log na tabela llm_request
-      await fastify.supabase
-        .from('llm_request')
-        .insert({
-          model_key: result.modelUsed,
-          model_name: `${result.provider}/${result.modelUsed}`, // 🔥 INCLUIR PROVEDOR
-          prompt: prompt.substring(0, 1000),
-          response: result.response.substring(0, 2000),
-          status: 'completed',
-          tokens_used: result.tokensUsed?.total || 0,
-          response_time: processingTime,
-          attempt_count: result.attemptCount,
-          provider_used: result.provider, // 🔥 NOVO CAMPO PARA RASTREAR PROVEDOR
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        });      fastify.log.info(`✅ LLM invoke respondeu via ${result.provider}/${result.modelUsed} (${processingTime}ms, ${result.attemptCount} tentativas)`);
+      });const processingTime = result.latency;      // Gravar log na tabela llm_request (OPCIONAL - pode falhar se tabela não existir)
+      try {
+        await fastify.supabase
+          .from('llm_request')
+          .insert({
+            model_key: result.modelUsed,
+            model_name: `${result.provider}/${result.modelUsed}`,
+            prompt: prompt.substring(0, 1000),
+            response: result.response.substring(0, 2000),
+            status: 'completed',
+            tokens_used: result.tokensUsed?.total || 0,
+            response_time: processingTime,
+            attempt_count: result.attemptCount,
+            provider_used: result.provider,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          });
+      } catch (dbError) {
+        // Log DB é opcional, não quebrar se falhar
+        fastify.log.warn('Tabela llm_request não existe, continuando sem log DB');
+      }fastify.log.info(`✅ LLM invoke respondeu via ${result.provider}/${result.modelUsed} (${processingTime}ms, ${result.attemptCount} tentativas)`);
 
       return reply.send({
         success: true,
@@ -181,10 +191,11 @@ export default async function llmRoutes(fastify: FastifyInstance) {
       fastify.log.error('Erro na rota /llm/invoke:', error);
       
       const processingTime = Date.now() - Date.now();
-      
-      // Gravar erro no log
-      try {        await fastify.supabase
-          .from('llm_request')          .insert({
+        // Gravar erro no log (OPCIONAL)
+      try {        
+        await fastify.supabase
+          .from('llm_request')          
+          .insert({
             model_key: 'unknown',
             model_name: 'unknown',
             prompt: request.body?.prompt?.substring(0, 1000) || '',
@@ -195,7 +206,8 @@ export default async function llmRoutes(fastify: FastifyInstance) {
             updated_at: new Date().toISOString()
           });
       } catch (logError) {
-        fastify.log.error('Erro ao gravar log de erro:', logError);
+        // Log DB é opcional
+        fastify.log.warn('Não foi possível gravar log de erro no DB');
       }
       
       if (error instanceof z.ZodError) {

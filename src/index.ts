@@ -21,6 +21,10 @@ console.log('- OPENROUTER_API_KEY:', process.env.OPENROUTER_API_KEY ? '✅ Defin
 console.log('- PORT:', process.env.PORT || 'Usando padrão');
 console.log('- Arquivo .env.server path:', join(projectRoot, '.env.server'));
 
+// Importar e inicializar LLM Dispatcher APÓS env estar carregado
+import { llmDispatcher } from './modules/llm/llmDispatcher.js';
+llmDispatcher.initialize();
+
 // Plugins
 import supabasePlugin from './plugins/supabaseClient.js';
 

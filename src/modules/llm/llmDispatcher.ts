@@ -70,8 +70,16 @@ class LLMDispatcher {
   private readonly CACHE_DURATION = 5 * 60 * 1000; // 5 minutos para cache de respostas
   private readonly HEALTH_CHECK_INTERVAL = 10 * 60 * 1000; // 10 minutos para health check
   private healthCheckTimer?: NodeJS.Timeout;
-  private supabase: any;
-  constructor() {
+  private supabase: any;  constructor() {
+    // NÃO inicializar provedores no constructor
+    // Aguardar chamada explícita para inicializar após env estar carregado
+    console.log('🔧 LLM Dispatcher criado - aguardando inicialização manual');
+  }
+
+  /**
+   * 🚀 Inicialização manual após env estar carregado
+   */
+  public initialize(): void {
     // Verificar se as variáveis de ambiente estão disponíveis
     if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
       console.warn('⚠️ Supabase não configurado, logs serão apenas no console');
@@ -89,11 +97,15 @@ class LLMDispatcher {
     this.startHealthCheckTimer();
     console.log('🚀 LLM Dispatcher inicializado com múltiplos provedores e logging inteligente');
   }
-
   /**
    * 🔧 Inicializa configurações dos provedores
    */
   private initializeProviders(): void {
+    console.log('🔍 DEBUG - Verificando chaves de API:');
+    console.log('- OPENROUTER_API_KEY:', process.env.OPENROUTER_API_KEY ? `✅ ${process.env.OPENROUTER_API_KEY.substring(0, 20)}...` : '❌ Não encontrada');
+    console.log('- GROQ_API_KEY:', process.env.GROQ_API_KEY ? `✅ ${process.env.GROQ_API_KEY.substring(0, 20)}...` : '❌ Não encontrada');
+    console.log('- TOGETHER_API_KEY:', process.env.TOGETHER_API_KEY ? `✅ ${process.env.TOGETHER_API_KEY.substring(0, 20)}...` : '❌ Não encontrada');
+
     // OpenRouter (Principal)
     if (process.env.OPENROUTER_API_KEY) {
       this.providers.set('openrouter', {
@@ -113,9 +125,8 @@ class LLMDispatcher {
         isActive: true,
         avgLatency: 2000
       });
-    }
-
-    // Groq (Ultra rápido)
+      console.log('✅ OpenRouter provedor configurado');
+    }    // Groq (Ultra rápido)
     if (process.env.GROQ_API_KEY) {
       this.providers.set('groq', {
         name: 'Groq',
@@ -133,6 +144,7 @@ class LLMDispatcher {
         isActive: true,
         avgLatency: 800
       });
+      console.log('✅ Groq provedor configurado');
     }
 
     // Together AI
@@ -612,52 +624,60 @@ class LLMDispatcher {
   }
   /**
    * 📊 Loga execução no Supabase - Tabela llm_execution_log
-   */
-  private async logExecutionToSupabase(request: LLMRequest, response: LLMResponse, providerName: string): Promise<void> {
+   */  private async logExecutionToSupabase(request: LLMRequest, response: LLMResponse, providerName: string): Promise<void> {
     try {
+      // TEMPORÁRIO: Apenas logar no console para evitar erros de tabelas
+      console.log('📊 [LLM EXECUTION LOG]:', {
+        provider: providerName,
+        model: response.modelUsed,
+        success: response.success,
+        latency: response.latency,
+        tokens: response.tokensUsed?.total || 0,
+        prompt_preview: request.prompt.substring(0, 100) + '...'
+      });
+      
       // Se Supabase não está configurado, apenas logar no console
       if (!this.supabase) {
-        console.log('📊 [LOG LOCAL]:', {
-          provider: providerName,
-          model: response.modelUsed,
-          success: response.success,
-          latency: response.latency,
-          tokens: response.tokensUsed?.total || 0
-        });
         return;
       }
 
-      const logData = {
-        provider_name: providerName,
-        model_used: response.modelUsed,
-        prompt: request.prompt.substring(0, 1000), // Limitar tamanho
-        response_text: response.response.substring(0, 2000), // Limitar tamanho
-        system_message: request.systemMessage?.substring(0, 500) || null,
-        temperature: request.temperature || 0.7,
-        max_tokens: request.maxTokens || 2048,
-        tokens_used: response.tokensUsed?.total || 0,
-        prompt_tokens: response.tokensUsed?.prompt || 0,
-        completion_tokens: response.tokensUsed?.completion || 0,
-        latency_ms: response.latency,
-        attempt_count: response.attemptCount,
-        success: response.success,
-        cached: response.cached,
-        execution_timestamp: new Date().toISOString(),
-        user_id: null, // Pode ser preenchido posteriormente se houver contexto de usuário
-        session_id: null // Pode ser preenchido posteriormente se houver contexto de sessão
-      };
+      // OPCIONAL: Tentar salvar no Supabase se a tabela existir
+      try {
+        const logData = {
+          provider_name: providerName,
+          model_used: response.modelUsed,
+          prompt: request.prompt.substring(0, 1000),
+          response_text: response.response.substring(0, 2000),
+          system_message: request.systemMessage?.substring(0, 500) || null,
+          temperature: request.temperature || 0.7,
+          max_tokens: request.maxTokens || 2048,
+          tokens_used: response.tokensUsed?.total || 0,
+          prompt_tokens: response.tokensUsed?.prompt || 0,
+          completion_tokens: response.tokensUsed?.completion || 0,
+          latency_ms: response.latency,
+          attempt_count: response.attemptCount,
+          success: response.success,
+          cached: response.cached,
+          execution_timestamp: new Date().toISOString(),
+          user_id: null,
+          session_id: null
+        };
 
-      const { error } = await this.supabase
-        .from('llm_execution_log')
-        .insert([logData]);
+        const { error } = await this.supabase
+          .from('llm_execution_log')
+          .insert([logData]);
 
-      if (error) {
-        console.warn('⚠️ Erro ao salvar log no Supabase:', error.message);
-      } else {
-        console.log('📊 Log de execução salvo no Supabase com sucesso');
+        if (error) {
+          console.warn('⚠️ Tabela llm_execution_log não existe, usando apenas console logs');
+        } else {
+          console.log('📊 Log salvo no Supabase com sucesso');
+        }
+      } catch (dbError) {
+        // Silenciar erros de banco para não quebrar a aplicação
+        console.warn('⚠️ Log DB opcional falhou, continuando...');
       }
     } catch (error: any) {
-      console.warn('⚠️ Falha ao logar execução no Supabase:', error.message);
+      console.warn('⚠️ Falha geral no log:', error.message);
     }
   }
 
