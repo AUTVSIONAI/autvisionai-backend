@@ -12,6 +12,13 @@ yarn-error.log*
 .env.production.local
 .env.server
 
+# CRITICAL: Files with sensitive data - NEVER COMMIT
+VERCEL-ENV-VARS.txt
+*-ENV-VARS.txt
+*.env.txt
+update-vercel-env.ps1
+*vercel-env*
+
 # Build outputs (mantemos dist para Vercel)
 # dist/
 build/
