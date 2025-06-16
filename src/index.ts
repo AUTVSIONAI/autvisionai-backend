@@ -64,8 +64,8 @@ fastify.addHook('preHandler', async (request, reply) => {
 /**
  * 🛡️ CONFIGURAÇÃO DE SEGURANÇA
  */
-async function setupSecurity() {
-  // CORS - DEVE SER O PRIMEIRO!  await fastify.register(cors, {
+async function setupSecurity() {  // CORS - DEVE SER O PRIMEIRO!
+  await fastify.register(cors, {
     origin: [
       'http://localhost:5173',
       'http://localhost:5174', 
@@ -75,17 +75,19 @@ async function setupSecurity() {
       'http://127.0.0.1:5174',
       'http://127.0.0.1:5175',
       'https://autvision.ai',
+      'https://www.autvision.ai',
       'https://autvisionai.com',
-      'https://www.autvisionai.com',
-      'https://autvisionai-real.vercel.app',
-      'https://autvisionai-real-kdt1okwaj-maumautremeterra-gmailcoms-projects.vercel.app', // PRODUÇÃO NOVA
+      'https://www.autvisionai.com',      'https://autvisionai-real.vercel.app',
+      'https://autvisionai-real-kdt1okwaj-maumautremeterra-gmailcoms-projects.vercel.app',
+      'https://autvisionai-real-l4qsyx5h9-maumautremeterra-gmailcoms-projects.vercel.app', // NOVA URL DEPLOYADA
+      'https://autvisionai-real-qnbo9afel-maumautremeterra-gmailcoms-projects.vercel.app', // URL MAIS RECENTE
       /\.autvision\.ai$/,
       /\.autvisionai\.com$/,
       /\.vercel\.app$/
     ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key', 'Origin', 'Accept'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key', 'Origin', 'Accept', 'Access-Control-Allow-Methods', 'access-control-allow-methods'],
     optionsSuccessStatus: 200,
     preflightContinue: false
   });

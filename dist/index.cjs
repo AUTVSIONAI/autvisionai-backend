@@ -417,16 +417,14 @@ async function llmRoutes(fastify2) {
         agentConfig = agent;
       }
       const finalSystemPrompt = agentConfig?.config?.systemPrompt || systemPrompt || "Voc\xEA \xE9 o AUTVISION, um assistente de IA avan\xE7ado. Responda de forma \xFAtil e precisa.";
-      const result = await openRouter.askWithFallback(prompt, finalSystemPrompt);
       await fastify2.supabase.from("llm_interactions").insert({
         prompt: prompt.substring(0, 1e3),
-        // Limita o tamanho
         response: result.response.substring(0, 2e3),
         model_used: result.modelUsed,
         agent_id: agentId,
         tokens_used: result.tokensUsed,
         attempt_count: result.attemptCount,
-        context,
+        context: JSON.stringify(context),
         created_at: (/* @__PURE__ */ new Date()).toISOString()
       });
       fastify2.log.info(`\u2705 LLM respondeu via ${result.modelUsed} (${result.attemptCount} tentativas)`);
@@ -464,35 +462,35 @@ async function llmRoutes(fastify2) {
       fastify2.log.info(`\u{1F525} Nova invoca\xE7\xE3o LLM: "${prompt.substring(0, 100)}..."`);
       const startTime = Date.now();
       const finalSystemPrompt = options.systemPrompt || "Voc\xEA \xE9 o AUTVISION, um assistente de IA avan\xE7ado. Responda de forma \xFAtil e precisa.";
-      const result = await openRouter.askWithFallback(prompt, finalSystemPrompt, {
+      const result2 = await openRouter.askWithFallback(prompt, finalSystemPrompt, {
         temperature: options.temperature,
         maxTokens: options.maxTokens,
         modelKey: options.modelKey
       });
       const processingTime = Date.now() - startTime;
-      await fastify2.supabase.from("llm_requests").insert({
-        model_key: result.modelUsed,
-        model_name: result.modelUsed,
+      await fastify2.supabase.from("llm_request").insert({
+        model_key: result2.modelUsed,
+        model_name: result2.modelUsed,
         prompt: prompt.substring(0, 1e3),
-        response: result.response.substring(0, 2e3),
+        response: result2.response.substring(0, 2e3),
         status: "completed",
-        tokens_used: result.tokensUsed || 0,
+        tokens_used: result2.tokensUsed || 0,
         response_time: processingTime,
         created_at: (/* @__PURE__ */ new Date()).toISOString(),
         updated_at: (/* @__PURE__ */ new Date()).toISOString()
       });
-      fastify2.log.info(`\u2705 LLM invoke respondeu via ${result.modelUsed} (${processingTime}ms)`);
+      fastify2.log.info(`\u2705 LLM invoke respondeu via ${result2.modelUsed} (${processingTime}ms)`);
       return reply.send({
         success: true,
         data: {
-          content: result.response,
-          model: result.modelUsed,
-          modelKey: result.modelUsed,
+          content: result2.response,
+          model: result2.modelUsed,
+          modelKey: result2.modelUsed,
           processing_time: processingTime,
           usage: {
-            total_tokens: result.tokensUsed || 0,
+            total_tokens: result2.tokensUsed || 0,
             prompt_tokens: 0,
-            completion_tokens: result.tokensUsed || 0
+            completion_tokens: result2.tokensUsed || 0
           },
           timestamp: (/* @__PURE__ */ new Date()).toISOString()
         }
@@ -501,7 +499,7 @@ async function llmRoutes(fastify2) {
       fastify2.log.error("Erro na rota /llm/invoke:", error);
       const processingTime = Date.now() - Date.now();
       try {
-        await fastify2.supabase.from("llm_requests").insert({
+        await fastify2.supabase.from("llm_request").insert({
           model_key: "unknown",
           model_name: "unknown",
           prompt: request.body?.prompt?.substring(0, 1e3) || "",
@@ -539,10 +537,10 @@ async function llmRoutes(fastify2) {
           code: "MODEL_NAME_REQUIRED"
         });
       }
-      const result = await openRouter.askWithFallback(prompt, systemPrompt);
+      const result2 = await openRouter.askWithFallback(prompt, systemPrompt);
       return reply.send({
         success: true,
-        data: result
+        data: result2
       });
     } catch (error) {
       fastify2.log.error("Erro na rota /llm/ask-specific:", error);
@@ -1639,17 +1637,29 @@ async function setupSecurity() {
       "http://localhost:5173",
       "http://localhost:5174",
       "http://localhost:5175",
+      "http://localhost:3000",
+      "http://127.0.0.1:5173",
+      "http://127.0.0.1:5174",
+      "http://127.0.0.1:5175",
       "https://autvision.ai",
+      "https://www.autvision.ai",
       "https://autvisionai.com",
       "https://www.autvisionai.com",
       "https://autvisionai-real.vercel.app",
+      "https://autvisionai-real-kdt1okwaj-maumautremeterra-gmailcoms-projects.vercel.app",
+      "https://autvisionai-real-l4qsyx5h9-maumautremeterra-gmailcoms-projects.vercel.app",
+      // NOVA URL DEPLOYADA
+      "https://autvisionai-real-qnbo9afel-maumautremeterra-gmailcoms-projects.vercel.app",
+      // URL MAIS RECENTE
       /\.autvision\.ai$/,
       /\.autvisionai\.com$/,
       /\.vercel\.app$/
     ],
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization", "x-api-key", "Origin"]
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+    allowedHeaders: ["Content-Type", "Authorization", "x-api-key", "Origin", "Accept", "Access-Control-Allow-Methods", "access-control-allow-methods"],
+    optionsSuccessStatus: 200,
+    preflightContinue: false
   });
   await fastify.register(import_helmet.default, {
     contentSecurityPolicy: false,

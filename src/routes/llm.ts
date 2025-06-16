@@ -61,20 +61,19 @@ export default async function llmRoutes(fastify: FastifyInstance) {
       const finalSystemPrompt = agentConfig?.config?.systemPrompt || systemPrompt || 
         'Você é o AUTVISION, um assistente de IA avançado. Responda de forma útil e precisa.';
 
-      // Chama o sistema de fallback
-      const result = await openRouter.askWithFallback(prompt, finalSystemPrompt);
+      // Chama o sistema de fallback      const result = await openRouter.askWithFallback(prompt, finalSystemPrompt);
 
       // Grava a consulta no log
       await fastify.supabase
         .from('llm_interactions')
         .insert({
-          prompt: prompt.substring(0, 1000), // Limita o tamanho
+          prompt: prompt.substring(0, 1000),
           response: result.response.substring(0, 2000),
           model_used: result.modelUsed,
           agent_id: agentId,
           tokens_used: result.tokensUsed,
           attempt_count: result.attemptCount,
-          context,
+          context: JSON.stringify(context),
           created_at: new Date().toISOString()
         });
 
@@ -136,13 +135,11 @@ export default async function llmRoutes(fastify: FastifyInstance) {
         temperature: options.temperature,
         maxTokens: options.maxTokens,
         modelKey: options.modelKey
-      });
+      });      const processingTime = Date.now() - startTime;
 
-      const processingTime = Date.now() - startTime;
-
-      // Gravar log na tabela llm_requests
+      // Gravar log na tabela llm_request
       await fastify.supabase
-        .from('llm_requests')
+        .from('llm_request')
         .insert({
           model_key: result.modelUsed,
           model_name: result.modelUsed,
@@ -179,10 +176,8 @@ export default async function llmRoutes(fastify: FastifyInstance) {
       const processingTime = Date.now() - Date.now();
       
       // Gravar erro no log
-      try {
-        await fastify.supabase
-          .from('llm_requests')
-          .insert({
+      try {        await fastify.supabase
+          .from('llm_request')          .insert({
             model_key: 'unknown',
             model_name: 'unknown',
             prompt: request.body?.prompt?.substring(0, 1000) || '',
