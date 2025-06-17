@@ -36,6 +36,7 @@ import ovosRoutes from './routes/ovos.js';
 import logsRoutes from './routes/logs.js';
 import configRoutes from './routes/config.js';
 import supremoRoutes from './routes/supremo.js';
+import supremoRoutes from './routes/supremo.js';
 
 const fastify = Fastify({
   logger: {
@@ -168,14 +169,14 @@ async function setupRoutes() {
       memory: process.memoryUsage(),
       timestamp: new Date().toISOString()
     };
-  });
-  // Registro das rotas principais
+  });  // Registro das rotas principais
   await fastify.register(commandRoutes, { prefix: '/command' });
   await fastify.register(llmRoutes, { prefix: '/llm' });
   await fastify.register(n8nRoutes, { prefix: '/n8n' });
   await fastify.register(ovosRoutes, { prefix: '/ovos' });
   await fastify.register(logsRoutes, { prefix: '/logs' });
   await fastify.register(configRoutes, { prefix: '/config' });
+  await fastify.register(supremoRoutes, { prefix: '/supremo' });
   await fastify.register(supremoRoutes, { prefix: '/supremo' });
 }
 
