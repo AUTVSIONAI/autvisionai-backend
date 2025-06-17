@@ -35,6 +35,7 @@ import n8nRoutes from './routes/n8n.js';
 import ovosRoutes from './routes/ovos.js';
 import logsRoutes from './routes/logs.js';
 import configRoutes from './routes/config.js';
+import supremoRoutes from './routes/supremo.js';
 
 const fastify = Fastify({
   logger: {
@@ -146,14 +147,14 @@ async function setupRoutes() {
       service: 'AUTVISION Backend',
       version: '1.0.0',
       status: 'running',
-      timestamp: new Date().toISOString(),
-      endpoints: {
+      timestamp: new Date().toISOString(),      endpoints: {
         commands: '/command/*',
         llm: '/llm/*',
         n8n: '/n8n/*', 
         ovos: '/ovos/*',
         logs: '/logs/*',
-        config: '/config/*'
+        config: '/config/*',
+        visionSupremo: '/supremo/*'
       }
     };
   });
@@ -168,7 +169,6 @@ async function setupRoutes() {
       timestamp: new Date().toISOString()
     };
   });
-
   // Registro das rotas principais
   await fastify.register(commandRoutes, { prefix: '/command' });
   await fastify.register(llmRoutes, { prefix: '/llm' });
@@ -176,6 +176,7 @@ async function setupRoutes() {
   await fastify.register(ovosRoutes, { prefix: '/ovos' });
   await fastify.register(logsRoutes, { prefix: '/logs' });
   await fastify.register(configRoutes, { prefix: '/config' });
+  await fastify.register(supremoRoutes, { prefix: '/supremo' });
 }
 
 /**

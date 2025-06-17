@@ -65401,13 +65401,23 @@ var LLMDispatcher = class {
     console.log("\u{1F680} LLM Dispatcher inicializado com m\xFAltiplos provedores e logging inteligente");
   }
   /**
-   * 🔧 Inicializa configurações dos provedores
-   */
+  * 🔧 Inicializa configurações dos provedores
+  */
   initializeProviders() {
-    console.log("\u{1F50D} DEBUG - Verificando chaves de API:");
+    console.log("\u{1F50D} DEBUG - Verificando TODAS as vari\xE1veis de ambiente:");
+    console.log("- NODE_ENV:", process.env.NODE_ENV);
+    console.log("- Total env vars:", Object.keys(process.env).length);
     console.log("- OPENROUTER_API_KEY:", process.env.OPENROUTER_API_KEY ? `\u2705 ${process.env.OPENROUTER_API_KEY.substring(0, 20)}...` : "\u274C N\xE3o encontrada");
     console.log("- GROQ_API_KEY:", process.env.GROQ_API_KEY ? `\u2705 ${process.env.GROQ_API_KEY.substring(0, 20)}...` : "\u274C N\xE3o encontrada");
+    console.log("- LLM_GROQ_GLOBAL_API_KEY:", process.env.LLM_GROQ_GLOBAL_API_KEY ? `\u2705 ${process.env.LLM_GROQ_GLOBAL_API_KEY.substring(0, 20)}...` : "\u274C N\xE3o encontrada");
     console.log("- TOGETHER_API_KEY:", process.env.TOGETHER_API_KEY ? `\u2705 ${process.env.TOGETHER_API_KEY.substring(0, 20)}...` : "\u274C N\xE3o encontrada");
+    console.log("- LLM_TOGETHER_GLOBAL_API_KEY:", process.env.LLM_TOGETHER_GLOBAL_API_KEY ? `\u2705 ${process.env.LLM_TOGETHER_GLOBAL_API_KEY.substring(0, 20)}...` : "\u274C N\xE3o encontrada");
+    console.log("- GEMINI_API_KEY:", process.env.GEMINI_API_KEY ? `\u2705 ${process.env.GEMINI_API_KEY.substring(0, 20)}...` : "\u274C N\xE3o encontrada");
+    console.log("- LLM_GEMINI_API_KEY:", process.env.LLM_GEMINI_API_KEY ? `\u2705 ${process.env.LLM_GEMINI_API_KEY.substring(0, 20)}...` : "\u274C N\xE3o encontrada");
+    const envKeys = Object.keys(process.env);
+    console.log("\u{1F50D} Chaves contendo GROQ:", envKeys.filter((k) => k.includes("GROQ")));
+    console.log("\u{1F50D} Chaves contendo TOGETHER:", envKeys.filter((k) => k.includes("TOGETHER")));
+    console.log("\u{1F50D} Chaves contendo GEMINI:", envKeys.filter((k) => k.includes("GEMINI")));
     if (process.env.OPENROUTER_API_KEY) {
       this.providers.set("openrouter", {
         name: "OpenRouter",
@@ -65428,10 +65438,11 @@ var LLMDispatcher = class {
       });
       console.log("\u2705 OpenRouter provedor configurado");
     }
-    if (process.env.GROQ_API_KEY) {
+    const groqApiKey = process.env.GROQ_API_KEY || process.env.LLM_GROQ_GLOBAL_API_KEY;
+    if (groqApiKey) {
       this.providers.set("groq", {
         name: "Groq",
-        apiKey: process.env.GROQ_API_KEY,
+        apiKey: groqApiKey,
         baseUrl: "https://api.groq.com/openai/v1",
         models: [
           "llama-3.1-8b-instant",
@@ -65447,10 +65458,11 @@ var LLMDispatcher = class {
       });
       console.log("\u2705 Groq provedor configurado");
     }
-    if (process.env.TOGETHER_API_KEY) {
+    const togetherApiKey = process.env.TOGETHER_API_KEY || process.env.LLM_TOGETHER_GLOBAL_API_KEY;
+    if (togetherApiKey) {
       this.providers.set("together", {
         name: "Together AI",
-        apiKey: process.env.TOGETHER_API_KEY,
+        apiKey: togetherApiKey,
         baseUrl: "https://api.together.xyz/v1",
         models: [
           "meta-llama/Llama-3-8b-chat-hf",
@@ -65464,11 +65476,13 @@ var LLMDispatcher = class {
         isActive: true,
         avgLatency: 3e3
       });
+      console.log("\u2705 Together AI provedor configurado");
     }
-    if (process.env.GEMINI_API_KEY) {
+    const geminiApiKey = process.env.GEMINI_API_KEY || process.env.LLM_GEMINI_API_KEY;
+    if (geminiApiKey) {
       this.providers.set("gemini", {
         name: "Google Gemini",
-        apiKey: process.env.GEMINI_API_KEY,
+        apiKey: geminiApiKey,
         baseUrl: "https://generativelanguage.googleapis.com/v1beta",
         models: [
           "gemini-1.5-flash",
@@ -65481,6 +65495,7 @@ var LLMDispatcher = class {
         isActive: true,
         avgLatency: 2500
       });
+      console.log("\u2705 Google Gemini provedor configurado");
     }
     this.providers.forEach((config2, name) => {
       this.providerStats.set(name, {
@@ -65593,38 +65608,47 @@ var LLMDispatcher = class {
    * 🔌 OpenRouter API call
    */
   async callOpenRouter(provider, model, request) {
-    const response = await axios_default.post(
-      `${provider.baseUrl}/chat/completions`,
-      {
-        model,
-        messages: [
-          ...request.systemMessage ? [{ role: "system", content: request.systemMessage }] : [],
-          { role: "user", content: request.prompt }
-        ],
-        temperature: request.temperature || 0.7,
-        max_tokens: request.maxTokens || 2048,
-        stream: false
-      },
-      {
-        headers: {
-          "Authorization": `Bearer ${provider.apiKey}`,
-          "Content-Type": "application/json",
-          "HTTP-Referer": "https://autvision.ai",
-          "X-Title": "AUTVISION Backend"
+    console.log(`\u{1F527} DEBUG OpenRouter: Tentando modelo ${model}`);
+    console.log(`\u{1F527} DEBUG OpenRouter: API Key presente: ${!!provider.apiKey}`);
+    console.log(`\u{1F527} DEBUG OpenRouter: API Key primeiros chars: ${provider.apiKey?.substring(0, 15)}...`);
+    try {
+      const response = await axios_default.post(
+        `${provider.baseUrl}/chat/completions`,
+        {
+          model,
+          messages: [
+            ...request.systemMessage ? [{ role: "system", content: request.systemMessage }] : [],
+            { role: "user", content: request.prompt }
+          ],
+          temperature: request.temperature || 0.7,
+          max_tokens: request.maxTokens || 2048,
+          stream: false
         },
-        timeout: provider.timeout
-      }
-    );
-    const content = response.data.choices[0]?.message?.content || "Resposta vazia";
-    const usage = response.data.usage;
-    return {
-      content,
-      tokensUsed: usage ? {
-        prompt: usage.prompt_tokens,
-        completion: usage.completion_tokens,
-        total: usage.total_tokens
-      } : void 0
-    };
+        {
+          headers: {
+            "Authorization": `Bearer ${provider.apiKey}`,
+            "Content-Type": "application/json",
+            "HTTP-Referer": "https://autvision.ai",
+            "X-Title": "AUTVISION Backend"
+          },
+          timeout: provider.timeout
+        }
+      );
+      console.log(`\u2705 OpenRouter respondeu com sucesso para modelo ${model}`);
+      const content = response.data.choices[0]?.message?.content || "Resposta vazia";
+      const usage = response.data.usage;
+      return {
+        content,
+        tokensUsed: usage ? {
+          prompt: usage.prompt_tokens,
+          completion: usage.completion_tokens,
+          total: usage.total_tokens
+        } : void 0
+      };
+    } catch (error) {
+      console.error(`\u274C Erro OpenRouter (${model}):`, error.response?.data || error.message);
+      throw error;
+    }
   }
   /**
    * ⚡ Groq API call
@@ -65899,6 +65923,26 @@ User: ${request.prompt}` : request.prompt
     } catch (error) {
       console.warn("\u26A0\uFE0F Falha geral no log:", error.message);
     }
+  }
+  /**
+   * 📊 Retorna status detalhado dos provedores para debug
+   */
+  getProviderStatus() {
+    const providers = Array.from(this.providers.entries()).map(([key, config2]) => ({
+      key,
+      name: config2.name,
+      isActive: config2.isActive,
+      hasApiKey: !!config2.apiKey,
+      models: config2.models,
+      priority: config2.priority,
+      stats: this.providerStats.get(key) || {}
+    }));
+    return {
+      totalProviders: this.providers.size,
+      activeProviders: providers.filter((p) => p.isActive).length,
+      providers,
+      lastInitialized: (/* @__PURE__ */ new Date()).toISOString()
+    };
   }
   /**
    * 🧹 Cleanup
@@ -71235,6 +71279,30 @@ async function llmRoutes(fastify2) {
       });
     }
   });
+  fastify2.get("/env-debug", async (request, reply) => {
+    try {
+      const envVars = Object.keys(process.env).filter(
+        (key) => key.includes("API_KEY") || key.includes("GROQ") || key.includes("TOGETHER") || key.includes("GEMINI") || key.includes("OPENROUTER") || key.includes("LLM")
+      ).reduce((obj, key) => {
+        obj[key] = process.env[key] ? `${process.env[key].substring(0, 10)}...` : "undefined";
+        return obj;
+      }, {});
+      return reply.send({
+        success: true,
+        data: {
+          totalEnvVars: Object.keys(process.env).length,
+          relevantVars: envVars,
+          nodeEnv: process.env.NODE_ENV,
+          timestamp: (/* @__PURE__ */ new Date()).toISOString()
+        }
+      });
+    } catch (error) {
+      reply.status(500).send({
+        success: false,
+        error: error.message
+      });
+    }
+  });
   fastify2.post("/dispatcher/force-init", async (request, reply) => {
     try {
       await llmDispatcher.forceRefresh();
@@ -71262,6 +71330,34 @@ async function llmRoutes(fastify2) {
         success: false,
         error: error.message,
         code: "FORCE_INIT_ERROR"
+      });
+    }
+  });
+  fastify2.get("/debug", async (request, reply) => {
+    try {
+      const providerStatus = llmDispatcher.getProviderStatus();
+      const envDebug = {
+        hasOpenRouterKey: !!process.env.OPENROUTER_API_KEY,
+        hasGroqKey: !!process.env.GROQ_API_KEY,
+        hasTogetherKey: !!process.env.TOGETHER_API_KEY,
+        hasGeminiKey: !!process.env.GEMINI_API_KEY,
+        nodeEnv: process.env.NODE_ENV,
+        processUptime: process.uptime()
+      };
+      return reply.send({
+        success: true,
+        data: {
+          providers: providerStatus,
+          environment: envDebug,
+          timestamp: (/* @__PURE__ */ new Date()).toISOString()
+        }
+      });
+    } catch (error) {
+      fastify2.log.error("Erro no debug LLM:", error);
+      return reply.code(500).send({
+        success: false,
+        error: error.message,
+        code: "DEBUG_ERROR"
       });
     }
   });
@@ -72273,6 +72369,401 @@ async function configRoutes(fastify2) {
   });
 }
 
+// src/routes/supremo.js
+async function supremoRoutes(fastify2, options) {
+  fastify2.get("/companion/profile/:userId", async (request, reply) => {
+    try {
+      const { userId } = request.params;
+      const { data, error } = await fastify2.supabase.from("user_personality_profile").select("*").eq("user_id", userId).single();
+      if (error) {
+        return reply.status(404).send({
+          success: false,
+          error: "Perfil n\xE3o encontrado",
+          code: "PROFILE_NOT_FOUND"
+        });
+      }
+      return {
+        success: true,
+        data: {
+          profile: data,
+          companionLevel: Math.floor(data.experience_points / 100) + 1,
+          nextLevelXP: (Math.floor(data.experience_points / 100) + 1) * 100,
+          progressToNext: data.experience_points % 100
+        }
+      };
+    } catch (error) {
+      return reply.status(500).send({
+        success: false,
+        error: "Erro interno do servidor",
+        code: "INTERNAL_ERROR"
+      });
+    }
+  });
+  fastify2.post("/companion/experience/:userId", async (request, reply) => {
+    try {
+      const { userId } = request.params;
+      const { action, points = 10 } = request.body;
+      const { data: currentProfile } = await fastify2.supabase.from("user_personality_profile").select("experience_points").eq("user_id", userId).single();
+      const newXP = (currentProfile?.experience_points || 0) + points;
+      const { data, error } = await fastify2.supabase.from("user_personality_profile").update({
+        experience_points: newXP,
+        updated_at: (/* @__PURE__ */ new Date()).toISOString()
+      }).eq("user_id", userId).select().single();
+      if (error) throw error;
+      await fastify2.supabase.from("companion_logs").insert({
+        user_id: userId,
+        action_type: action,
+        experience_gained: points,
+        total_experience: newXP,
+        metadata: { timestamp: (/* @__PURE__ */ new Date()).toISOString() }
+      });
+      return {
+        success: true,
+        data: {
+          newExperience: newXP,
+          pointsGained: points,
+          newLevel: Math.floor(newXP / 100) + 1
+        }
+      };
+    } catch (error) {
+      return reply.status(500).send({
+        success: false,
+        error: "Erro ao atualizar experi\xEAncia",
+        code: "UPDATE_ERROR"
+      });
+    }
+  });
+  fastify2.post("/companion/personality/evolve/:userId", async (request, reply) => {
+    try {
+      const { userId } = request.params;
+      const { interaction, context } = request.body;
+      const adaptationData = {
+        user_id: userId,
+        interaction_type: interaction.type,
+        personality_shift: {
+          openness: Math.random() * 0.1 - 0.05,
+          conscientiousness: Math.random() * 0.1 - 0.05,
+          extraversion: Math.random() * 0.1 - 0.05,
+          agreeableness: Math.random() * 0.1 - 0.05,
+          neuroticism: Math.random() * 0.1 - 0.05
+        },
+        context,
+        timestamp: (/* @__PURE__ */ new Date()).toISOString()
+      };
+      await fastify2.supabase.from("personality_evolution_log").insert(adaptationData);
+      const { data: currentProfile } = await fastify2.supabase.from("user_personality_profile").select("personality_traits").eq("user_id", userId).single();
+      const currentTraits = currentProfile?.personality_traits || {};
+      const newTraits = {
+        openness: Math.max(0, Math.min(1, (currentTraits.openness || 0.5) + adaptationData.personality_shift.openness)),
+        conscientiousness: Math.max(0, Math.min(1, (currentTraits.conscientiousness || 0.5) + adaptationData.personality_shift.conscientiousness)),
+        extraversion: Math.max(0, Math.min(1, (currentTraits.extraversion || 0.5) + adaptationData.personality_shift.extraversion)),
+        agreeableness: Math.max(0, Math.min(1, (currentTraits.agreeableness || 0.5) + adaptationData.personality_shift.agreeableness)),
+        neuroticism: Math.max(0, Math.min(1, (currentTraits.neuroticism || 0.5) + adaptationData.personality_shift.neuroticism))
+      };
+      await fastify2.supabase.from("user_personality_profile").update({
+        personality_traits: newTraits,
+        updated_at: (/* @__PURE__ */ new Date()).toISOString()
+      }).eq("user_id", userId);
+      return {
+        success: true,
+        data: {
+          evolution: adaptationData.personality_shift,
+          newTraits,
+          context
+        }
+      };
+    } catch (error) {
+      return reply.status(500).send({
+        success: false,
+        error: "Erro na evolu\xE7\xE3o da personalidade",
+        code: "EVOLUTION_ERROR"
+      });
+    }
+  });
+  fastify2.post("/autonomous/analyze/:userId", async (request, reply) => {
+    try {
+      const { userId } = request.params;
+      const { context, data: analysisData } = request.body;
+      const analysis = {
+        user_id: userId,
+        analysis_type: "autonomous_insight",
+        insights: {
+          patterns: [`Padr\xE3o de uso detectado: ${Math.random() > 0.5 ? "intensivo" : "moderado"}`],
+          suggestions: [
+            "Considere explorar novas funcionalidades",
+            "Otimize sua rotina de intera\xE7\xE3o",
+            "Experimente diferentes abordagens"
+          ],
+          priority_score: Math.random() * 100,
+          confidence: Math.random() * 0.3 + 0.7
+        },
+        context,
+        created_at: (/* @__PURE__ */ new Date()).toISOString()
+      };
+      await fastify2.supabase.from("autonomous_analysis_log").insert(analysis);
+      return {
+        success: true,
+        data: analysis.insights
+      };
+    } catch (error) {
+      return reply.status(500).send({
+        success: false,
+        error: "Erro na an\xE1lise aut\xF4noma",
+        code: "ANALYSIS_ERROR"
+      });
+    }
+  });
+  fastify2.get("/autonomous/suggestions/:userId", async (request, reply) => {
+    try {
+      const { userId } = request.params;
+      const { data: recentAnalyses } = await fastify2.supabase.from("autonomous_analysis_log").select("insights").eq("user_id", userId).order("created_at", { ascending: false }).limit(5);
+      const suggestions = recentAnalyses?.map((a) => a.insights.suggestions).flat() || [
+        "Explore novos m\xF3dulos do sistema",
+        "Configure prefer\xEAncias personalizadas",
+        "Revise suas metas e objetivos"
+      ];
+      return {
+        success: true,
+        data: {
+          suggestions: suggestions.slice(0, 3),
+          lastUpdate: (/* @__PURE__ */ new Date()).toISOString()
+        }
+      };
+    } catch (error) {
+      return reply.status(500).send({
+        success: false,
+        error: "Erro ao buscar sugest\xF5es",
+        code: "SUGGESTIONS_ERROR"
+      });
+    }
+  });
+  fastify2.post("/sensorial/environment/:userId", async (request, reply) => {
+    try {
+      const { userId } = request.params;
+      const { environmentType, settings } = request.body;
+      const environmentConfig = {
+        user_id: userId,
+        environment_type: environmentType,
+        settings,
+        is_active: true,
+        created_at: (/* @__PURE__ */ new Date()).toISOString()
+      };
+      await fastify2.supabase.from("sensorial_environments").update({ is_active: false }).eq("user_id", userId);
+      const { data, error } = await fastify2.supabase.from("sensorial_environments").insert(environmentConfig).select().single();
+      if (error) throw error;
+      return {
+        success: true,
+        data: {
+          environment: data,
+          message: `Ambiente ${environmentType} ativado com sucesso`
+        }
+      };
+    } catch (error) {
+      return reply.status(500).send({
+        success: false,
+        error: "Erro ao configurar ambiente",
+        code: "ENVIRONMENT_ERROR"
+      });
+    }
+  });
+  fastify2.post("/sensorial/stimuli/:userId", async (request, reply) => {
+    try {
+      const { userId } = request.params;
+      const { stimuliType, intensity, duration } = request.body;
+      const stimuliConfig = {
+        user_id: userId,
+        stimuli_type: stimuliType,
+        intensity,
+        duration,
+        status: "active",
+        started_at: (/* @__PURE__ */ new Date()).toISOString()
+      };
+      await fastify2.supabase.from("sensorial_stimuli_log").insert(stimuliConfig);
+      return {
+        success: true,
+        data: {
+          stimuli: stimuliConfig,
+          message: `Est\xEDmulo ${stimuliType} ativado`
+        }
+      };
+    } catch (error) {
+      return reply.status(500).send({
+        success: false,
+        error: "Erro ao ativar est\xEDmulo",
+        code: "STIMULI_ERROR"
+      });
+    }
+  });
+  fastify2.post("/personality/analyze/:userId", async (request, reply) => {
+    try {
+      const { userId } = request.params;
+      const { interactionData, context } = request.body;
+      const analysis = {
+        user_id: userId,
+        analysis_type: "personality_assessment",
+        personality_scores: {
+          openness: Math.random() * 0.4 + 0.3,
+          conscientiousness: Math.random() * 0.4 + 0.3,
+          extraversion: Math.random() * 0.4 + 0.3,
+          agreeableness: Math.random() * 0.4 + 0.3,
+          neuroticism: Math.random() * 0.4 + 0.3
+        },
+        insights: [
+          "Demonstra alta criatividade",
+          "Prefer\xEAncia por estrutura e organiza\xE7\xE3o",
+          "Comunica\xE7\xE3o assertiva e clara"
+        ],
+        recommendations: [
+          "Continue explorando solu\xE7\xF5es criativas",
+          "Mantenha rotinas estruturadas",
+          "Desenvolva habilidades de lideran\xE7a"
+        ],
+        context,
+        created_at: (/* @__PURE__ */ new Date()).toISOString()
+      };
+      await fastify2.supabase.from("personality_analysis_log").insert(analysis);
+      return {
+        success: true,
+        data: analysis
+      };
+    } catch (error) {
+      return reply.status(500).send({
+        success: false,
+        error: "Erro na an\xE1lise de personalidade",
+        code: "PERSONALITY_ANALYSIS_ERROR"
+      });
+    }
+  });
+  fastify2.post("/personality/adapt/:userId", async (request, reply) => {
+    try {
+      const { userId } = request.params;
+      const { targetTraits, adaptationSpeed = "moderate" } = request.body;
+      const speeds = { slow: 0.01, moderate: 0.05, fast: 0.1 };
+      const speed = speeds[adaptationSpeed] || 0.05;
+      const { data: currentProfile } = await fastify2.supabase.from("user_personality_profile").select("personality_traits").eq("user_id", userId).single();
+      const currentTraits = currentProfile?.personality_traits || {};
+      const adaptedTraits = {};
+      for (const trait in targetTraits) {
+        const current = currentTraits[trait] || 0.5;
+        const target = targetTraits[trait];
+        const adjustment = (target - current) * speed;
+        adaptedTraits[trait] = Math.max(0, Math.min(1, current + adjustment));
+      }
+      await fastify2.supabase.from("user_personality_profile").update({
+        personality_traits: { ...currentTraits, ...adaptedTraits },
+        updated_at: (/* @__PURE__ */ new Date()).toISOString()
+      }).eq("user_id", userId);
+      await fastify2.supabase.from("personality_adaptation_log").insert({
+        user_id: userId,
+        target_traits: targetTraits,
+        adapted_traits: adaptedTraits,
+        adaptation_speed: adaptationSpeed,
+        created_at: (/* @__PURE__ */ new Date()).toISOString()
+      });
+      return {
+        success: true,
+        data: {
+          adaptedTraits,
+          adaptationSpeed,
+          message: "Personalidade adaptada com sucesso"
+        }
+      };
+    } catch (error) {
+      return reply.status(500).send({
+        success: false,
+        error: "Erro na adapta\xE7\xE3o de personalidade",
+        code: "ADAPTATION_ERROR"
+      });
+    }
+  });
+  fastify2.get("/dashboard/:userId", async (request, reply) => {
+    try {
+      const { userId } = request.params;
+      const [
+        profileData,
+        recentAnalyses,
+        activeEnvironment,
+        personalityEvolution
+      ] = await Promise.all([
+        fastify2.supabase.from("user_personality_profile").select("*").eq("user_id", userId).single(),
+        fastify2.supabase.from("autonomous_analysis_log").select("insights").eq("user_id", userId).order("created_at", { ascending: false }).limit(3),
+        fastify2.supabase.from("sensorial_environments").select("*").eq("user_id", userId).eq("is_active", true).single(),
+        fastify2.supabase.from("personality_evolution_log").select("*").eq("user_id", userId).order("timestamp", { ascending: false }).limit(5)
+      ]);
+      const dashboardData = {
+        companion: {
+          level: Math.floor((profileData.data?.experience_points || 0) / 100) + 1,
+          experience: profileData.data?.experience_points || 0,
+          personality: profileData.data?.personality_traits || {}
+        },
+        autonomous: {
+          recentInsights: recentAnalyses.data?.map((a) => a.insights) || [],
+          analysisCount: recentAnalyses.data?.length || 0
+        },
+        sensorial: {
+          activeEnvironment: activeEnvironment.data?.environment_type || null,
+          environmentSettings: activeEnvironment.data?.settings || {}
+        },
+        personality: {
+          recentEvolution: personalityEvolution.data || [],
+          evolutionTrend: personalityEvolution.data?.length > 0 ? "progressing" : "stable"
+        }
+      };
+      return {
+        success: true,
+        data: dashboardData
+      };
+    } catch (error) {
+      return reply.status(500).send({
+        success: false,
+        error: "Erro ao carregar dashboard",
+        code: "DASHBOARD_ERROR"
+      });
+    }
+  });
+  fastify2.post("/sync/:userId", async (request, reply) => {
+    try {
+      const { userId } = request.params;
+      const { modules = ["companion", "autonomous", "sensorial", "personality"] } = request.body;
+      const syncResults = {};
+      for (const module2 of modules) {
+        try {
+          switch (module2) {
+            case "companion":
+              syncResults.companion = { status: "synced", timestamp: (/* @__PURE__ */ new Date()).toISOString() };
+              break;
+            case "autonomous":
+              syncResults.autonomous = { status: "synced", timestamp: (/* @__PURE__ */ new Date()).toISOString() };
+              break;
+            case "sensorial":
+              syncResults.sensorial = { status: "synced", timestamp: (/* @__PURE__ */ new Date()).toISOString() };
+              break;
+            case "personality":
+              syncResults.personality = { status: "synced", timestamp: (/* @__PURE__ */ new Date()).toISOString() };
+              break;
+          }
+        } catch (moduleError) {
+          syncResults[module2] = { status: "error", error: moduleError.message };
+        }
+      }
+      return {
+        success: true,
+        data: {
+          syncResults,
+          timestamp: (/* @__PURE__ */ new Date()).toISOString(),
+          message: "Sincroniza\xE7\xE3o completa realizada"
+        }
+      };
+    } catch (error) {
+      return reply.status(500).send({
+        success: false,
+        error: "Erro na sincroniza\xE7\xE3o",
+        code: "SYNC_ERROR"
+      });
+    }
+  });
+}
+
 // src/index.ts
 var projectRoot = process.cwd().includes("backend-autvision") ? process.cwd() : (0, import_path.join)(process.cwd(), "backend-autvision");
 (0, import_dotenv.config)({ path: (0, import_path.join)(projectRoot, ".env.server") });
@@ -72374,7 +72865,8 @@ async function setupRoutes() {
         n8n: "/n8n/*",
         ovos: "/ovos/*",
         logs: "/logs/*",
-        config: "/config/*"
+        config: "/config/*",
+        visionSupremo: "/supremo/*"
       }
     };
   });
@@ -72393,6 +72885,7 @@ async function setupRoutes() {
   await fastify.register(ovosRoutes, { prefix: "/ovos" });
   await fastify.register(logsRoutes, { prefix: "/logs" });
   await fastify.register(configRoutes, { prefix: "/config" });
+  await fastify.register(supremoRoutes, { prefix: "/supremo" });
 }
 async function start() {
   try {

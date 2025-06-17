@@ -898,6 +898,40 @@ export default async function llmRoutes(fastify: FastifyInstance) {
     }
   });
 
+  // 🔍 DEBUG: Endpoint para verificar TODAS as variáveis de ambiente
+  fastify.get('/env-debug', async (request, reply) => {
+    try {
+      const envVars = Object.keys(process.env)
+        .filter(key => 
+          key.includes('API_KEY') || 
+          key.includes('GROQ') || 
+          key.includes('TOGETHER') || 
+          key.includes('GEMINI') || 
+          key.includes('OPENROUTER') ||
+          key.includes('LLM')
+        )
+        .reduce((obj: any, key) => {
+          obj[key] = process.env[key] ? `${process.env[key].substring(0, 10)}...` : 'undefined';
+          return obj;
+        }, {});
+
+      return reply.send({
+        success: true,
+        data: {
+          totalEnvVars: Object.keys(process.env).length,
+          relevantVars: envVars,
+          nodeEnv: process.env.NODE_ENV,
+          timestamp: new Date().toISOString()
+        }
+      });
+    } catch (error: any) {
+      reply.status(500).send({
+        success: false,
+        error: error.message
+      });
+    }
+  });
+
   /**
    * 🔥 POST /llm/dispatcher/force-init
    * Força reinicialização completa do dispatcher
@@ -933,6 +967,44 @@ export default async function llmRoutes(fastify: FastifyInstance) {
         success: false,
         error: error.message,
         code: 'FORCE_INIT_ERROR'
+      });
+    }
+  });
+
+  /**
+   * 🔍 GET /llm/debug
+   * Endpoint de debug para verificar status dos provedores LLM
+   */
+  fastify.get('/debug', async (request: FastifyRequest, reply: FastifyReply) => {
+    try {
+      // Obter status dos provedores
+      const providerStatus = llmDispatcher.getProviderStatus();
+      
+      // Informações de debug do ambiente
+      const envDebug = {
+        hasOpenRouterKey: !!process.env.OPENROUTER_API_KEY,
+        hasGroqKey: !!process.env.GROQ_API_KEY,
+        hasTogetherKey: !!process.env.TOGETHER_API_KEY,
+        hasGeminiKey: !!process.env.GEMINI_API_KEY,
+        nodeEnv: process.env.NODE_ENV,
+        processUptime: process.uptime()
+      };
+
+      return reply.send({
+        success: true,
+        data: {
+          providers: providerStatus,
+          environment: envDebug,
+          timestamp: new Date().toISOString()
+        }
+      });
+
+    } catch (error: any) {
+      fastify.log.error('Erro no debug LLM:', error);
+      return reply.code(500).send({
+        success: false,
+        error: error.message,
+        code: 'DEBUG_ERROR'
       });
     }
   });

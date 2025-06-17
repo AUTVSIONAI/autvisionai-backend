@@ -96,15 +96,25 @@ class LLMDispatcher {
     this.initializeProviders();
     this.startHealthCheckTimer();
     console.log('🚀 LLM Dispatcher inicializado com múltiplos provedores e logging inteligente');
-  }
-  /**
+  }  /**
    * 🔧 Inicializa configurações dos provedores
    */
-  private initializeProviders(): void {
-    console.log('🔍 DEBUG - Verificando chaves de API:');
+  private initializeProviders(): void {    console.log('🔍 DEBUG - Verificando TODAS as variáveis de ambiente:');
+    console.log('- NODE_ENV:', process.env.NODE_ENV);
+    console.log('- Total env vars:', Object.keys(process.env).length);
     console.log('- OPENROUTER_API_KEY:', process.env.OPENROUTER_API_KEY ? `✅ ${process.env.OPENROUTER_API_KEY.substring(0, 20)}...` : '❌ Não encontrada');
     console.log('- GROQ_API_KEY:', process.env.GROQ_API_KEY ? `✅ ${process.env.GROQ_API_KEY.substring(0, 20)}...` : '❌ Não encontrada');
+    console.log('- LLM_GROQ_GLOBAL_API_KEY:', process.env.LLM_GROQ_GLOBAL_API_KEY ? `✅ ${process.env.LLM_GROQ_GLOBAL_API_KEY.substring(0, 20)}...` : '❌ Não encontrada');
     console.log('- TOGETHER_API_KEY:', process.env.TOGETHER_API_KEY ? `✅ ${process.env.TOGETHER_API_KEY.substring(0, 20)}...` : '❌ Não encontrada');
+    console.log('- LLM_TOGETHER_GLOBAL_API_KEY:', process.env.LLM_TOGETHER_GLOBAL_API_KEY ? `✅ ${process.env.LLM_TOGETHER_GLOBAL_API_KEY.substring(0, 20)}...` : '❌ Não encontrada');
+    console.log('- GEMINI_API_KEY:', process.env.GEMINI_API_KEY ? `✅ ${process.env.GEMINI_API_KEY.substring(0, 20)}...` : '❌ Não encontrada');
+    console.log('- LLM_GEMINI_API_KEY:', process.env.LLM_GEMINI_API_KEY ? `✅ ${process.env.LLM_GEMINI_API_KEY.substring(0, 20)}...` : '❌ Não encontrada');
+    
+    // DEBUG: Listar todas as chaves que começam com essas strings
+    const envKeys = Object.keys(process.env);
+    console.log('🔍 Chaves contendo GROQ:', envKeys.filter(k => k.includes('GROQ')));
+    console.log('🔍 Chaves contendo TOGETHER:', envKeys.filter(k => k.includes('TOGETHER')));
+    console.log('🔍 Chaves contendo GEMINI:', envKeys.filter(k => k.includes('GEMINI')));
 
     // OpenRouter (Principal)
     if (process.env.OPENROUTER_API_KEY) {
@@ -125,12 +135,12 @@ class LLMDispatcher {
         isActive: true,
         avgLatency: 2000
       });
-      console.log('✅ OpenRouter provedor configurado');
-    }    // Groq (Ultra rápido)
-    if (process.env.GROQ_API_KEY) {
+      console.log('✅ OpenRouter provedor configurado');    }    // Groq (Ultra rápido) - usando LLM_GROQ_GLOBAL_API_KEY que existe no Vercel
+    const groqApiKey = process.env.GROQ_API_KEY || process.env.LLM_GROQ_GLOBAL_API_KEY;
+    if (groqApiKey) {
       this.providers.set('groq', {
         name: 'Groq',
-        apiKey: process.env.GROQ_API_KEY,
+        apiKey: groqApiKey,
         baseUrl: 'https://api.groq.com/openai/v1',
         models: [
           'llama-3.1-8b-instant',
@@ -147,11 +157,12 @@ class LLMDispatcher {
       console.log('✅ Groq provedor configurado');
     }
 
-    // Together AI
-    if (process.env.TOGETHER_API_KEY) {
+    // Together AI - usando LLM_TOGETHER_GLOBAL_API_KEY que existe no Vercel
+    const togetherApiKey = process.env.TOGETHER_API_KEY || process.env.LLM_TOGETHER_GLOBAL_API_KEY;
+    if (togetherApiKey) {
       this.providers.set('together', {
         name: 'Together AI',
-        apiKey: process.env.TOGETHER_API_KEY,
+        apiKey: togetherApiKey,
         baseUrl: 'https://api.together.xyz/v1',
         models: [
           'meta-llama/Llama-3-8b-chat-hf',
@@ -165,13 +176,15 @@ class LLMDispatcher {
         isActive: true,
         avgLatency: 3000
       });
+      console.log('✅ Together AI provedor configurado');
     }
 
-    // Google Gemini
-    if (process.env.GEMINI_API_KEY) {
+    // Google Gemini - usando LLM_GEMINI_API_KEY que existe no Vercel
+    const geminiApiKey = process.env.GEMINI_API_KEY || process.env.LLM_GEMINI_API_KEY;
+    if (geminiApiKey) {
       this.providers.set('gemini', {
         name: 'Google Gemini',
-        apiKey: process.env.GEMINI_API_KEY,
+        apiKey: geminiApiKey,
         baseUrl: 'https://generativelanguage.googleapis.com/v1beta',
         models: [
           'gemini-1.5-flash',
@@ -184,6 +197,7 @@ class LLMDispatcher {
         isActive: true,
         avgLatency: 2500
       });
+      console.log('✅ Google Gemini provedor configurado');
     }
 
     // Inicializar estatísticas dos provedores
@@ -325,34 +339,37 @@ class LLMDispatcher {
       cached: false
     };
   }
-
   /**
    * 🔌 OpenRouter API call
-   */
-  private async callOpenRouter(provider: ProviderConfig, model: string, request: LLMRequest): Promise<any> {
-    const response = await axios.post(
-      `${provider.baseUrl}/chat/completions`,
-      {
-        model,
-        messages: [
-          ...(request.systemMessage ? [{ role: 'system', content: request.systemMessage }] : []),
-          { role: 'user', content: request.prompt }
-        ],
-        temperature: request.temperature || 0.7,
-        max_tokens: request.maxTokens || 2048,
-        stream: false
-      },
-      {
-        headers: {
-          'Authorization': `Bearer ${provider.apiKey}`,
-          'Content-Type': 'application/json',
-          'HTTP-Referer': 'https://autvision.ai',
-          'X-Title': 'AUTVISION Backend'
+   */  private async callOpenRouter(provider: ProviderConfig, model: string, request: LLMRequest): Promise<any> {
+    console.log(`🔧 DEBUG OpenRouter: Tentando modelo ${model}`);
+    console.log(`🔧 DEBUG OpenRouter: API Key presente: ${!!provider.apiKey}`);
+    console.log(`🔧 DEBUG OpenRouter: API Key primeiros chars: ${provider.apiKey?.substring(0, 15)}...`);
+    
+    try {
+      const response = await axios.post(
+        `${provider.baseUrl}/chat/completions`,
+        {
+          model,
+          messages: [
+            ...(request.systemMessage ? [{ role: 'system', content: request.systemMessage }] : []),
+            { role: 'user', content: request.prompt }
+          ],
+          temperature: request.temperature || 0.7,
+          max_tokens: request.maxTokens || 2048,
+          stream: false
         },
+        {
+          headers: {
+            'Authorization': `Bearer ${provider.apiKey}`,
+            'Content-Type': 'application/json',
+            'HTTP-Referer': 'https://autvision.ai',
+            'X-Title': 'AUTVISION Backend'        },
         timeout: provider.timeout
       }
     );
 
+    console.log(`✅ OpenRouter respondeu com sucesso para modelo ${model}`);
     const content = response.data.choices[0]?.message?.content || 'Resposta vazia';
     const usage = response.data.usage;
 
@@ -364,6 +381,10 @@ class LLMDispatcher {
         total: usage.total_tokens
       } : undefined
     };
+    } catch (error: any) {
+      console.error(`❌ Erro OpenRouter (${model}):`, error.response?.data || error.message);
+      throw error;
+    }
   }
 
   /**
@@ -679,6 +700,28 @@ class LLMDispatcher {
     } catch (error: any) {
       console.warn('⚠️ Falha geral no log:', error.message);
     }
+  }
+
+  /**
+   * 📊 Retorna status detalhado dos provedores para debug
+   */
+  public getProviderStatus(): any {
+    const providers = Array.from(this.providers.entries()).map(([key, config]) => ({
+      key,
+      name: config.name,
+      isActive: config.isActive,
+      hasApiKey: !!config.apiKey,
+      models: config.models,
+      priority: config.priority,
+      stats: this.providerStats.get(key) || {}
+    }));
+
+    return {
+      totalProviders: this.providers.size,
+      activeProviders: providers.filter(p => p.isActive).length,
+      providers,
+      lastInitialized: new Date().toISOString()
+    };
   }
 
   /**
