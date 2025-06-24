@@ -22,14 +22,24 @@ export interface OpenRouterResponse {
 export class OpenRouterService {
   private models: LLMModel[] = [
     {
-      name: 'LLaMA 3.3 8B',
-      model: 'meta-llama/llama-3.3-8b-instruct:free',
-      apiKey: process.env.LLM_LLAMA3_8B_KEY || ''
-    },
-    {
       name: 'DeepSeek R1',
       model: 'deepseek/deepseek-r1-0528:free',
       apiKey: process.env.LLM_DEEPSEEK_R1_KEY || ''
+    },
+    {
+      name: 'Mistral Small',
+      model: 'mistralai/mistral-small-3.2-24b-instruct:free',
+      apiKey: process.env.LLM_MISTRAL_SMALL_KEY || ''
+    },
+    {
+      name: 'Kimi Dev',
+      model: 'moonshotai/kimi-dev-72b:free',
+      apiKey: process.env.LLM_KIMI_DEV_KEY || ''
+    },
+    {
+      name: 'LLaMA 3.3 8B',
+      model: 'meta-llama/llama-3.3-8b-instruct:free',
+      apiKey: process.env.LLM_LLAMA3_8B_KEY || ''
     },
     {
       name: 'DeepSeek Prover',

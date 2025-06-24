@@ -5,13 +5,34 @@ import rateLimit from '@fastify/rate-limit';
 import { config } from 'dotenv';
 import { dirname, join } from 'path';
 
-// Para bundle CJS, usar o diretório atual do processo e subir uma pasta
-const projectRoot = process.cwd().includes('backend-autvision') ? 
-  process.cwd() : 
-  join(process.cwd(), 'backend-autvision');
+console.log('🟢 process.cwd():', process.cwd());
 
-// Carrega variáveis de ambiente do arquivo correto  
-config({ path: join(projectRoot, '.env.server') });
+// Carrega variáveis de ambiente do arquivo .env no diretório do backend
+// Tenta primeiro no diretório atual, depois no diretório pai
+const envPaths = [
+  join(process.cwd(), '.env'),
+  join(process.cwd(), 'autvisionai-backend', '.env'),
+  join(__dirname, '..', '.env')
+];
+
+let envLoaded = false;
+for (const envPath of envPaths) {
+  try {
+    config({ path: envPath });
+    if (process.env.SUPABASE_URL) {
+      console.log('🟢 Variáveis carregadas de:', envPath);
+      envLoaded = true;
+      break;
+    }
+  } catch (error) {
+    // Continua tentando outros caminhos
+  }
+}
+
+if (!envLoaded) {
+  console.log('⚠️ Tentando carregar .env padrão...');
+  config();
+}
 
 // Debug: verificar se as variáveis foram carregadas
 console.log('🔍 DEBUG - Variáveis de ambiente:');
@@ -19,7 +40,6 @@ console.log('- SUPABASE_URL:', process.env.SUPABASE_URL ? '✅ Definida' : '❌ 
 console.log('- SUPABASE_SERVICE_ROLE_KEY:', process.env.SUPABASE_SERVICE_ROLE_KEY ? '✅ Definida' : '❌ Não encontrada');
 console.log('- OPENROUTER_API_KEY:', process.env.OPENROUTER_API_KEY ? '✅ Definida' : '❌ Não encontrada');
 console.log('- PORT:', process.env.PORT || 'Usando padrão');
-console.log('- Arquivo .env.server path:', join(projectRoot, '.env.server'));
 
 // Importar e inicializar LLM Dispatcher APÓS env estar carregado
 import { llmDispatcher } from './modules/llm/llmDispatcher.js';
@@ -36,7 +56,10 @@ import ovosRoutes from './routes/ovos.js';
 import logsRoutes from './routes/logs.js';
 import configRoutes from './routes/config.js';
 import supremoRoutes from './routes/supremo.js';
-import supremoRoutes from './routes/supremo.js';
+import tutorialsRoutes from './routes/tutorials.js';
+import routinesRoutes from './routes/routines.js';
+import missionsRoutes from './routes/missions.js';
+import badgesRoutes from './routes/badges.js';
 
 const fastify = Fastify({
   logger: {
@@ -155,7 +178,11 @@ async function setupRoutes() {
         ovos: '/ovos/*',
         logs: '/logs/*',
         config: '/config/*',
-        visionSupremo: '/supremo/*'
+        visionSupremo: '/supremo/*',
+        tutorials: '/tutorials/*',
+        routines: '/routines/*',
+        missions: '/missions/*',
+        badges: '/badges/*'
       }
     };
   });
@@ -177,7 +204,10 @@ async function setupRoutes() {
   await fastify.register(logsRoutes, { prefix: '/logs' });
   await fastify.register(configRoutes, { prefix: '/config' });
   await fastify.register(supremoRoutes, { prefix: '/supremo' });
-  await fastify.register(supremoRoutes, { prefix: '/supremo' });
+  await fastify.register(tutorialsRoutes, { prefix: '/tutorials' });
+  await fastify.register(routinesRoutes, { prefix: '/routines' });
+  await fastify.register(missionsRoutes, { prefix: '/missions' });
+  await fastify.register(badgesRoutes, { prefix: '/badges' });
 }
 
 /**

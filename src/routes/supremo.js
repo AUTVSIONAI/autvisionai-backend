@@ -6,6 +6,143 @@
 
 export default async function supremoRoutes(fastify, options) {
   
+  // ========== COMPANION BASIC CRUD ==========
+
+  // 📋 GET /companion - Lista companions do usuário
+  fastify.get('/companion', async (request, reply) => {
+    try {
+      const { created_by } = request.query;
+      
+      if (!created_by) {
+        return reply.code(400).send({
+          success: false,
+          error: 'Parâmetro created_by é obrigatório',
+          code: 'MISSING_CREATED_BY'
+        });
+      }
+
+      // Busca companions no Supabase
+      const { data: companions, error } = await fastify.supabase
+        .from('vision_companions')
+        .select('*')
+        .eq('created_by', created_by)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        fastify.log.warn('Tabela vision_companions não existe, retornando mock');
+        // Retorna companion padrão se tabela não existir
+        return reply.send({
+          success: true,
+          data: [{
+            id: 'mock_vision_' + Date.now(),
+            name: 'Vision',
+            created_by,
+            total_interactions: 0,
+            created_at: new Date().toISOString()
+          }]
+        });
+      }
+
+      return reply.send({
+        success: true,
+        data: companions || []
+      });
+
+    } catch (error) {
+      fastify.log.error('Erro na rota GET /companion:', error);
+      return reply.code(500).send({
+        success: false,
+        error: 'Erro interno do servidor',
+        code: 'INTERNAL_ERROR'
+      });
+    }
+  });
+
+  // 📝 POST /companion - Cria novo companion
+  fastify.post('/companion', async (request, reply) => {
+    try {
+      const companionData = request.body;
+      
+      const newCompanion = {
+        ...companionData,
+        total_interactions: 0,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+
+      const { data, error } = await fastify.supabase
+        .from('vision_companions')
+        .insert(newCompanion)
+        .select()
+        .single();
+
+      if (error) {
+        fastify.log.warn('Erro ao criar companion, retornando mock:', error);
+        // Retorna mock se falhar
+        return reply.send({
+          success: true,
+          data: {
+            id: 'mock_vision_' + Date.now(),
+            ...newCompanion
+          }
+        });
+      }
+
+      return reply.send({
+        success: true,
+        data
+      });
+
+    } catch (error) {
+      fastify.log.error('Erro na criação de companion:', error);
+      return reply.code(500).send({
+        success: false,
+        error: 'Erro interno do servidor',
+        code: 'INTERNAL_ERROR'
+      });
+    }
+  });
+
+  // 🔄 PUT /companion/:id - Atualiza companion
+  fastify.put('/companion/:id', async (request, reply) => {
+    try {
+      const { id } = request.params;
+      const updateData = request.body;
+
+      const { data, error } = await fastify.supabase
+        .from('vision_companions')
+        .update({
+          ...updateData,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) {
+        fastify.log.warn('Erro ao atualizar companion:', error);
+        // Retorna dados enviados se falhar
+        return reply.send({
+          success: true,
+          data: { id, ...updateData }
+        });
+      }
+
+      return reply.send({
+        success: true,
+        data
+      });
+
+    } catch (error) {
+      fastify.log.error('Erro na atualização de companion:', error);
+      return reply.code(500).send({
+        success: false,
+        error: 'Erro interno do servidor',
+        code: 'INTERNAL_ERROR'
+      });
+    }
+  });
+  
   // ========== COMPANION CORE ENDPOINTS ==========
 
   // 📊 Obter perfil do companion

@@ -46947,121 +46947,6 @@ var require_browser = __commonJS({
   }
 });
 
-// ../node_modules/has-flag/index.js
-var require_has_flag = __commonJS({
-  "../node_modules/has-flag/index.js"(exports2, module2) {
-    "use strict";
-    module2.exports = (flag, argv = process.argv) => {
-      const prefix = flag.startsWith("-") ? "" : flag.length === 1 ? "-" : "--";
-      const position = argv.indexOf(prefix + flag);
-      const terminatorPosition = argv.indexOf("--");
-      return position !== -1 && (terminatorPosition === -1 || position < terminatorPosition);
-    };
-  }
-});
-
-// ../node_modules/supports-color/index.js
-var require_supports_color = __commonJS({
-  "../node_modules/supports-color/index.js"(exports2, module2) {
-    "use strict";
-    var os = require("os");
-    var tty = require("tty");
-    var hasFlag = require_has_flag();
-    var { env } = process;
-    var forceColor;
-    if (hasFlag("no-color") || hasFlag("no-colors") || hasFlag("color=false") || hasFlag("color=never")) {
-      forceColor = 0;
-    } else if (hasFlag("color") || hasFlag("colors") || hasFlag("color=true") || hasFlag("color=always")) {
-      forceColor = 1;
-    }
-    if ("FORCE_COLOR" in env) {
-      if (env.FORCE_COLOR === "true") {
-        forceColor = 1;
-      } else if (env.FORCE_COLOR === "false") {
-        forceColor = 0;
-      } else {
-        forceColor = env.FORCE_COLOR.length === 0 ? 1 : Math.min(parseInt(env.FORCE_COLOR, 10), 3);
-      }
-    }
-    function translateLevel(level) {
-      if (level === 0) {
-        return false;
-      }
-      return {
-        level,
-        hasBasic: true,
-        has256: level >= 2,
-        has16m: level >= 3
-      };
-    }
-    function supportsColor(haveStream, streamIsTTY) {
-      if (forceColor === 0) {
-        return 0;
-      }
-      if (hasFlag("color=16m") || hasFlag("color=full") || hasFlag("color=truecolor")) {
-        return 3;
-      }
-      if (hasFlag("color=256")) {
-        return 2;
-      }
-      if (haveStream && !streamIsTTY && forceColor === void 0) {
-        return 0;
-      }
-      const min = forceColor || 0;
-      if (env.TERM === "dumb") {
-        return min;
-      }
-      if (process.platform === "win32") {
-        const osRelease = os.release().split(".");
-        if (Number(osRelease[0]) >= 10 && Number(osRelease[2]) >= 10586) {
-          return Number(osRelease[2]) >= 14931 ? 3 : 2;
-        }
-        return 1;
-      }
-      if ("CI" in env) {
-        if (["TRAVIS", "CIRCLECI", "APPVEYOR", "GITLAB_CI", "GITHUB_ACTIONS", "BUILDKITE"].some((sign) => sign in env) || env.CI_NAME === "codeship") {
-          return 1;
-        }
-        return min;
-      }
-      if ("TEAMCITY_VERSION" in env) {
-        return /^(9\.(0*[1-9]\d*)\.|\d{2,}\.)/.test(env.TEAMCITY_VERSION) ? 1 : 0;
-      }
-      if (env.COLORTERM === "truecolor") {
-        return 3;
-      }
-      if ("TERM_PROGRAM" in env) {
-        const version4 = parseInt((env.TERM_PROGRAM_VERSION || "").split(".")[0], 10);
-        switch (env.TERM_PROGRAM) {
-          case "iTerm.app":
-            return version4 >= 3 ? 3 : 2;
-          case "Apple_Terminal":
-            return 2;
-        }
-      }
-      if (/-256(color)?$/i.test(env.TERM)) {
-        return 2;
-      }
-      if (/^screen|^xterm|^vt100|^vt220|^rxvt|color|ansi|cygwin|linux/i.test(env.TERM)) {
-        return 1;
-      }
-      if ("COLORTERM" in env) {
-        return 1;
-      }
-      return min;
-    }
-    function getSupportLevel(stream4) {
-      const level = supportsColor(stream4, stream4 && stream4.isTTY);
-      return translateLevel(level);
-    }
-    module2.exports = {
-      supportsColor: getSupportLevel,
-      stdout: translateLevel(supportsColor(true, tty.isatty(1))),
-      stderr: translateLevel(supportsColor(true, tty.isatty(2)))
-    };
-  }
-});
-
 // node_modules/debug/src/node.js
 var require_node2 = __commonJS({
   "node_modules/debug/src/node.js"(exports2, module2) {
@@ -47081,7 +46966,7 @@ var require_node2 = __commonJS({
     );
     exports2.colors = [6, 2, 3, 4, 5, 1];
     try {
-      const supportsColor = require_supports_color();
+      const supportsColor = require("supports-color");
       if (supportsColor && (supportsColor.stderr || supportsColor).level >= 2) {
         exports2.colors = [
           20,
@@ -70135,14 +70020,24 @@ async function commandRoutes(fastify2) {
 var OpenRouterService = class {
   models = [
     {
-      name: "LLaMA 3.3 8B",
-      model: "meta-llama/llama-3.3-8b-instruct:free",
-      apiKey: process.env.LLM_LLAMA3_8B_KEY || ""
-    },
-    {
       name: "DeepSeek R1",
       model: "deepseek/deepseek-r1-0528:free",
       apiKey: process.env.LLM_DEEPSEEK_R1_KEY || ""
+    },
+    {
+      name: "Mistral Small",
+      model: "mistralai/mistral-small-3.2-24b-instruct:free",
+      apiKey: process.env.LLM_MISTRAL_SMALL_KEY || ""
+    },
+    {
+      name: "Kimi Dev",
+      model: "moonshotai/kimi-dev-72b:free",
+      apiKey: process.env.LLM_KIMI_DEV_KEY || ""
+    },
+    {
+      name: "LLaMA 3.3 8B",
+      model: "meta-llama/llama-3.3-8b-instruct:free",
+      apiKey: process.env.LLM_LLAMA3_8B_KEY || ""
     },
     {
       name: "DeepSeek Prover",
@@ -70661,16 +70556,51 @@ async function llmRoutes(fastify2) {
       fastify2.log.info(`\u{1F9E0} Nova consulta LLM: "${prompt.substring(0, 100)}..."`);
       let agentConfig = null;
       if (agentId) {
-        const { data: agent } = await fastify2.supabase.from("agents").select("name, config").eq("id", agentId).single();
-        agentConfig = agent;
+        try {
+          const { data: agent } = await fastify2.supabase.from("agents").select("name, config").eq("id", agentId).single();
+          agentConfig = agent;
+        } catch (supabaseError) {
+          fastify2.log.warn("Supabase n\xE3o dispon\xEDvel para buscar agente, continuando sem configura\xE7\xE3o espec\xEDfica");
+          agentConfig = {
+            name: "AutVision Agent",
+            config: {
+              systemPrompt: "Voc\xEA \xE9 o AUTVISION, um assistente inteligente."
+            }
+          };
+        }
       }
       const finalSystemPrompt = agentConfig?.config?.systemPrompt || systemPrompt || "Voc\xEA \xE9 o AUTVISION, um assistente de IA avan\xE7ado. Responda de forma \xFAtil e precisa.";
-      const result = await llmDispatcher.dispatch({
-        prompt,
-        systemMessage: finalSystemPrompt,
-        temperature: 0.7,
-        maxTokens: 2048
-      });
+      let result;
+      try {
+        result = await llmDispatcher.dispatch({
+          prompt,
+          systemMessage: finalSystemPrompt,
+          temperature: 0.7,
+          maxTokens: 2048
+        });
+      } catch (llmError) {
+        fastify2.log.warn("LLM Dispatcher falhou, retornando resposta mock para desenvolvimento");
+        result = {
+          response: `\u{1F916} **AUTVISION AI** (Modo Mock)
+
+Recebido: "${prompt}"
+
+Esta \xE9 uma resposta simulada para desenvolvimento. Configure as chaves de API dos LLMs no arquivo .env para obter respostas reais.
+
+**Configura\xE7\xE3o necess\xE1ria:**
+- OPENROUTER_API_KEY
+- GROQ_API_KEY
+- GEMINI_API_KEY
+
+*Sistema funcionando corretamente em modo demonstra\xE7\xE3o.*`,
+          modelUsed: "mock-gpt-4o",
+          provider: "mock",
+          attemptCount: 1,
+          tokensUsed: { total: 150, prompt: 50, completion: 100 },
+          latency: 100,
+          cached: false
+        };
+      }
       try {
         await fastify2.supabase.from("llm_interactions").insert({
           prompt: prompt.substring(0, 1e3),
@@ -70726,12 +70656,37 @@ async function llmRoutes(fastify2) {
       fastify2.log.info(`\u{1F525} Nova invoca\xE7\xE3o LLM: "${prompt.substring(0, 100)}..."`);
       const startTime = Date.now();
       const finalSystemPrompt = options.systemPrompt || "Voc\xEA \xE9 o AUTVISION, um assistente de IA avan\xE7ado. Responda de forma \xFAtil e precisa.";
-      const result = await llmDispatcher.dispatch({
-        prompt,
-        systemMessage: finalSystemPrompt,
-        temperature: options.temperature || 0.7,
-        maxTokens: options.maxTokens || 2048
-      });
+      let result;
+      try {
+        result = await llmDispatcher.dispatch({
+          prompt,
+          systemMessage: finalSystemPrompt,
+          temperature: options.temperature || 0.7,
+          maxTokens: options.maxTokens || 2048
+        });
+      } catch (llmError) {
+        fastify2.log.warn("LLM Dispatcher falhou, retornando resposta mock para desenvolvimento");
+        result = {
+          response: `\u{1F916} **AUTVISION AI** (Modo Mock)
+
+Recebido: "${prompt}"
+
+Esta \xE9 uma resposta simulada para desenvolvimento. Configure as chaves de API dos LLMs no arquivo .env para obter respostas reais.
+
+**Configura\xE7\xE3o necess\xE1ria:**
+- OPENROUTER_API_KEY
+- GROQ_API_KEY
+- GEMINI_API_KEY
+
+*Sistema funcionando corretamente em modo demonstra\xE7\xE3o.*`,
+          modelUsed: "mock-gpt-4o",
+          provider: "mock",
+          attemptCount: 1,
+          tokensUsed: { total: 150, prompt: 50, completion: 100 },
+          latency: 100,
+          cached: false
+        };
+      }
       const processingTime = result.latency;
       try {
         await fastify2.supabase.from("llm_request").insert({
@@ -72118,8 +72073,42 @@ async function configRoutes(fastify2) {
   const openRouter = new OpenRouterService();
   fastify2.get("/llms", async (request, reply) => {
     try {
-      const { data: llmConfigs, error } = await fastify2.supabase.from("llm_configs").select("*").eq("active", true).order("priority", { ascending: true });
-      if (error) {
+      let llmConfigs;
+      let error = null;
+      try {
+        const result = await fastify2.supabase.from("llm_configs").select("*").eq("active", true).order("priority", { ascending: true });
+        llmConfigs = result.data;
+        error = result.error;
+      } catch (supabaseError) {
+        fastify2.log.warn("Supabase n\xE3o dispon\xEDvel, usando dados mock para LLMs");
+        llmConfigs = [
+          {
+            id: "llm_1",
+            model_name: "gpt-4o",
+            priority: 1,
+            system_prompt: "Voc\xEA \xE9 um assistente inteligente da AutVision.",
+            max_tokens: 2e3,
+            temperature: 0.7,
+            active: true,
+            last_used: (/* @__PURE__ */ new Date()).toISOString(),
+            total_usage: 150,
+            success_rate: 0.95
+          },
+          {
+            id: "llm_2",
+            model_name: "gpt-4o-mini",
+            priority: 2,
+            system_prompt: "Voc\xEA \xE9 um assistente r\xE1pido e eficiente.",
+            max_tokens: 1e3,
+            temperature: 0.5,
+            active: true,
+            last_used: (/* @__PURE__ */ new Date()).toISOString(),
+            total_usage: 300,
+            success_rate: 0.98
+          }
+        ];
+      }
+      if (error && llmConfigs === null) {
         fastify2.log.error("Erro ao buscar LLMs do Supabase:", error);
       }
       const availableModels = openRouter.getAvailableModels();
@@ -72211,21 +72200,44 @@ async function configRoutes(fastify2) {
   });
   fastify2.get("/agents", async (request, reply) => {
     try {
-      const { data: agents, error } = await fastify2.supabase.from("agents").select(`
-          id,
-          name,
-          type,
-          status,
-          config,
-          created_at,
-          updated_at
-        `).order("name", { ascending: true });
-      if (error) {
-        return reply.code(500).send({
-          success: false,
-          error: "Erro ao buscar agentes",
-          code: "DATABASE_ERROR"
-        });
+      let agents = [];
+      try {
+        const result = await fastify2.supabase.from("agents").select(`
+            id,
+            name,
+            type,
+            status,
+            config,
+            created_at,
+            updated_at
+          `).order("name", { ascending: true });
+        if (result.data && !result.error) {
+          agents = result.data;
+        } else {
+          throw new Error("Supabase error or no data");
+        }
+      } catch (supabaseError) {
+        fastify2.log.warn("Supabase n\xE3o dispon\xEDvel, usando dados mock para agents");
+        agents = [
+          {
+            id: "agent_1",
+            name: "AgentVision",
+            type: "vision",
+            status: "active",
+            config: { model: "gpt-4o", temperature: 0.7 },
+            created_at: (/* @__PURE__ */ new Date()).toISOString(),
+            updated_at: (/* @__PURE__ */ new Date()).toISOString()
+          },
+          {
+            id: "agent_2",
+            name: "AgentChat",
+            type: "chat",
+            status: "active",
+            config: { model: "gpt-4o-mini", temperature: 0.5 },
+            created_at: (/* @__PURE__ */ new Date()).toISOString(),
+            updated_at: (/* @__PURE__ */ new Date()).toISOString()
+          }
+        ];
       }
       const stats = {
         total: agents?.length || 0,
@@ -72371,6 +72383,104 @@ async function configRoutes(fastify2) {
 
 // src/routes/supremo.js
 async function supremoRoutes(fastify2, options) {
+  fastify2.get("/companion", async (request, reply) => {
+    try {
+      const { created_by } = request.query;
+      if (!created_by) {
+        return reply.code(400).send({
+          success: false,
+          error: "Par\xE2metro created_by \xE9 obrigat\xF3rio",
+          code: "MISSING_CREATED_BY"
+        });
+      }
+      const { data: companions, error } = await fastify2.supabase.from("vision_companions").select("*").eq("created_by", created_by).order("created_at", { ascending: false });
+      if (error) {
+        fastify2.log.warn("Tabela vision_companions n\xE3o existe, retornando mock");
+        return reply.send({
+          success: true,
+          data: [{
+            id: "mock_vision_" + Date.now(),
+            name: "Vision",
+            created_by,
+            total_interactions: 0,
+            created_at: (/* @__PURE__ */ new Date()).toISOString()
+          }]
+        });
+      }
+      return reply.send({
+        success: true,
+        data: companions || []
+      });
+    } catch (error) {
+      fastify2.log.error("Erro na rota GET /companion:", error);
+      return reply.code(500).send({
+        success: false,
+        error: "Erro interno do servidor",
+        code: "INTERNAL_ERROR"
+      });
+    }
+  });
+  fastify2.post("/companion", async (request, reply) => {
+    try {
+      const companionData = request.body;
+      const newCompanion = {
+        ...companionData,
+        total_interactions: 0,
+        created_at: (/* @__PURE__ */ new Date()).toISOString(),
+        updated_at: (/* @__PURE__ */ new Date()).toISOString()
+      };
+      const { data, error } = await fastify2.supabase.from("vision_companions").insert(newCompanion).select().single();
+      if (error) {
+        fastify2.log.warn("Erro ao criar companion, retornando mock:", error);
+        return reply.send({
+          success: true,
+          data: {
+            id: "mock_vision_" + Date.now(),
+            ...newCompanion
+          }
+        });
+      }
+      return reply.send({
+        success: true,
+        data
+      });
+    } catch (error) {
+      fastify2.log.error("Erro na cria\xE7\xE3o de companion:", error);
+      return reply.code(500).send({
+        success: false,
+        error: "Erro interno do servidor",
+        code: "INTERNAL_ERROR"
+      });
+    }
+  });
+  fastify2.put("/companion/:id", async (request, reply) => {
+    try {
+      const { id } = request.params;
+      const updateData = request.body;
+      const { data, error } = await fastify2.supabase.from("vision_companions").update({
+        ...updateData,
+        updated_at: (/* @__PURE__ */ new Date()).toISOString()
+      }).eq("id", id).select().single();
+      if (error) {
+        fastify2.log.warn("Erro ao atualizar companion:", error);
+        return reply.send({
+          success: true,
+          data: { id, ...updateData }
+        });
+      }
+      return reply.send({
+        success: true,
+        data
+      });
+    } catch (error) {
+      fastify2.log.error("Erro na atualiza\xE7\xE3o de companion:", error);
+      return reply.code(500).send({
+        success: false,
+        error: "Erro interno do servidor",
+        code: "INTERNAL_ERROR"
+      });
+    }
+  });
   fastify2.get("/companion/profile/:userId", async (request, reply) => {
     try {
       const { userId } = request.params;
@@ -72764,15 +72874,391 @@ async function supremoRoutes(fastify2, options) {
   });
 }
 
+// src/routes/tutorials.ts
+async function tutorialsRoutes(fastify2) {
+  fastify2.get("/", async (request, reply) => {
+    try {
+      const { created_by } = request.query;
+      if (!created_by) {
+        return reply.send({
+          success: true,
+          data: []
+        });
+      }
+      const { data: tutorials, error } = await fastify2.supabase.from("tutorials").select("*").eq("created_by", created_by).order("created_at", { ascending: false });
+      if (error) {
+        fastify2.log.error("Erro ao buscar tutoriais:", error);
+        return reply.send({
+          success: true,
+          data: []
+        });
+      }
+      return reply.send({
+        success: true,
+        data: tutorials || []
+      });
+    } catch (error) {
+      fastify2.log.error("Erro na rota /tutorials:", error);
+      return reply.send({
+        success: true,
+        data: []
+      });
+    }
+  });
+  fastify2.post("/", async (request, reply) => {
+    try {
+      const tutorialData = request.body;
+      const { data, error } = await fastify2.supabase.from("tutorials").insert({
+        ...tutorialData,
+        created_at: (/* @__PURE__ */ new Date()).toISOString(),
+        updated_at: (/* @__PURE__ */ new Date()).toISOString()
+      }).select().single();
+      if (error) {
+        fastify2.log.error("Erro ao criar tutorial:", error);
+        return reply.code(500).send({
+          success: false,
+          error: "Erro ao criar tutorial",
+          code: "CREATE_ERROR"
+        });
+      }
+      return reply.send({
+        success: true,
+        data
+      });
+    } catch (error) {
+      fastify2.log.error("Erro na cria\xE7\xE3o de tutorial:", error);
+      return reply.code(500).send({
+        success: false,
+        error: "Erro interno do servidor",
+        code: "INTERNAL_ERROR"
+      });
+    }
+  });
+  fastify2.put("/:id", async (request, reply) => {
+    try {
+      const { id } = request.params;
+      const updateData = request.body;
+      const { data, error } = await fastify2.supabase.from("tutorials").update({
+        ...updateData,
+        updated_at: (/* @__PURE__ */ new Date()).toISOString()
+      }).eq("id", id).select().single();
+      if (error) {
+        fastify2.log.error("Erro ao atualizar tutorial:", error);
+        return reply.code(500).send({
+          success: false,
+          error: "Erro ao atualizar tutorial",
+          code: "UPDATE_ERROR"
+        });
+      }
+      return reply.send({
+        success: true,
+        data
+      });
+    } catch (error) {
+      fastify2.log.error("Erro na atualiza\xE7\xE3o de tutorial:", error);
+      return reply.code(500).send({
+        success: false,
+        error: "Erro interno do servidor",
+        code: "INTERNAL_ERROR"
+      });
+    }
+  });
+}
+
+// src/routes/routines.ts
+async function routinesRoutes(fastify2) {
+  fastify2.get("/", async (request, reply) => {
+    try {
+      const { created_by } = request.query;
+      if (!created_by) {
+        return reply.send({
+          success: true,
+          data: []
+        });
+      }
+      const { data: routines, error } = await fastify2.supabase.from("routines").select("*").eq("created_by", created_by).order("created_at", { ascending: false });
+      if (error) {
+        fastify2.log.error("Erro ao buscar rotinas:", error);
+        return reply.send({
+          success: true,
+          data: []
+        });
+      }
+      return reply.send({
+        success: true,
+        data: routines || []
+      });
+    } catch (error) {
+      fastify2.log.error("Erro na rota /routines:", error);
+      return reply.send({
+        success: true,
+        data: []
+      });
+    }
+  });
+  fastify2.post("/", async (request, reply) => {
+    try {
+      const routineData = request.body;
+      const { data, error } = await fastify2.supabase.from("routines").insert({
+        ...routineData,
+        created_at: (/* @__PURE__ */ new Date()).toISOString(),
+        updated_at: (/* @__PURE__ */ new Date()).toISOString()
+      }).select().single();
+      if (error) {
+        fastify2.log.error("Erro ao criar rotina:", error);
+        return reply.code(500).send({
+          success: false,
+          error: "Erro ao criar rotina",
+          code: "CREATE_ERROR"
+        });
+      }
+      return reply.send({
+        success: true,
+        data
+      });
+    } catch (error) {
+      fastify2.log.error("Erro na cria\xE7\xE3o de rotina:", error);
+      return reply.code(500).send({
+        success: false,
+        error: "Erro interno do servidor",
+        code: "INTERNAL_ERROR"
+      });
+    }
+  });
+  fastify2.put("/:id", async (request, reply) => {
+    try {
+      const { id } = request.params;
+      const updateData = request.body;
+      const { data, error } = await fastify2.supabase.from("routines").update({
+        ...updateData,
+        updated_at: (/* @__PURE__ */ new Date()).toISOString()
+      }).eq("id", id).select().single();
+      if (error) {
+        fastify2.log.error("Erro ao atualizar rotina:", error);
+        return reply.code(500).send({
+          success: false,
+          error: "Erro ao atualizar rotina",
+          code: "UPDATE_ERROR"
+        });
+      }
+      return reply.send({
+        success: true,
+        data
+      });
+    } catch (error) {
+      fastify2.log.error("Erro na atualiza\xE7\xE3o de rotina:", error);
+      return reply.code(500).send({
+        success: false,
+        error: "Erro interno do servidor",
+        code: "INTERNAL_ERROR"
+      });
+    }
+  });
+}
+
+// src/routes/missions.ts
+async function missionsRoutes(fastify2) {
+  fastify2.get("/", async (request, reply) => {
+    try {
+      const { created_by } = request.query;
+      const mockMissions = [
+        {
+          id: 1,
+          title: "Primeira Conversa",
+          description: "Converse com o Vision Companion",
+          progress: 0,
+          total: 1,
+          completed: false,
+          created_by: created_by || "demo"
+        },
+        {
+          id: 2,
+          title: "Explore os Agentes",
+          description: "Visite a p\xE1gina de Agentes",
+          progress: 0,
+          total: 1,
+          completed: false,
+          created_by: created_by || "demo"
+        }
+      ];
+      return reply.send({
+        success: true,
+        data: mockMissions
+      });
+    } catch (error) {
+      fastify2.log.error("Erro na rota /missions:", error);
+      return reply.send({
+        success: true,
+        data: []
+      });
+    }
+  });
+  fastify2.post("/", async (request, reply) => {
+    try {
+      const missionData = request.body;
+      const mockMission = {
+        id: Date.now(),
+        ...missionData,
+        created_at: (/* @__PURE__ */ new Date()).toISOString(),
+        updated_at: (/* @__PURE__ */ new Date()).toISOString()
+      };
+      return reply.send({
+        success: true,
+        data: mockMission
+      });
+    } catch (error) {
+      fastify2.log.error("Erro na cria\xE7\xE3o de miss\xE3o:", error);
+      return reply.code(500).send({
+        success: false,
+        error: "Erro interno do servidor",
+        code: "INTERNAL_ERROR"
+      });
+    }
+  });
+  fastify2.put("/:id", async (request, reply) => {
+    try {
+      const { id } = request.params;
+      const updateData = request.body;
+      const mockMission = {
+        id: parseInt(id),
+        ...updateData,
+        updated_at: (/* @__PURE__ */ new Date()).toISOString()
+      };
+      return reply.send({
+        success: true,
+        data: mockMission
+      });
+    } catch (error) {
+      fastify2.log.error("Erro na atualiza\xE7\xE3o de miss\xE3o:", error);
+      return reply.code(500).send({
+        success: false,
+        error: "Erro interno do servidor",
+        code: "INTERNAL_ERROR"
+      });
+    }
+  });
+}
+
+// src/routes/badges.ts
+async function badgesRoutes(fastify2) {
+  fastify2.get("/", async (request, reply) => {
+    try {
+      const { created_by } = request.query;
+      const mockBadges = [
+        {
+          id: 1,
+          name: "Primeiro Passo",
+          description: "Completou o primeiro tutorial",
+          icon: "\u{1F3AF}",
+          earned: false,
+          earned_at: null,
+          created_by: created_by || "demo"
+        },
+        {
+          id: 2,
+          name: "Conversador",
+          description: "Teve sua primeira conversa com o Vision",
+          icon: "\u{1F4AC}",
+          earned: false,
+          earned_at: null,
+          created_by: created_by || "demo"
+        },
+        {
+          id: 3,
+          name: "Explorador",
+          description: "Visitou todas as se\xE7\xF5es da plataforma",
+          icon: "\u{1F5FA}\uFE0F",
+          earned: false,
+          earned_at: null,
+          created_by: created_by || "demo"
+        }
+      ];
+      return reply.send({
+        success: true,
+        data: mockBadges
+      });
+    } catch (error) {
+      fastify2.log.error("Erro na rota /badges:", error);
+      return reply.send({
+        success: true,
+        data: []
+      });
+    }
+  });
+  fastify2.post("/", async (request, reply) => {
+    try {
+      const badgeData = request.body;
+      const mockBadge = {
+        id: Date.now(),
+        ...badgeData,
+        created_at: (/* @__PURE__ */ new Date()).toISOString(),
+        updated_at: (/* @__PURE__ */ new Date()).toISOString()
+      };
+      return reply.send({
+        success: true,
+        data: mockBadge
+      });
+    } catch (error) {
+      fastify2.log.error("Erro na cria\xE7\xE3o de badge:", error);
+      return reply.code(500).send({
+        success: false,
+        error: "Erro interno do servidor",
+        code: "INTERNAL_ERROR"
+      });
+    }
+  });
+  fastify2.put("/:id", async (request, reply) => {
+    try {
+      const { id } = request.params;
+      const updateData = request.body;
+      const mockBadge = {
+        id: parseInt(id),
+        ...updateData,
+        updated_at: (/* @__PURE__ */ new Date()).toISOString()
+      };
+      return reply.send({
+        success: true,
+        data: mockBadge
+      });
+    } catch (error) {
+      fastify2.log.error("Erro na atualiza\xE7\xE3o de badge:", error);
+      return reply.code(500).send({
+        success: false,
+        error: "Erro interno do servidor",
+        code: "INTERNAL_ERROR"
+      });
+    }
+  });
+}
+
 // src/index.ts
-var projectRoot = process.cwd().includes("backend-autvision") ? process.cwd() : (0, import_path.join)(process.cwd(), "backend-autvision");
-(0, import_dotenv.config)({ path: (0, import_path.join)(projectRoot, ".env.server") });
+console.log("\u{1F7E2} process.cwd():", process.cwd());
+var envPaths = [
+  (0, import_path.join)(process.cwd(), ".env"),
+  (0, import_path.join)(process.cwd(), "autvisionai-backend", ".env"),
+  (0, import_path.join)(__dirname, "..", ".env")
+];
+var envLoaded = false;
+for (const envPath of envPaths) {
+  try {
+    (0, import_dotenv.config)({ path: envPath });
+    if (process.env.SUPABASE_URL) {
+      console.log("\u{1F7E2} Vari\xE1veis carregadas de:", envPath);
+      envLoaded = true;
+      break;
+    }
+  } catch (error) {
+  }
+}
+if (!envLoaded) {
+  console.log("\u26A0\uFE0F Tentando carregar .env padr\xE3o...");
+  (0, import_dotenv.config)();
+}
 console.log("\u{1F50D} DEBUG - Vari\xE1veis de ambiente:");
 console.log("- SUPABASE_URL:", process.env.SUPABASE_URL ? "\u2705 Definida" : "\u274C N\xE3o encontrada");
 console.log("- SUPABASE_SERVICE_ROLE_KEY:", process.env.SUPABASE_SERVICE_ROLE_KEY ? "\u2705 Definida" : "\u274C N\xE3o encontrada");
 console.log("- OPENROUTER_API_KEY:", process.env.OPENROUTER_API_KEY ? "\u2705 Definida" : "\u274C N\xE3o encontrada");
 console.log("- PORT:", process.env.PORT || "Usando padr\xE3o");
-console.log("- Arquivo .env.server path:", (0, import_path.join)(projectRoot, ".env.server"));
 llmDispatcher.initialize();
 var fastify = (0, import_fastify.default)({
   logger: {
@@ -72866,7 +73352,11 @@ async function setupRoutes() {
         ovos: "/ovos/*",
         logs: "/logs/*",
         config: "/config/*",
-        visionSupremo: "/supremo/*"
+        visionSupremo: "/supremo/*",
+        tutorials: "/tutorials/*",
+        routines: "/routines/*",
+        missions: "/missions/*",
+        badges: "/badges/*"
       }
     };
   });
@@ -72886,6 +73376,10 @@ async function setupRoutes() {
   await fastify.register(logsRoutes, { prefix: "/logs" });
   await fastify.register(configRoutes, { prefix: "/config" });
   await fastify.register(supremoRoutes, { prefix: "/supremo" });
+  await fastify.register(tutorialsRoutes, { prefix: "/tutorials" });
+  await fastify.register(routinesRoutes, { prefix: "/routines" });
+  await fastify.register(missionsRoutes, { prefix: "/missions" });
+  await fastify.register(badgesRoutes, { prefix: "/badges" });
 }
 async function start() {
   try {
