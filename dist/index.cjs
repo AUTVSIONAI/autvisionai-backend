@@ -73943,6 +73943,7 @@ async function setupSecurity() {
     origin: [
       "https://www.autvisionai.com",
       "https://autvisionai-real.vercel.app",
+      "http://localhost:3002",
       "http://localhost:5173",
       "http://localhost:5174",
       "http://localhost:5175",
@@ -73951,6 +73952,7 @@ async function setupSecurity() {
       "http://localhost:5181",
       "http://localhost:5182",
       "http://localhost:3000",
+      "http://127.0.0.1:3002",
       "http://127.0.0.1:5173",
       "http://127.0.0.1:5174",
       "http://127.0.0.1:5175",
