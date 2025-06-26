@@ -21,19 +21,14 @@ export default async function tutorialsRoutes(fastify: FastifyInstance) {
     try {
       const { created_by } = request.query;
       
-      if (!created_by) {
-        return reply.send({
-          success: true,
-          data: []
-        });
-      }
-
       // Busca tutoriais no Supabase
-      const { data: tutorials, error } = await fastify.supabase
-        .from('tutorials')
-        .select('*')
-        .eq('created_by', created_by)
-        .order('created_at', { ascending: false });
+      let query = fastify.supabase.from('tutorials').select('*');
+      
+      if (created_by) {
+        query = query.eq('created_by', created_by);
+      }
+      
+      const { data: tutorials, error } = await query.order('created_at', { ascending: false });
 
       if (error) {
         fastify.log.error('Erro ao buscar tutoriais:', error);
@@ -137,6 +132,43 @@ export default async function tutorialsRoutes(fastify: FastifyInstance) {
 
     } catch (error) {
       fastify.log.error('Erro na atualização de tutorial:', error);
+      return reply.code(500).send({
+        success: false,
+        error: 'Erro interno do servidor',
+        code: 'INTERNAL_ERROR'
+      });
+    }
+  });
+
+  /**
+   * 🔍 GET /tutorials/debug
+   * Lista TODOS os tutoriais (para debug) 
+   */
+  fastify.get('/debug', async (request: FastifyRequest, reply: FastifyReply) => {
+    try {
+      // Busca TODOS os tutoriais no Supabase
+      const { data: tutorials, error } = await fastify.supabase
+        .from('tutorials')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        fastify.log.error('Erro ao buscar TODOS os tutoriais:', error);
+        return reply.code(500).send({
+          success: false,
+          error: error.message,
+          code: 'DATABASE_ERROR'
+        });
+      }
+
+      return reply.send({
+        success: true,
+        data: tutorials || [],
+        total: tutorials?.length || 0
+      });
+
+    } catch (error) {
+      fastify.log.error('Erro na rota /tutorials/debug:', error);
       return reply.code(500).send({
         success: false,
         error: 'Erro interno do servidor',

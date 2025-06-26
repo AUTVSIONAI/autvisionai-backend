@@ -72879,13 +72879,11 @@ async function tutorialsRoutes(fastify2) {
   fastify2.get("/", async (request, reply) => {
     try {
       const { created_by } = request.query;
-      if (!created_by) {
-        return reply.send({
-          success: true,
-          data: []
-        });
+      let query = fastify2.supabase.from("tutorials").select("*");
+      if (created_by) {
+        query = query.eq("created_by", created_by);
       }
-      const { data: tutorials, error } = await fastify2.supabase.from("tutorials").select("*").eq("created_by", created_by).order("created_at", { ascending: false });
+      const { data: tutorials, error } = await query.order("created_at", { ascending: false });
       if (error) {
         fastify2.log.error("Erro ao buscar tutoriais:", error);
         return reply.send({
@@ -72956,6 +72954,31 @@ async function tutorialsRoutes(fastify2) {
       });
     } catch (error) {
       fastify2.log.error("Erro na atualiza\xE7\xE3o de tutorial:", error);
+      return reply.code(500).send({
+        success: false,
+        error: "Erro interno do servidor",
+        code: "INTERNAL_ERROR"
+      });
+    }
+  });
+  fastify2.get("/debug", async (request, reply) => {
+    try {
+      const { data: tutorials, error } = await fastify2.supabase.from("tutorials").select("*").order("created_at", { ascending: false });
+      if (error) {
+        fastify2.log.error("Erro ao buscar TODOS os tutoriais:", error);
+        return reply.code(500).send({
+          success: false,
+          error: error.message,
+          code: "DATABASE_ERROR"
+        });
+      }
+      return reply.send({
+        success: true,
+        data: tutorials || [],
+        total: tutorials?.length || 0
+      });
+    } catch (error) {
+      fastify2.log.error("Erro na rota /tutorials/debug:", error);
       return reply.code(500).send({
         success: false,
         error: "Erro interno do servidor",
@@ -73061,29 +73084,21 @@ async function missionsRoutes(fastify2) {
   fastify2.get("/", async (request, reply) => {
     try {
       const { created_by } = request.query;
-      const mockMissions = [
-        {
-          id: 1,
-          title: "Primeira Conversa",
-          description: "Converse com o Vision Companion",
-          progress: 0,
-          total: 1,
-          completed: false,
-          created_by: created_by || "demo"
-        },
-        {
-          id: 2,
-          title: "Explore os Agentes",
-          description: "Visite a p\xE1gina de Agentes",
-          progress: 0,
-          total: 1,
-          completed: false,
-          created_by: created_by || "demo"
-        }
-      ];
+      let query = fastify2.supabase.from("missions").select("*");
+      if (created_by) {
+        query = query.eq("created_by", created_by);
+      }
+      const { data: missions, error } = await query.order("created_at", { ascending: false });
+      if (error) {
+        fastify2.log.error("Erro ao buscar miss\xF5es:", error);
+        return reply.send({
+          success: true,
+          data: []
+        });
+      }
       return reply.send({
         success: true,
-        data: mockMissions
+        data: missions || []
       });
     } catch (error) {
       fastify2.log.error("Erro na rota /missions:", error);
@@ -73096,15 +73111,22 @@ async function missionsRoutes(fastify2) {
   fastify2.post("/", async (request, reply) => {
     try {
       const missionData = request.body;
-      const mockMission = {
-        id: Date.now(),
+      const { data, error } = await fastify2.supabase.from("missions").insert({
         ...missionData,
         created_at: (/* @__PURE__ */ new Date()).toISOString(),
         updated_at: (/* @__PURE__ */ new Date()).toISOString()
-      };
+      }).select().single();
+      if (error) {
+        fastify2.log.error("Erro ao criar miss\xE3o:", error);
+        return reply.code(500).send({
+          success: false,
+          error: "Erro ao criar miss\xE3o",
+          code: "CREATE_ERROR"
+        });
+      }
       return reply.send({
         success: true,
-        data: mockMission
+        data
       });
     } catch (error) {
       fastify2.log.error("Erro na cria\xE7\xE3o de miss\xE3o:", error);
@@ -73119,17 +73141,59 @@ async function missionsRoutes(fastify2) {
     try {
       const { id } = request.params;
       const updateData = request.body;
-      const mockMission = {
-        id: parseInt(id),
+      const { data, error } = await fastify2.supabase.from("missions").update({
         ...updateData,
         updated_at: (/* @__PURE__ */ new Date()).toISOString()
-      };
+      }).eq("id", id).select().single();
+      if (error) {
+        fastify2.log.error("Erro ao atualizar miss\xE3o:", error);
+        return reply.code(500).send({
+          success: false,
+          error: "Erro ao atualizar miss\xE3o",
+          code: "UPDATE_ERROR"
+        });
+      }
       return reply.send({
         success: true,
-        data: mockMission
+        data
       });
     } catch (error) {
       fastify2.log.error("Erro na atualiza\xE7\xE3o de miss\xE3o:", error);
+      return reply.code(500).send({
+        success: false,
+        error: "Erro interno do servidor",
+        code: "INTERNAL_ERROR"
+      });
+    }
+  });
+  fastify2.get("/debug", async (request, reply) => {
+    try {
+      const { data: missions, error } = await fastify2.supabase.rpc("get_all_missions_debug");
+      if (error) {
+        fastify2.log.error("Erro ao buscar TODAS as miss\xF5es:", error);
+        const { data: directMissions, error: directError } = await fastify2.supabase.from("missions").select("*").order("created_at", { ascending: false });
+        if (directError) {
+          return reply.code(500).send({
+            success: false,
+            error: directError.message,
+            code: "DATABASE_ERROR"
+          });
+        }
+        return reply.send({
+          success: true,
+          data: directMissions || [],
+          total: directMissions?.length || 0,
+          method: "direct_query"
+        });
+      }
+      return reply.send({
+        success: true,
+        data: missions || [],
+        total: missions?.length || 0,
+        method: "rpc_call"
+      });
+    } catch (error) {
+      fastify2.log.error("Erro na rota /missions/debug:", error);
       return reply.code(500).send({
         success: false,
         error: "Erro interno do servidor",
@@ -73144,38 +73208,21 @@ async function badgesRoutes(fastify2) {
   fastify2.get("/", async (request, reply) => {
     try {
       const { created_by } = request.query;
-      const mockBadges = [
-        {
-          id: 1,
-          name: "Primeiro Passo",
-          description: "Completou o primeiro tutorial",
-          icon: "\u{1F3AF}",
-          earned: false,
-          earned_at: null,
-          created_by: created_by || "demo"
-        },
-        {
-          id: 2,
-          name: "Conversador",
-          description: "Teve sua primeira conversa com o Vision",
-          icon: "\u{1F4AC}",
-          earned: false,
-          earned_at: null,
-          created_by: created_by || "demo"
-        },
-        {
-          id: 3,
-          name: "Explorador",
-          description: "Visitou todas as se\xE7\xF5es da plataforma",
-          icon: "\u{1F5FA}\uFE0F",
-          earned: false,
-          earned_at: null,
-          created_by: created_by || "demo"
-        }
-      ];
+      let query = fastify2.supabase.from("badges").select("*");
+      if (created_by) {
+        query = query.eq("created_by", created_by);
+      }
+      const { data: badges, error } = await query.order("created_at", { ascending: false });
+      if (error) {
+        fastify2.log.error("Erro ao buscar badges:", error);
+        return reply.send({
+          success: true,
+          data: []
+        });
+      }
       return reply.send({
         success: true,
-        data: mockBadges
+        data: badges || []
       });
     } catch (error) {
       fastify2.log.error("Erro na rota /badges:", error);
@@ -73231,6 +73278,609 @@ async function badgesRoutes(fastify2) {
   });
 }
 
+// src/routes/agents.ts
+async function agentsRoutes(fastify2) {
+  fastify2.get("/", async (request, reply) => {
+    try {
+      const { type, is_active, plan_required } = request.query;
+      let query = fastify2.supabase.from("agents").select("*");
+      if (type) query = query.eq("type", type);
+      if (is_active !== void 0) query = query.eq("is_active", is_active);
+      if (plan_required) query = query.eq("plan_required", plan_required);
+      const { data: agents, error } = await query.order("created_at", { ascending: false });
+      if (error) {
+        fastify2.log.error("Erro ao buscar agentes:", error);
+        return reply.code(500).send({
+          success: false,
+          error: "Erro ao buscar agentes",
+          code: "DATABASE_ERROR"
+        });
+      }
+      return reply.send({
+        success: true,
+        data: agents || []
+      });
+    } catch (error) {
+      fastify2.log.error("Erro na rota /agents:", error);
+      return reply.code(500).send({
+        success: false,
+        error: "Erro interno do servidor",
+        code: "INTERNAL_ERROR"
+      });
+    }
+  });
+  fastify2.post("/", async (request, reply) => {
+    try {
+      const agentData = request.body;
+      const { data, error } = await fastify2.supabase.from("agents").insert({
+        ...agentData,
+        capabilities: agentData.capabilities || [],
+        is_active: agentData.is_active !== false,
+        plan_required: agentData.plan_required || "free",
+        created_at: (/* @__PURE__ */ new Date()).toISOString(),
+        updated_at: (/* @__PURE__ */ new Date()).toISOString()
+      }).select().single();
+      if (error) {
+        fastify2.log.error("Erro ao criar agente:", error);
+        fastify2.log.error("Dados enviados:", agentData);
+        return reply.code(500).send({
+          success: false,
+          error: "Erro ao criar agente",
+          details: error.message,
+          code: "CREATE_ERROR"
+        });
+      }
+      return reply.send({
+        success: true,
+        data
+      });
+    } catch (error) {
+      fastify2.log.error("Erro na cria\xE7\xE3o de agente:", error);
+      return reply.code(500).send({
+        success: false,
+        error: "Erro interno do servidor",
+        code: "INTERNAL_ERROR"
+      });
+    }
+  });
+  fastify2.put("/:id", async (request, reply) => {
+    try {
+      const { id } = request.params;
+      const updateData = request.body;
+      const { data, error } = await fastify2.supabase.from("agents").update({
+        ...updateData,
+        updated_at: (/* @__PURE__ */ new Date()).toISOString()
+      }).eq("id", id).select().single();
+      if (error) {
+        fastify2.log.error("Erro ao atualizar agente:", error);
+        return reply.code(500).send({
+          success: false,
+          error: "Erro ao atualizar agente",
+          code: "UPDATE_ERROR"
+        });
+      }
+      return reply.send({
+        success: true,
+        data
+      });
+    } catch (error) {
+      fastify2.log.error("Erro na atualiza\xE7\xE3o de agente:", error);
+      return reply.code(500).send({
+        success: false,
+        error: "Erro interno do servidor",
+        code: "INTERNAL_ERROR"
+      });
+    }
+  });
+  fastify2.delete("/:id", async (request, reply) => {
+    try {
+      const { id } = request.params;
+      const { error } = await fastify2.supabase.from("agents").delete().eq("id", id);
+      if (error) {
+        fastify2.log.error("Erro ao deletar agente:", error);
+        return reply.code(500).send({
+          success: false,
+          error: "Erro ao deletar agente",
+          code: "DELETE_ERROR"
+        });
+      }
+      return reply.send({
+        success: true,
+        message: "Agente deletado com sucesso"
+      });
+    } catch (error) {
+      fastify2.log.error("Erro na dele\xE7\xE3o de agente:", error);
+      return reply.code(500).send({
+        success: false,
+        error: "Erro interno do servidor",
+        code: "INTERNAL_ERROR"
+      });
+    }
+  });
+  fastify2.post("/:id/upload-image", async (request, reply) => {
+    try {
+      const { id } = request.params;
+      const mockImageUrl = `/assets/images/agents/agent_${id}.png`;
+      const { data, error } = await fastify2.supabase.from("agents").update({
+        image: mockImageUrl,
+        updated_at: (/* @__PURE__ */ new Date()).toISOString()
+      }).eq("id", id).select().single();
+      if (error) {
+        fastify2.log.error("Erro ao atualizar imagem do agente:", error);
+        return reply.code(500).send({
+          success: false,
+          error: "Erro ao atualizar imagem",
+          code: "UPLOAD_ERROR"
+        });
+      }
+      return reply.send({
+        success: true,
+        data,
+        message: "Imagem atualizada com sucesso"
+      });
+    } catch (error) {
+      fastify2.log.error("Erro no upload de imagem:", error);
+      return reply.code(500).send({
+        success: false,
+        error: "Erro interno do servidor",
+        code: "INTERNAL_ERROR"
+      });
+    }
+  });
+}
+
+// src/routes/users.ts
+async function usersRoutes(fastify2) {
+  fastify2.get("/me", async (request, reply) => {
+    try {
+      const user = {
+        id: "user_123",
+        email: "user@example.com",
+        full_name: "Usu\xE1rio Teste",
+        role: "user",
+        plan_id: "starter",
+        tokens: 100,
+        created_at: (/* @__PURE__ */ new Date()).toISOString()
+      };
+      return {
+        success: true,
+        data: user
+      };
+    } catch (error) {
+      fastify2.log.error("Erro ao buscar usu\xE1rio:", error);
+      return reply.code(500).send({
+        success: false,
+        error: "Erro interno do servidor"
+      });
+    }
+  });
+  fastify2.get("/", async (request, reply) => {
+    try {
+      const users = [
+        {
+          id: "user_123",
+          email: "user@example.com",
+          full_name: "Usu\xE1rio Teste",
+          role: "user",
+          plan_id: "starter",
+          tokens: 100,
+          created_at: (/* @__PURE__ */ new Date()).toISOString()
+        }
+      ];
+      return {
+        success: true,
+        data: users
+      };
+    } catch (error) {
+      fastify2.log.error("Erro ao listar usu\xE1rios:", error);
+      return reply.code(500).send({
+        success: false,
+        error: "Erro interno do servidor"
+      });
+    }
+  });
+}
+
+// src/routes/plans.ts
+async function plansRoutes(fastify2) {
+  fastify2.get("/", async (request, reply) => {
+    try {
+      const plans = [
+        {
+          id: "starter",
+          name: "Starter",
+          description: "Plano b\xE1sico para come\xE7ar",
+          price: 0,
+          tokens: 100,
+          features: ["Dashboard b\xE1sico", "Suporte por email"],
+          active: true
+        },
+        {
+          id: "pro",
+          name: "Pro",
+          description: "Plano profissional com mais recursos",
+          price: 29.99,
+          tokens: 1e3,
+          features: ["Dashboard avan\xE7ado", "Suporte priorit\xE1rio", "API access"],
+          active: true
+        },
+        {
+          id: "enterprise",
+          name: "Enterprise",
+          description: "Plano empresarial completo",
+          price: 99.99,
+          tokens: 1e4,
+          features: ["Recursos completos", "Suporte 24/7", "API ilimitada", "Admin panel"],
+          active: true
+        }
+      ];
+      return {
+        success: true,
+        data: plans
+      };
+    } catch (error) {
+      fastify2.log.error("Erro ao listar planos:", error);
+      return reply.code(500).send({
+        success: false,
+        error: "Erro interno do servidor"
+      });
+    }
+  });
+  fastify2.get("/:id", async (request, reply) => {
+    try {
+      const { id } = request.params;
+      const plans = [
+        {
+          id: "starter",
+          name: "Starter",
+          description: "Plano b\xE1sico para come\xE7ar",
+          price: 0,
+          tokens: 100,
+          features: ["Dashboard b\xE1sico", "Suporte por email"],
+          active: true
+        },
+        {
+          id: "pro",
+          name: "Pro",
+          description: "Plano profissional com mais recursos",
+          price: 29.99,
+          tokens: 1e3,
+          features: ["Dashboard avan\xE7ado", "Suporte priorit\xE1rio", "API access"],
+          active: true
+        },
+        {
+          id: "enterprise",
+          name: "Enterprise",
+          description: "Plano empresarial completo",
+          price: 99.99,
+          tokens: 1e4,
+          features: ["Recursos completos", "Suporte 24/7", "API ilimitada", "Admin panel"],
+          active: true
+        }
+      ];
+      const plan = plans.find((p) => p.id === id);
+      if (!plan) {
+        return reply.code(404).send({
+          success: false,
+          error: "Plano n\xE3o encontrado"
+        });
+      }
+      return {
+        success: true,
+        data: plan
+      };
+    } catch (error) {
+      fastify2.log.error("Erro ao buscar plano:", error);
+      return reply.code(500).send({
+        success: false,
+        error: "Erro interno do servidor"
+      });
+    }
+  });
+}
+
+// src/routes/integrations.ts
+async function integrationsRoutes(fastify2) {
+  fastify2.get("/", async (request, reply) => {
+    try {
+      const integrations = [
+        {
+          id: "n8n",
+          name: "N8N",
+          description: "Automa\xE7\xE3o de workflows",
+          icon: "workflow",
+          status: "connected",
+          config: {
+            url: "http://localhost:5678",
+            api_key: "n8n_api_key"
+          }
+        },
+        {
+          id: "whatsapp",
+          name: "WhatsApp Business",
+          description: "Integra\xE7\xE3o com WhatsApp",
+          icon: "message-circle",
+          status: "disconnected",
+          config: {}
+        },
+        {
+          id: "supabase",
+          name: "Supabase",
+          description: "Base de dados principal",
+          icon: "database",
+          status: "connected",
+          config: {
+            url: process.env.SUPABASE_URL,
+            status: "active"
+          }
+        }
+      ];
+      return {
+        success: true,
+        data: integrations
+      };
+    } catch (error) {
+      fastify2.log.error("Erro ao listar integra\xE7\xF5es:", error);
+      return reply.code(500).send({
+        success: false,
+        error: "Erro interno do servidor"
+      });
+    }
+  });
+  fastify2.get("/:id", async (request, reply) => {
+    try {
+      const { id } = request.params;
+      const integrations = [
+        {
+          id: "n8n",
+          name: "N8N",
+          description: "Automa\xE7\xE3o de workflows",
+          icon: "workflow",
+          status: "connected",
+          config: {
+            url: "http://localhost:5678",
+            api_key: "n8n_api_key"
+          }
+        },
+        {
+          id: "whatsapp",
+          name: "WhatsApp Business",
+          description: "Integra\xE7\xE3o com WhatsApp",
+          icon: "message-circle",
+          status: "disconnected",
+          config: {}
+        },
+        {
+          id: "supabase",
+          name: "Supabase",
+          description: "Base de dados principal",
+          icon: "database",
+          status: "connected",
+          config: {
+            url: process.env.SUPABASE_URL,
+            status: "active"
+          }
+        }
+      ];
+      const integration = integrations.find((i) => i.id === id);
+      if (!integration) {
+        return reply.code(404).send({
+          success: false,
+          error: "Integra\xE7\xE3o n\xE3o encontrada"
+        });
+      }
+      return {
+        success: true,
+        data: integration
+      };
+    } catch (error) {
+      fastify2.log.error("Erro ao buscar integra\xE7\xE3o:", error);
+      return reply.code(500).send({
+        success: false,
+        error: "Erro interno do servidor"
+      });
+    }
+  });
+  fastify2.post("/:id/connect", async (request, reply) => {
+    try {
+      const { id } = request.params;
+      return {
+        success: true,
+        message: `Integra\xE7\xE3o ${id} conectada com sucesso`,
+        data: {
+          id,
+          status: "connected",
+          connected_at: (/* @__PURE__ */ new Date()).toISOString()
+        }
+      };
+    } catch (error) {
+      fastify2.log.error("Erro ao conectar integra\xE7\xE3o:", error);
+      return reply.code(500).send({
+        success: false,
+        error: "Erro interno do servidor"
+      });
+    }
+  });
+  fastify2.post("/:id/disconnect", async (request, reply) => {
+    try {
+      const { id } = request.params;
+      return {
+        success: true,
+        message: `Integra\xE7\xE3o ${id} desconectada com sucesso`,
+        data: {
+          id,
+          status: "disconnected",
+          disconnected_at: (/* @__PURE__ */ new Date()).toISOString()
+        }
+      };
+    } catch (error) {
+      fastify2.log.error("Erro ao desconectar integra\xE7\xE3o:", error);
+      return reply.code(500).send({
+        success: false,
+        error: "Erro interno do servidor"
+      });
+    }
+  });
+}
+
+// src/routes/affiliates.ts
+async function affiliatesRoutes(fastify2) {
+  fastify2.get("/", async (request, reply) => {
+    try {
+      const affiliates = [
+        {
+          id: "aff_001",
+          name: "Afiliado Demo",
+          email: "afiliado@example.com",
+          commission_rate: 0.15,
+          total_sales: 1250,
+          total_commission: 187.5,
+          status: "active",
+          created_at: (/* @__PURE__ */ new Date()).toISOString()
+        }
+      ];
+      return {
+        success: true,
+        data: affiliates
+      };
+    } catch (error) {
+      fastify2.log.error("Erro ao listar afiliados:", error);
+      return reply.code(500).send({
+        success: false,
+        error: "Erro interno do servidor"
+      });
+    }
+  });
+}
+
+// src/routes/llm-config.ts
+async function llmConfigRoutes(fastify2) {
+  fastify2.get("/", async (request, reply) => {
+    try {
+      const config2 = {
+        provider: "openrouter",
+        model: "anthropic/claude-3-haiku",
+        api_key: process.env.OPENROUTER_API_KEY ? "***" : null,
+        max_tokens: 1e3,
+        temperature: 0.7,
+        system_prompt: "Voc\xEA \xE9 o AutVision AI, um assistente inteligente.",
+        status: "active"
+      };
+      return {
+        success: true,
+        data: config2
+      };
+    } catch (error) {
+      fastify2.log.error("Erro ao obter config LLM:", error);
+      return reply.code(500).send({
+        success: false,
+        error: "Erro interno do servidor"
+      });
+    }
+  });
+  fastify2.put("/", async (request, reply) => {
+    try {
+      const body = request.body;
+      const updatedConfig = {
+        ...body,
+        updated_at: (/* @__PURE__ */ new Date()).toISOString()
+      };
+      return {
+        success: true,
+        message: "Configura\xE7\xF5es do LLM atualizadas com sucesso",
+        data: updatedConfig
+      };
+    } catch (error) {
+      fastify2.log.error("Erro ao atualizar config LLM:", error);
+      return reply.code(500).send({
+        success: false,
+        error: "Erro interno do servidor"
+      });
+    }
+  });
+}
+
+// src/routes/platform-config.ts
+async function platformConfigRoutes(fastify2) {
+  fastify2.get("/", async (request, reply) => {
+    try {
+      const config2 = {
+        platform_name: "AutVision AI",
+        version: "1.0.0",
+        maintenance_mode: false,
+        max_users: 1e4,
+        features: {
+          voice_mode: true,
+          vision_companion: true,
+          integrations: true,
+          admin_panel: true
+        },
+        limits: {
+          free_tokens: 100,
+          pro_tokens: 1e3,
+          enterprise_tokens: 1e4
+        },
+        updated_at: (/* @__PURE__ */ new Date()).toISOString()
+      };
+      return {
+        success: true,
+        data: config2
+      };
+    } catch (error) {
+      fastify2.log.error("Erro ao obter config da plataforma:", error);
+      return reply.code(500).send({
+        success: false,
+        error: "Erro interno do servidor"
+      });
+    }
+  });
+  fastify2.put("/", async (request, reply) => {
+    try {
+      const body = request.body;
+      const updatedConfig = {
+        ...body,
+        updated_at: (/* @__PURE__ */ new Date()).toISOString()
+      };
+      return {
+        success: true,
+        message: "Configura\xE7\xF5es da plataforma atualizadas com sucesso",
+        data: updatedConfig
+      };
+    } catch (error) {
+      fastify2.log.error("Erro ao atualizar config da plataforma:", error);
+      return reply.code(500).send({
+        success: false,
+        error: "Erro interno do servidor"
+      });
+    }
+  });
+  fastify2.get("/health", async (request, reply) => {
+    try {
+      const health = {
+        status: "healthy",
+        uptime: process.uptime(),
+        memory: process.memoryUsage(),
+        timestamp: (/* @__PURE__ */ new Date()).toISOString(),
+        services: {
+          database: "healthy",
+          llm: "healthy",
+          integrations: "healthy"
+        }
+      };
+      return {
+        success: true,
+        data: health
+      };
+    } catch (error) {
+      fastify2.log.error("Erro no health check:", error);
+      return reply.code(500).send({
+        success: false,
+        error: "Erro interno do servidor"
+      });
+    }
+  });
+}
+
 // src/index.ts
 console.log("\u{1F7E2} process.cwd():", process.cwd());
 var envPaths = [
@@ -73259,7 +73909,12 @@ console.log("- SUPABASE_URL:", process.env.SUPABASE_URL ? "\u2705 Definida" : "\
 console.log("- SUPABASE_SERVICE_ROLE_KEY:", process.env.SUPABASE_SERVICE_ROLE_KEY ? "\u2705 Definida" : "\u274C N\xE3o encontrada");
 console.log("- OPENROUTER_API_KEY:", process.env.OPENROUTER_API_KEY ? "\u2705 Definida" : "\u274C N\xE3o encontrada");
 console.log("- PORT:", process.env.PORT || "Usando padr\xE3o");
-llmDispatcher.initialize();
+try {
+  llmDispatcher.initialize();
+  console.log("\u2705 LLM Dispatcher inicializado com sucesso");
+} catch (error) {
+  console.log("\u26A0\uFE0F Erro ao inicializar LLM Dispatcher:", error);
+}
 var fastify = (0, import_fastify.default)({
   logger: {
     level: process.env.NODE_ENV === "production" ? "info" : "debug"
@@ -73291,10 +73946,18 @@ async function setupSecurity() {
       "http://localhost:5173",
       "http://localhost:5174",
       "http://localhost:5175",
+      "http://localhost:5179",
+      "http://localhost:5180",
+      "http://localhost:5181",
+      "http://localhost:5182",
       "http://localhost:3000",
       "http://127.0.0.1:5173",
       "http://127.0.0.1:5174",
       "http://127.0.0.1:5175",
+      "http://127.0.0.1:5179",
+      "http://127.0.0.1:5180",
+      "http://127.0.0.1:5181",
+      "http://127.0.0.1:5182",
       "https://autvision.ai",
       "https://www.autvision.ai",
       "https://autvisionai.com",
@@ -73356,7 +74019,8 @@ async function setupRoutes() {
         tutorials: "/tutorials/*",
         routines: "/routines/*",
         missions: "/missions/*",
-        badges: "/badges/*"
+        badges: "/badges/*",
+        agents: "/agents/*"
       }
     };
   });
@@ -73380,6 +74044,13 @@ async function setupRoutes() {
   await fastify.register(routinesRoutes, { prefix: "/routines" });
   await fastify.register(missionsRoutes, { prefix: "/missions" });
   await fastify.register(badgesRoutes, { prefix: "/badges" });
+  await fastify.register(agentsRoutes, { prefix: "/agents" });
+  await fastify.register(usersRoutes, { prefix: "/users" });
+  await fastify.register(plansRoutes, { prefix: "/plans" });
+  await fastify.register(integrationsRoutes, { prefix: "/integrations" });
+  await fastify.register(affiliatesRoutes, { prefix: "/affiliates" });
+  await fastify.register(llmConfigRoutes, { prefix: "/llm-config" });
+  await fastify.register(platformConfigRoutes, { prefix: "/platform-config" });
 }
 async function start() {
   try {

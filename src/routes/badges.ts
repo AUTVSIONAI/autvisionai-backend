@@ -21,40 +21,27 @@ export default async function badgesRoutes(fastify: FastifyInstance) {
     try {
       const { created_by } = request.query;
       
-      // Retorna badges mock por enquanto
-      const mockBadges = [
-        {
-          id: 1,
-          name: "Primeiro Passo",
-          description: "Completou o primeiro tutorial",
-          icon: "🎯",
-          earned: false,
-          earned_at: null,
-          created_by: created_by || 'demo'
-        },
-        {
-          id: 2,
-          name: "Conversador",
-          description: "Teve sua primeira conversa com o Vision",
-          icon: "💬",
-          earned: false,
-          earned_at: null,
-          created_by: created_by || 'demo'
-        },
-        {
-          id: 3,
-          name: "Explorador",
-          description: "Visitou todas as seções da plataforma",
-          icon: "🗺️",
-          earned: false,
-          earned_at: null,
-          created_by: created_by || 'demo'
-        }
-      ];
+      // Busca badges no Supabase
+      let query = fastify.supabase.from('badges').select('*');
+      
+      if (created_by) {
+        query = query.eq('created_by', created_by);
+      }
+      
+      const { data: badges, error } = await query.order('created_at', { ascending: false });
+
+      if (error) {
+        fastify.log.error('Erro ao buscar badges:', error);
+        // Retorna array vazio se não conseguir buscar
+        return reply.send({
+          success: true,
+          data: []
+        });
+      }
 
       return reply.send({
         success: true,
-        data: mockBadges
+        data: badges || []
       });
 
     } catch (error) {

@@ -43,7 +43,13 @@ console.log('- PORT:', process.env.PORT || 'Usando padrão');
 
 // Importar e inicializar LLM Dispatcher APÓS env estar carregado
 import { llmDispatcher } from './modules/llm/llmDispatcher.js';
-llmDispatcher.initialize();
+// Initialize LLM dispatcher after environment is loaded
+try {
+  llmDispatcher.initialize();
+  console.log('✅ LLM Dispatcher inicializado com sucesso');
+} catch (error) {
+  console.log('⚠️ Erro ao inicializar LLM Dispatcher:', error);
+}
 
 // Plugins
 import supabasePlugin from './plugins/supabaseClient.js';
@@ -60,6 +66,14 @@ import tutorialsRoutes from './routes/tutorials.js';
 import routinesRoutes from './routes/routines.js';
 import missionsRoutes from './routes/missions.js';
 import badgesRoutes from './routes/badges.js';
+import agentsRoutes from './routes/agents.js';
+// 🔥 NOVAS ROTAS
+import usersRoutes from './routes/users.js';
+import plansRoutes from './routes/plans.js';
+import integrationsRoutes from './routes/integrations.js';
+import affiliatesRoutes from './routes/affiliates.js';
+import llmConfigRoutes from './routes/llm-config.js';
+import platformConfigRoutes from './routes/platform-config.js';
 
 const fastify = Fastify({
   logger: {
@@ -102,13 +116,23 @@ async function setupSecurity() {
     origin: [
       'https://www.autvisionai.com',
       'https://autvisionai-real.vercel.app',
+      'http://localhost:3002',
       'http://localhost:5173',
       'http://localhost:5174', 
       'http://localhost:5175',
+      'http://localhost:5179',
+      'http://localhost:5180',
+      'http://localhost:5181',
+      'http://localhost:5182',
       'http://localhost:3000',
+      'http://127.0.0.1:3002',
       'http://127.0.0.1:5173',
       'http://127.0.0.1:5174',
       'http://127.0.0.1:5175',
+      'http://127.0.0.1:5179',
+      'http://127.0.0.1:5180',
+      'http://127.0.0.1:5181',
+      'http://127.0.0.1:5182',
       'https://autvision.ai',
       'https://www.autvision.ai',
       'https://autvisionai.com',
@@ -182,7 +206,8 @@ async function setupRoutes() {
         tutorials: '/tutorials/*',
         routines: '/routines/*',
         missions: '/missions/*',
-        badges: '/badges/*'
+        badges: '/badges/*',
+        agents: '/agents/*'
       }
     };
   });
@@ -208,6 +233,15 @@ async function setupRoutes() {
   await fastify.register(routinesRoutes, { prefix: '/routines' });
   await fastify.register(missionsRoutes, { prefix: '/missions' });
   await fastify.register(badgesRoutes, { prefix: '/badges' });
+  await fastify.register(agentsRoutes, { prefix: '/agents' });
+  
+  // 🔥 NOVAS ROTAS QUE ESTAVAM FALTANDO
+  await fastify.register(usersRoutes, { prefix: '/users' });
+  await fastify.register(plansRoutes, { prefix: '/plans' });
+  await fastify.register(integrationsRoutes, { prefix: '/integrations' });
+  await fastify.register(affiliatesRoutes, { prefix: '/affiliates' });
+  await fastify.register(llmConfigRoutes, { prefix: '/llm-config' });
+  await fastify.register(platformConfigRoutes, { prefix: '/platform-config' });
 }
 
 /**
