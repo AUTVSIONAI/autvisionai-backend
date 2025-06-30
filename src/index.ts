@@ -2,6 +2,7 @@ import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
 import rateLimit from '@fastify/rate-limit';
+import multipart from '@fastify/multipart';
 import { config } from 'dotenv';
 import { dirname, join } from 'path';
 
@@ -42,7 +43,7 @@ console.log('- OPENROUTER_API_KEY:', process.env.OPENROUTER_API_KEY ? '✅ Defin
 console.log('- PORT:', process.env.PORT || 'Usando padrão');
 
 // Importar e inicializar LLM Dispatcher APÓS env estar carregado
-import { llmDispatcher } from './modules/llm/llmDispatcher.js';
+import { llmDispatcher } from './modules/llm/llmDispatcher';
 // Initialize LLM dispatcher after environment is loaded
 try {
   llmDispatcher.initialize();
@@ -52,28 +53,29 @@ try {
 }
 
 // Plugins
-import supabasePlugin from './plugins/supabaseClient.js';
+import supabasePlugin from './plugins/supabaseClient';
 
 // Rotas
-import commandRoutes from './routes/command.js';
-import llmRoutes from './routes/llm.js';
-import n8nRoutes from './routes/n8n.js';
-import ovosRoutes from './routes/ovos.js';
-import logsRoutes from './routes/logs.js';
-import configRoutes from './routes/config.js';
-import supremoRoutes from './routes/supremo.js';
-import tutorialsRoutes from './routes/tutorials.js';
-import routinesRoutes from './routes/routines.js';
-import missionsRoutes from './routes/missions.js';
-import badgesRoutes from './routes/badges.js';
-import agentsRoutes from './routes/agents.js';
+import commandRoutes from './routes/command';
+import llmRoutes from './routes/llm';
+import n8nRoutes from './routes/n8n';
+import ovosRoutes from './routes/ovos';
+import logsRoutes from './routes/logs';
+import analyticsRoutes from './routes/analytics';
+import configRoutes from './routes/config';
+import supremoRoutes from './routes/supremo';
+import tutorialsRoutes from './routes/tutorials';
+import routinesRoutes from './routes/routines';
+import missionsRoutes from './routes/missions';
+import badgesRoutes from './routes/badges';
+import agentsRoutes from './routes/agents';
 // 🔥 NOVAS ROTAS
-import usersRoutes from './routes/users.js';
-import plansRoutes from './routes/plans.js';
-import integrationsRoutes from './routes/integrations.js';
-import affiliatesRoutes from './routes/affiliates.js';
-import llmConfigRoutes from './routes/llm-config.js';
-import platformConfigRoutes from './routes/platform-config.js';
+import usersRoutes from './routes/users';
+import plansRoutes from './routes/plans';
+import integrationsRoutes from './routes/integrations';
+import affiliatesRoutes from './routes/affiliates';
+import llmConfigRoutes from './routes/llm-config';
+import platformConfigRoutes from './routes/platform-config';
 
 const fastify = Fastify({
   logger: {
@@ -90,8 +92,20 @@ fastify.addHook('preHandler', async (request, reply) => {
     return;
   }
 
-  const apiKey = request.headers['x-api-key'];
+  // 🚀 TEMPORÁRIO: Permitir acesso sem API_KEY para testar agentes
+  if (process.env.NODE_ENV === 'development') {
+    fastify.log.warn('⚠️ MODO DESENVOLVIMENTO - Autenticação desabilitada temporariamente');
+    return;
+  }
+
+  // Em desenvolvimento, permite bypass da autenticação se API_KEY não estiver configurada
   const expectedApiKey = process.env.API_KEY;
+  if (!expectedApiKey && process.env.NODE_ENV === 'development') {
+    fastify.log.warn('⚠️ API_KEY não configurada - modo desenvolvimento ativo');
+    return;
+  }
+
+  const apiKey = request.headers['x-api-key'];
 
   if (!expectedApiKey) {
     fastify.log.warn('⚠️ API_KEY não configurada no ambiente');
@@ -115,8 +129,10 @@ async function setupSecurity() {
   await fastify.register(cors, {
     origin: [
       'https://www.autvisionai.com',
+      'https://autvisionai.vercel.app',
       'https://autvisionai-real.vercel.app',
       'http://localhost:3002',
+      'http://localhost:3003',
       'http://localhost:5173',
       'http://localhost:5174', 
       'http://localhost:5175',
@@ -126,6 +142,7 @@ async function setupSecurity() {
       'http://localhost:5182',
       'http://localhost:3000',
       'http://127.0.0.1:3002',
+      'http://127.0.0.1:3003',
       'http://127.0.0.1:5173',
       'http://127.0.0.1:5174',
       'http://127.0.0.1:5175',
@@ -151,8 +168,7 @@ async function setupSecurity() {
       'x-api-key',
       'Origin',
       'Accept',
-      'access-control-allow-methods',
-      'access-control-allow-headers'
+      'Access-Control-Allow-Origin'
     ],
     optionsSuccessStatus: 200,
     preflightContinue: false
@@ -164,9 +180,9 @@ async function setupSecurity() {
     crossOriginEmbedderPolicy: false
   });
 
-  // Rate limiting
+  // Rate limiting (mais permissivo para desenvolvimento)
   await fastify.register(rateLimit, {
-    max: 100,
+    max: process.env.NODE_ENV === 'production' ? 200 : 1000,
     timeWindow: '1 minute',
     errorResponseBuilder: (request, context) => ({
       success: false,
@@ -181,7 +197,18 @@ async function setupSecurity() {
  * 🔌 REGISTRO DE PLUGINS
  */
 async function setupPlugins() {
+  // Plugin para upload de arquivos
+  console.log('🔧 Registrando plugin multipart...');
+  await fastify.register(multipart, {
+    limits: {
+      fileSize: 5 * 1024 * 1024 // 5MB
+    }
+  });
+  console.log('✅ Plugin multipart registrado com sucesso');
+  
+  console.log('🔧 Registrando plugin Supabase...');
   await fastify.register(supabasePlugin);
+  console.log('✅ Plugin Supabase registrado com sucesso');
 }
 
 /**
@@ -227,6 +254,7 @@ async function setupRoutes() {
   await fastify.register(n8nRoutes, { prefix: '/n8n' });
   await fastify.register(ovosRoutes, { prefix: '/ovos' });
   await fastify.register(logsRoutes, { prefix: '/logs' });
+  await fastify.register(analyticsRoutes, { prefix: '/analytics' });
   await fastify.register(configRoutes, { prefix: '/config' });
   await fastify.register(supremoRoutes, { prefix: '/supremo' });
   await fastify.register(tutorialsRoutes, { prefix: '/tutorials' });

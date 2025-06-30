@@ -35907,6 +35907,2985 @@ var require_rate_limit = __commonJS({
   }
 });
 
+// node_modules/@fastify/busboy/deps/streamsearch/sbmh.js
+var require_sbmh = __commonJS({
+  "node_modules/@fastify/busboy/deps/streamsearch/sbmh.js"(exports2, module2) {
+    "use strict";
+    var { EventEmitter: EventEmitter2 } = require("events");
+    var { inherits: inherits2 } = require("util");
+    function SBMH(needle) {
+      if (typeof needle === "string") {
+        needle = Buffer.from(needle);
+      }
+      if (!Buffer.isBuffer(needle)) {
+        throw new TypeError("The needle has to be a String or a Buffer.");
+      }
+      const needleLength = needle.length;
+      const needleLastCharIndex = needleLength - 1;
+      if (needleLength === 0) {
+        throw new Error("The needle cannot be an empty String/Buffer.");
+      }
+      if (needleLength > 256) {
+        throw new Error("The needle cannot have a length bigger than 256.");
+      }
+      this.maxMatches = Infinity;
+      this.matches = 0;
+      this._occ = new Uint8Array(256).fill(needleLength);
+      this._lookbehind_size = 0;
+      this._needle = needle;
+      this._bufpos = 0;
+      this._lookbehind = Buffer.alloc(needleLastCharIndex);
+      for (var i = 0; i < needleLastCharIndex; ++i) {
+        this._occ[needle[i]] = needleLastCharIndex - i;
+      }
+    }
+    inherits2(SBMH, EventEmitter2);
+    SBMH.prototype.reset = function() {
+      this._lookbehind_size = 0;
+      this.matches = 0;
+      this._bufpos = 0;
+    };
+    SBMH.prototype.push = function(chunk, pos) {
+      if (!Buffer.isBuffer(chunk)) {
+        chunk = Buffer.from(chunk, "binary");
+      }
+      const chlen = chunk.length;
+      this._bufpos = pos || 0;
+      let r;
+      while (r !== chlen && this.matches < this.maxMatches) {
+        r = this._sbmh_feed(chunk);
+      }
+      return r;
+    };
+    SBMH.prototype._sbmh_feed = function(data) {
+      const len = data.length;
+      const needle = this._needle;
+      const needleLength = needle.length;
+      const needleLastCharIndex = needleLength - 1;
+      const needleLastChar = needle[needleLastCharIndex];
+      let pos = -this._lookbehind_size;
+      let ch;
+      if (pos < 0) {
+        while (pos < 0 && pos <= len - needleLength) {
+          ch = data[pos + needleLastCharIndex];
+          if (ch === needleLastChar && this._sbmh_memcmp(data, pos, needleLastCharIndex)) {
+            this._lookbehind_size = 0;
+            ++this.matches;
+            this.emit("info", true);
+            return this._bufpos = pos + needleLength;
+          }
+          pos += this._occ[ch];
+        }
+        while (pos < 0 && !this._sbmh_memcmp(data, pos, len - pos)) {
+          ++pos;
+        }
+        if (pos >= 0) {
+          this.emit("info", false, this._lookbehind, 0, this._lookbehind_size);
+          this._lookbehind_size = 0;
+        } else {
+          const bytesToCutOff = this._lookbehind_size + pos;
+          if (bytesToCutOff > 0) {
+            this.emit("info", false, this._lookbehind, 0, bytesToCutOff);
+          }
+          this._lookbehind_size -= bytesToCutOff;
+          this._lookbehind.copy(this._lookbehind, 0, bytesToCutOff, this._lookbehind_size);
+          data.copy(this._lookbehind, this._lookbehind_size);
+          this._lookbehind_size += len;
+          this._bufpos = len;
+          return len;
+        }
+      }
+      pos = data.indexOf(needle, pos + this._bufpos);
+      if (pos !== -1) {
+        ++this.matches;
+        if (pos === 0) {
+          this.emit("info", true);
+        } else {
+          this.emit("info", true, data, this._bufpos, pos);
+        }
+        return this._bufpos = pos + needleLength;
+      }
+      pos = len - needleLastCharIndex;
+      if (pos < 0) {
+        pos = 0;
+      }
+      while (pos !== len && (data[pos] !== needle[0] || Buffer.compare(
+        data.subarray(pos + 1, len),
+        needle.subarray(1, len - pos)
+      ) !== 0)) {
+        ++pos;
+      }
+      if (pos !== len) {
+        data.copy(this._lookbehind, 0, pos, len);
+        this._lookbehind_size = len - pos;
+      }
+      if (pos !== 0) {
+        this.emit("info", false, data, this._bufpos, pos);
+      }
+      this._bufpos = len;
+      return len;
+    };
+    SBMH.prototype._sbmh_lookup_char = function(data, pos) {
+      return pos < 0 ? this._lookbehind[this._lookbehind_size + pos] : data[pos];
+    };
+    SBMH.prototype._sbmh_memcmp = function(data, pos, len) {
+      for (var i = 0; i < len; ++i) {
+        if (this._sbmh_lookup_char(data, pos + i) !== this._needle[i]) {
+          return false;
+        }
+      }
+      return true;
+    };
+    module2.exports = SBMH;
+  }
+});
+
+// node_modules/@fastify/busboy/deps/dicer/lib/PartStream.js
+var require_PartStream = __commonJS({
+  "node_modules/@fastify/busboy/deps/dicer/lib/PartStream.js"(exports2, module2) {
+    "use strict";
+    var inherits2 = require("util").inherits;
+    var ReadableStream2 = require("stream").Readable;
+    function PartStream(opts) {
+      ReadableStream2.call(this, opts);
+    }
+    inherits2(PartStream, ReadableStream2);
+    PartStream.prototype._read = function(n) {
+    };
+    module2.exports = PartStream;
+  }
+});
+
+// node_modules/@fastify/busboy/lib/utils/getLimit.js
+var require_getLimit = __commonJS({
+  "node_modules/@fastify/busboy/lib/utils/getLimit.js"(exports2, module2) {
+    "use strict";
+    module2.exports = function getLimit(limits, name, defaultLimit) {
+      if (!limits || limits[name] === void 0 || limits[name] === null) {
+        return defaultLimit;
+      }
+      if (typeof limits[name] !== "number" || isNaN(limits[name])) {
+        throw new TypeError("Limit " + name + " is not a valid number");
+      }
+      return limits[name];
+    };
+  }
+});
+
+// node_modules/@fastify/busboy/deps/dicer/lib/HeaderParser.js
+var require_HeaderParser = __commonJS({
+  "node_modules/@fastify/busboy/deps/dicer/lib/HeaderParser.js"(exports2, module2) {
+    "use strict";
+    var EventEmitter2 = require("events").EventEmitter;
+    var inherits2 = require("util").inherits;
+    var getLimit = require_getLimit();
+    var StreamSearch = require_sbmh();
+    var B_DCRLF = Buffer.from("\r\n\r\n");
+    var RE_CRLF = /\r\n/g;
+    var RE_HDR = /^([^:]+):[ \t]?([\x00-\xFF]+)?$/;
+    function HeaderParser(cfg) {
+      EventEmitter2.call(this);
+      cfg = cfg || {};
+      const self2 = this;
+      this.nread = 0;
+      this.maxed = false;
+      this.npairs = 0;
+      this.maxHeaderPairs = getLimit(cfg, "maxHeaderPairs", 2e3);
+      this.maxHeaderSize = getLimit(cfg, "maxHeaderSize", 80 * 1024);
+      this.buffer = "";
+      this.header = {};
+      this.finished = false;
+      this.ss = new StreamSearch(B_DCRLF);
+      this.ss.on("info", function(isMatch, data, start2, end) {
+        if (data && !self2.maxed) {
+          if (self2.nread + end - start2 >= self2.maxHeaderSize) {
+            end = self2.maxHeaderSize - self2.nread + start2;
+            self2.nread = self2.maxHeaderSize;
+            self2.maxed = true;
+          } else {
+            self2.nread += end - start2;
+          }
+          self2.buffer += data.toString("binary", start2, end);
+        }
+        if (isMatch) {
+          self2._finish();
+        }
+      });
+    }
+    inherits2(HeaderParser, EventEmitter2);
+    HeaderParser.prototype.push = function(data) {
+      const r = this.ss.push(data);
+      if (this.finished) {
+        return r;
+      }
+    };
+    HeaderParser.prototype.reset = function() {
+      this.finished = false;
+      this.buffer = "";
+      this.header = {};
+      this.ss.reset();
+    };
+    HeaderParser.prototype._finish = function() {
+      if (this.buffer) {
+        this._parseHeader();
+      }
+      this.ss.matches = this.ss.maxMatches;
+      const header = this.header;
+      this.header = {};
+      this.buffer = "";
+      this.finished = true;
+      this.nread = this.npairs = 0;
+      this.maxed = false;
+      this.emit("header", header);
+    };
+    HeaderParser.prototype._parseHeader = function() {
+      if (this.npairs === this.maxHeaderPairs) {
+        return;
+      }
+      const lines = this.buffer.split(RE_CRLF);
+      const len = lines.length;
+      let m, h;
+      for (var i = 0; i < len; ++i) {
+        if (lines[i].length === 0) {
+          continue;
+        }
+        if (lines[i][0] === "	" || lines[i][0] === " ") {
+          if (h) {
+            this.header[h][this.header[h].length - 1] += lines[i];
+            continue;
+          }
+        }
+        const posColon = lines[i].indexOf(":");
+        if (posColon === -1 || posColon === 0) {
+          return;
+        }
+        m = RE_HDR.exec(lines[i]);
+        h = m[1].toLowerCase();
+        this.header[h] = this.header[h] || [];
+        this.header[h].push(m[2] || "");
+        if (++this.npairs === this.maxHeaderPairs) {
+          break;
+        }
+      }
+    };
+    module2.exports = HeaderParser;
+  }
+});
+
+// node_modules/@fastify/busboy/deps/dicer/lib/Dicer.js
+var require_Dicer = __commonJS({
+  "node_modules/@fastify/busboy/deps/dicer/lib/Dicer.js"(exports2, module2) {
+    "use strict";
+    var WritableStream = require("stream").Writable;
+    var inherits2 = require("util").inherits;
+    var StreamSearch = require_sbmh();
+    var PartStream = require_PartStream();
+    var HeaderParser = require_HeaderParser();
+    var DASH = 45;
+    var B_ONEDASH = Buffer.from("-");
+    var B_CRLF = Buffer.from("\r\n");
+    var EMPTY_FN = function() {
+    };
+    function Dicer(cfg) {
+      if (!(this instanceof Dicer)) {
+        return new Dicer(cfg);
+      }
+      WritableStream.call(this, cfg);
+      if (!cfg || !cfg.headerFirst && typeof cfg.boundary !== "string") {
+        throw new TypeError("Boundary required");
+      }
+      if (typeof cfg.boundary === "string") {
+        this.setBoundary(cfg.boundary);
+      } else {
+        this._bparser = void 0;
+      }
+      this._headerFirst = cfg.headerFirst;
+      this._dashes = 0;
+      this._parts = 0;
+      this._finished = false;
+      this._realFinish = false;
+      this._isPreamble = true;
+      this._justMatched = false;
+      this._firstWrite = true;
+      this._inHeader = true;
+      this._part = void 0;
+      this._cb = void 0;
+      this._ignoreData = false;
+      this._partOpts = { highWaterMark: cfg.partHwm };
+      this._pause = false;
+      const self2 = this;
+      this._hparser = new HeaderParser(cfg);
+      this._hparser.on("header", function(header) {
+        self2._inHeader = false;
+        self2._part.emit("header", header);
+      });
+    }
+    inherits2(Dicer, WritableStream);
+    Dicer.prototype.emit = function(ev) {
+      if (ev === "finish" && !this._realFinish) {
+        if (!this._finished) {
+          const self2 = this;
+          process.nextTick(function() {
+            self2.emit("error", new Error("Unexpected end of multipart data"));
+            if (self2._part && !self2._ignoreData) {
+              const type = self2._isPreamble ? "Preamble" : "Part";
+              self2._part.emit("error", new Error(type + " terminated early due to unexpected end of multipart data"));
+              self2._part.push(null);
+              process.nextTick(function() {
+                self2._realFinish = true;
+                self2.emit("finish");
+                self2._realFinish = false;
+              });
+              return;
+            }
+            self2._realFinish = true;
+            self2.emit("finish");
+            self2._realFinish = false;
+          });
+        }
+      } else {
+        WritableStream.prototype.emit.apply(this, arguments);
+      }
+    };
+    Dicer.prototype._write = function(data, encoding, cb) {
+      if (!this._hparser && !this._bparser) {
+        return cb();
+      }
+      if (this._headerFirst && this._isPreamble) {
+        if (!this._part) {
+          this._part = new PartStream(this._partOpts);
+          if (this.listenerCount("preamble") !== 0) {
+            this.emit("preamble", this._part);
+          } else {
+            this._ignore();
+          }
+        }
+        const r = this._hparser.push(data);
+        if (!this._inHeader && r !== void 0 && r < data.length) {
+          data = data.slice(r);
+        } else {
+          return cb();
+        }
+      }
+      if (this._firstWrite) {
+        this._bparser.push(B_CRLF);
+        this._firstWrite = false;
+      }
+      this._bparser.push(data);
+      if (this._pause) {
+        this._cb = cb;
+      } else {
+        cb();
+      }
+    };
+    Dicer.prototype.reset = function() {
+      this._part = void 0;
+      this._bparser = void 0;
+      this._hparser = void 0;
+    };
+    Dicer.prototype.setBoundary = function(boundary) {
+      const self2 = this;
+      this._bparser = new StreamSearch("\r\n--" + boundary);
+      this._bparser.on("info", function(isMatch, data, start2, end) {
+        self2._oninfo(isMatch, data, start2, end);
+      });
+    };
+    Dicer.prototype._ignore = function() {
+      if (this._part && !this._ignoreData) {
+        this._ignoreData = true;
+        this._part.on("error", EMPTY_FN);
+        this._part.resume();
+      }
+    };
+    Dicer.prototype._oninfo = function(isMatch, data, start2, end) {
+      let buf;
+      const self2 = this;
+      let i = 0;
+      let r;
+      let shouldWriteMore = true;
+      if (!this._part && this._justMatched && data) {
+        while (this._dashes < 2 && start2 + i < end) {
+          if (data[start2 + i] === DASH) {
+            ++i;
+            ++this._dashes;
+          } else {
+            if (this._dashes) {
+              buf = B_ONEDASH;
+            }
+            this._dashes = 0;
+            break;
+          }
+        }
+        if (this._dashes === 2) {
+          if (start2 + i < end && this.listenerCount("trailer") !== 0) {
+            this.emit("trailer", data.slice(start2 + i, end));
+          }
+          this.reset();
+          this._finished = true;
+          if (self2._parts === 0) {
+            self2._realFinish = true;
+            self2.emit("finish");
+            self2._realFinish = false;
+          }
+        }
+        if (this._dashes) {
+          return;
+        }
+      }
+      if (this._justMatched) {
+        this._justMatched = false;
+      }
+      if (!this._part) {
+        this._part = new PartStream(this._partOpts);
+        this._part._read = function(n) {
+          self2._unpause();
+        };
+        if (this._isPreamble && this.listenerCount("preamble") !== 0) {
+          this.emit("preamble", this._part);
+        } else if (this._isPreamble !== true && this.listenerCount("part") !== 0) {
+          this.emit("part", this._part);
+        } else {
+          this._ignore();
+        }
+        if (!this._isPreamble) {
+          this._inHeader = true;
+        }
+      }
+      if (data && start2 < end && !this._ignoreData) {
+        if (this._isPreamble || !this._inHeader) {
+          if (buf) {
+            shouldWriteMore = this._part.push(buf);
+          }
+          shouldWriteMore = this._part.push(data.slice(start2, end));
+          if (!shouldWriteMore) {
+            this._pause = true;
+          }
+        } else if (!this._isPreamble && this._inHeader) {
+          if (buf) {
+            this._hparser.push(buf);
+          }
+          r = this._hparser.push(data.slice(start2, end));
+          if (!this._inHeader && r !== void 0 && r < end) {
+            this._oninfo(false, data, start2 + r, end);
+          }
+        }
+      }
+      if (isMatch) {
+        this._hparser.reset();
+        if (this._isPreamble) {
+          this._isPreamble = false;
+        } else {
+          if (start2 !== end) {
+            ++this._parts;
+            this._part.on("end", function() {
+              if (--self2._parts === 0) {
+                if (self2._finished) {
+                  self2._realFinish = true;
+                  self2.emit("finish");
+                  self2._realFinish = false;
+                } else {
+                  self2._unpause();
+                }
+              }
+            });
+          }
+        }
+        this._part.push(null);
+        this._part = void 0;
+        this._ignoreData = false;
+        this._justMatched = true;
+        this._dashes = 0;
+      }
+    };
+    Dicer.prototype._unpause = function() {
+      if (!this._pause) {
+        return;
+      }
+      this._pause = false;
+      if (this._cb) {
+        const cb = this._cb;
+        this._cb = void 0;
+        cb();
+      }
+    };
+    module2.exports = Dicer;
+  }
+});
+
+// node_modules/@fastify/busboy/lib/utils/decodeText.js
+var require_decodeText = __commonJS({
+  "node_modules/@fastify/busboy/lib/utils/decodeText.js"(exports2, module2) {
+    "use strict";
+    var utf8Decoder = new TextDecoder("utf-8");
+    var textDecoders = /* @__PURE__ */ new Map([
+      ["utf-8", utf8Decoder],
+      ["utf8", utf8Decoder]
+    ]);
+    function getDecoder(charset) {
+      let lc;
+      while (true) {
+        switch (charset) {
+          case "utf-8":
+          case "utf8":
+            return decoders.utf8;
+          case "latin1":
+          case "ascii":
+          // TODO: Make these a separate, strict decoder?
+          case "us-ascii":
+          case "iso-8859-1":
+          case "iso8859-1":
+          case "iso88591":
+          case "iso_8859-1":
+          case "windows-1252":
+          case "iso_8859-1:1987":
+          case "cp1252":
+          case "x-cp1252":
+            return decoders.latin1;
+          case "utf16le":
+          case "utf-16le":
+          case "ucs2":
+          case "ucs-2":
+            return decoders.utf16le;
+          case "base64":
+            return decoders.base64;
+          default:
+            if (lc === void 0) {
+              lc = true;
+              charset = charset.toLowerCase();
+              continue;
+            }
+            return decoders.other.bind(charset);
+        }
+      }
+    }
+    var decoders = {
+      utf8: (data, sourceEncoding) => {
+        if (data.length === 0) {
+          return "";
+        }
+        if (typeof data === "string") {
+          data = Buffer.from(data, sourceEncoding);
+        }
+        return data.utf8Slice(0, data.length);
+      },
+      latin1: (data, sourceEncoding) => {
+        if (data.length === 0) {
+          return "";
+        }
+        if (typeof data === "string") {
+          return data;
+        }
+        return data.latin1Slice(0, data.length);
+      },
+      utf16le: (data, sourceEncoding) => {
+        if (data.length === 0) {
+          return "";
+        }
+        if (typeof data === "string") {
+          data = Buffer.from(data, sourceEncoding);
+        }
+        return data.ucs2Slice(0, data.length);
+      },
+      base64: (data, sourceEncoding) => {
+        if (data.length === 0) {
+          return "";
+        }
+        if (typeof data === "string") {
+          data = Buffer.from(data, sourceEncoding);
+        }
+        return data.base64Slice(0, data.length);
+      },
+      other: (data, sourceEncoding) => {
+        if (data.length === 0) {
+          return "";
+        }
+        if (typeof data === "string") {
+          data = Buffer.from(data, sourceEncoding);
+        }
+        if (textDecoders.has(exports2.toString())) {
+          try {
+            return textDecoders.get(exports2).decode(data);
+          } catch {
+          }
+        }
+        return typeof data === "string" ? data : data.toString();
+      }
+    };
+    function decodeText(text, sourceEncoding, destEncoding) {
+      if (text) {
+        return getDecoder(destEncoding)(text, sourceEncoding);
+      }
+      return text;
+    }
+    module2.exports = decodeText;
+  }
+});
+
+// node_modules/@fastify/busboy/lib/utils/parseParams.js
+var require_parseParams = __commonJS({
+  "node_modules/@fastify/busboy/lib/utils/parseParams.js"(exports2, module2) {
+    "use strict";
+    var decodeText = require_decodeText();
+    var RE_ENCODED = /%[a-fA-F0-9][a-fA-F0-9]/g;
+    var EncodedLookup = {
+      "%00": "\0",
+      "%01": "",
+      "%02": "",
+      "%03": "",
+      "%04": "",
+      "%05": "",
+      "%06": "",
+      "%07": "\x07",
+      "%08": "\b",
+      "%09": "	",
+      "%0a": "\n",
+      "%0A": "\n",
+      "%0b": "\v",
+      "%0B": "\v",
+      "%0c": "\f",
+      "%0C": "\f",
+      "%0d": "\r",
+      "%0D": "\r",
+      "%0e": "",
+      "%0E": "",
+      "%0f": "",
+      "%0F": "",
+      "%10": "",
+      "%11": "",
+      "%12": "",
+      "%13": "",
+      "%14": "",
+      "%15": "",
+      "%16": "",
+      "%17": "",
+      "%18": "",
+      "%19": "",
+      "%1a": "",
+      "%1A": "",
+      "%1b": "\x1B",
+      "%1B": "\x1B",
+      "%1c": "",
+      "%1C": "",
+      "%1d": "",
+      "%1D": "",
+      "%1e": "",
+      "%1E": "",
+      "%1f": "",
+      "%1F": "",
+      "%20": " ",
+      "%21": "!",
+      "%22": '"',
+      "%23": "#",
+      "%24": "$",
+      "%25": "%",
+      "%26": "&",
+      "%27": "'",
+      "%28": "(",
+      "%29": ")",
+      "%2a": "*",
+      "%2A": "*",
+      "%2b": "+",
+      "%2B": "+",
+      "%2c": ",",
+      "%2C": ",",
+      "%2d": "-",
+      "%2D": "-",
+      "%2e": ".",
+      "%2E": ".",
+      "%2f": "/",
+      "%2F": "/",
+      "%30": "0",
+      "%31": "1",
+      "%32": "2",
+      "%33": "3",
+      "%34": "4",
+      "%35": "5",
+      "%36": "6",
+      "%37": "7",
+      "%38": "8",
+      "%39": "9",
+      "%3a": ":",
+      "%3A": ":",
+      "%3b": ";",
+      "%3B": ";",
+      "%3c": "<",
+      "%3C": "<",
+      "%3d": "=",
+      "%3D": "=",
+      "%3e": ">",
+      "%3E": ">",
+      "%3f": "?",
+      "%3F": "?",
+      "%40": "@",
+      "%41": "A",
+      "%42": "B",
+      "%43": "C",
+      "%44": "D",
+      "%45": "E",
+      "%46": "F",
+      "%47": "G",
+      "%48": "H",
+      "%49": "I",
+      "%4a": "J",
+      "%4A": "J",
+      "%4b": "K",
+      "%4B": "K",
+      "%4c": "L",
+      "%4C": "L",
+      "%4d": "M",
+      "%4D": "M",
+      "%4e": "N",
+      "%4E": "N",
+      "%4f": "O",
+      "%4F": "O",
+      "%50": "P",
+      "%51": "Q",
+      "%52": "R",
+      "%53": "S",
+      "%54": "T",
+      "%55": "U",
+      "%56": "V",
+      "%57": "W",
+      "%58": "X",
+      "%59": "Y",
+      "%5a": "Z",
+      "%5A": "Z",
+      "%5b": "[",
+      "%5B": "[",
+      "%5c": "\\",
+      "%5C": "\\",
+      "%5d": "]",
+      "%5D": "]",
+      "%5e": "^",
+      "%5E": "^",
+      "%5f": "_",
+      "%5F": "_",
+      "%60": "`",
+      "%61": "a",
+      "%62": "b",
+      "%63": "c",
+      "%64": "d",
+      "%65": "e",
+      "%66": "f",
+      "%67": "g",
+      "%68": "h",
+      "%69": "i",
+      "%6a": "j",
+      "%6A": "j",
+      "%6b": "k",
+      "%6B": "k",
+      "%6c": "l",
+      "%6C": "l",
+      "%6d": "m",
+      "%6D": "m",
+      "%6e": "n",
+      "%6E": "n",
+      "%6f": "o",
+      "%6F": "o",
+      "%70": "p",
+      "%71": "q",
+      "%72": "r",
+      "%73": "s",
+      "%74": "t",
+      "%75": "u",
+      "%76": "v",
+      "%77": "w",
+      "%78": "x",
+      "%79": "y",
+      "%7a": "z",
+      "%7A": "z",
+      "%7b": "{",
+      "%7B": "{",
+      "%7c": "|",
+      "%7C": "|",
+      "%7d": "}",
+      "%7D": "}",
+      "%7e": "~",
+      "%7E": "~",
+      "%7f": "\x7F",
+      "%7F": "\x7F",
+      "%80": "\x80",
+      "%81": "\x81",
+      "%82": "\x82",
+      "%83": "\x83",
+      "%84": "\x84",
+      "%85": "\x85",
+      "%86": "\x86",
+      "%87": "\x87",
+      "%88": "\x88",
+      "%89": "\x89",
+      "%8a": "\x8A",
+      "%8A": "\x8A",
+      "%8b": "\x8B",
+      "%8B": "\x8B",
+      "%8c": "\x8C",
+      "%8C": "\x8C",
+      "%8d": "\x8D",
+      "%8D": "\x8D",
+      "%8e": "\x8E",
+      "%8E": "\x8E",
+      "%8f": "\x8F",
+      "%8F": "\x8F",
+      "%90": "\x90",
+      "%91": "\x91",
+      "%92": "\x92",
+      "%93": "\x93",
+      "%94": "\x94",
+      "%95": "\x95",
+      "%96": "\x96",
+      "%97": "\x97",
+      "%98": "\x98",
+      "%99": "\x99",
+      "%9a": "\x9A",
+      "%9A": "\x9A",
+      "%9b": "\x9B",
+      "%9B": "\x9B",
+      "%9c": "\x9C",
+      "%9C": "\x9C",
+      "%9d": "\x9D",
+      "%9D": "\x9D",
+      "%9e": "\x9E",
+      "%9E": "\x9E",
+      "%9f": "\x9F",
+      "%9F": "\x9F",
+      "%a0": "\xA0",
+      "%A0": "\xA0",
+      "%a1": "\xA1",
+      "%A1": "\xA1",
+      "%a2": "\xA2",
+      "%A2": "\xA2",
+      "%a3": "\xA3",
+      "%A3": "\xA3",
+      "%a4": "\xA4",
+      "%A4": "\xA4",
+      "%a5": "\xA5",
+      "%A5": "\xA5",
+      "%a6": "\xA6",
+      "%A6": "\xA6",
+      "%a7": "\xA7",
+      "%A7": "\xA7",
+      "%a8": "\xA8",
+      "%A8": "\xA8",
+      "%a9": "\xA9",
+      "%A9": "\xA9",
+      "%aa": "\xAA",
+      "%Aa": "\xAA",
+      "%aA": "\xAA",
+      "%AA": "\xAA",
+      "%ab": "\xAB",
+      "%Ab": "\xAB",
+      "%aB": "\xAB",
+      "%AB": "\xAB",
+      "%ac": "\xAC",
+      "%Ac": "\xAC",
+      "%aC": "\xAC",
+      "%AC": "\xAC",
+      "%ad": "\xAD",
+      "%Ad": "\xAD",
+      "%aD": "\xAD",
+      "%AD": "\xAD",
+      "%ae": "\xAE",
+      "%Ae": "\xAE",
+      "%aE": "\xAE",
+      "%AE": "\xAE",
+      "%af": "\xAF",
+      "%Af": "\xAF",
+      "%aF": "\xAF",
+      "%AF": "\xAF",
+      "%b0": "\xB0",
+      "%B0": "\xB0",
+      "%b1": "\xB1",
+      "%B1": "\xB1",
+      "%b2": "\xB2",
+      "%B2": "\xB2",
+      "%b3": "\xB3",
+      "%B3": "\xB3",
+      "%b4": "\xB4",
+      "%B4": "\xB4",
+      "%b5": "\xB5",
+      "%B5": "\xB5",
+      "%b6": "\xB6",
+      "%B6": "\xB6",
+      "%b7": "\xB7",
+      "%B7": "\xB7",
+      "%b8": "\xB8",
+      "%B8": "\xB8",
+      "%b9": "\xB9",
+      "%B9": "\xB9",
+      "%ba": "\xBA",
+      "%Ba": "\xBA",
+      "%bA": "\xBA",
+      "%BA": "\xBA",
+      "%bb": "\xBB",
+      "%Bb": "\xBB",
+      "%bB": "\xBB",
+      "%BB": "\xBB",
+      "%bc": "\xBC",
+      "%Bc": "\xBC",
+      "%bC": "\xBC",
+      "%BC": "\xBC",
+      "%bd": "\xBD",
+      "%Bd": "\xBD",
+      "%bD": "\xBD",
+      "%BD": "\xBD",
+      "%be": "\xBE",
+      "%Be": "\xBE",
+      "%bE": "\xBE",
+      "%BE": "\xBE",
+      "%bf": "\xBF",
+      "%Bf": "\xBF",
+      "%bF": "\xBF",
+      "%BF": "\xBF",
+      "%c0": "\xC0",
+      "%C0": "\xC0",
+      "%c1": "\xC1",
+      "%C1": "\xC1",
+      "%c2": "\xC2",
+      "%C2": "\xC2",
+      "%c3": "\xC3",
+      "%C3": "\xC3",
+      "%c4": "\xC4",
+      "%C4": "\xC4",
+      "%c5": "\xC5",
+      "%C5": "\xC5",
+      "%c6": "\xC6",
+      "%C6": "\xC6",
+      "%c7": "\xC7",
+      "%C7": "\xC7",
+      "%c8": "\xC8",
+      "%C8": "\xC8",
+      "%c9": "\xC9",
+      "%C9": "\xC9",
+      "%ca": "\xCA",
+      "%Ca": "\xCA",
+      "%cA": "\xCA",
+      "%CA": "\xCA",
+      "%cb": "\xCB",
+      "%Cb": "\xCB",
+      "%cB": "\xCB",
+      "%CB": "\xCB",
+      "%cc": "\xCC",
+      "%Cc": "\xCC",
+      "%cC": "\xCC",
+      "%CC": "\xCC",
+      "%cd": "\xCD",
+      "%Cd": "\xCD",
+      "%cD": "\xCD",
+      "%CD": "\xCD",
+      "%ce": "\xCE",
+      "%Ce": "\xCE",
+      "%cE": "\xCE",
+      "%CE": "\xCE",
+      "%cf": "\xCF",
+      "%Cf": "\xCF",
+      "%cF": "\xCF",
+      "%CF": "\xCF",
+      "%d0": "\xD0",
+      "%D0": "\xD0",
+      "%d1": "\xD1",
+      "%D1": "\xD1",
+      "%d2": "\xD2",
+      "%D2": "\xD2",
+      "%d3": "\xD3",
+      "%D3": "\xD3",
+      "%d4": "\xD4",
+      "%D4": "\xD4",
+      "%d5": "\xD5",
+      "%D5": "\xD5",
+      "%d6": "\xD6",
+      "%D6": "\xD6",
+      "%d7": "\xD7",
+      "%D7": "\xD7",
+      "%d8": "\xD8",
+      "%D8": "\xD8",
+      "%d9": "\xD9",
+      "%D9": "\xD9",
+      "%da": "\xDA",
+      "%Da": "\xDA",
+      "%dA": "\xDA",
+      "%DA": "\xDA",
+      "%db": "\xDB",
+      "%Db": "\xDB",
+      "%dB": "\xDB",
+      "%DB": "\xDB",
+      "%dc": "\xDC",
+      "%Dc": "\xDC",
+      "%dC": "\xDC",
+      "%DC": "\xDC",
+      "%dd": "\xDD",
+      "%Dd": "\xDD",
+      "%dD": "\xDD",
+      "%DD": "\xDD",
+      "%de": "\xDE",
+      "%De": "\xDE",
+      "%dE": "\xDE",
+      "%DE": "\xDE",
+      "%df": "\xDF",
+      "%Df": "\xDF",
+      "%dF": "\xDF",
+      "%DF": "\xDF",
+      "%e0": "\xE0",
+      "%E0": "\xE0",
+      "%e1": "\xE1",
+      "%E1": "\xE1",
+      "%e2": "\xE2",
+      "%E2": "\xE2",
+      "%e3": "\xE3",
+      "%E3": "\xE3",
+      "%e4": "\xE4",
+      "%E4": "\xE4",
+      "%e5": "\xE5",
+      "%E5": "\xE5",
+      "%e6": "\xE6",
+      "%E6": "\xE6",
+      "%e7": "\xE7",
+      "%E7": "\xE7",
+      "%e8": "\xE8",
+      "%E8": "\xE8",
+      "%e9": "\xE9",
+      "%E9": "\xE9",
+      "%ea": "\xEA",
+      "%Ea": "\xEA",
+      "%eA": "\xEA",
+      "%EA": "\xEA",
+      "%eb": "\xEB",
+      "%Eb": "\xEB",
+      "%eB": "\xEB",
+      "%EB": "\xEB",
+      "%ec": "\xEC",
+      "%Ec": "\xEC",
+      "%eC": "\xEC",
+      "%EC": "\xEC",
+      "%ed": "\xED",
+      "%Ed": "\xED",
+      "%eD": "\xED",
+      "%ED": "\xED",
+      "%ee": "\xEE",
+      "%Ee": "\xEE",
+      "%eE": "\xEE",
+      "%EE": "\xEE",
+      "%ef": "\xEF",
+      "%Ef": "\xEF",
+      "%eF": "\xEF",
+      "%EF": "\xEF",
+      "%f0": "\xF0",
+      "%F0": "\xF0",
+      "%f1": "\xF1",
+      "%F1": "\xF1",
+      "%f2": "\xF2",
+      "%F2": "\xF2",
+      "%f3": "\xF3",
+      "%F3": "\xF3",
+      "%f4": "\xF4",
+      "%F4": "\xF4",
+      "%f5": "\xF5",
+      "%F5": "\xF5",
+      "%f6": "\xF6",
+      "%F6": "\xF6",
+      "%f7": "\xF7",
+      "%F7": "\xF7",
+      "%f8": "\xF8",
+      "%F8": "\xF8",
+      "%f9": "\xF9",
+      "%F9": "\xF9",
+      "%fa": "\xFA",
+      "%Fa": "\xFA",
+      "%fA": "\xFA",
+      "%FA": "\xFA",
+      "%fb": "\xFB",
+      "%Fb": "\xFB",
+      "%fB": "\xFB",
+      "%FB": "\xFB",
+      "%fc": "\xFC",
+      "%Fc": "\xFC",
+      "%fC": "\xFC",
+      "%FC": "\xFC",
+      "%fd": "\xFD",
+      "%Fd": "\xFD",
+      "%fD": "\xFD",
+      "%FD": "\xFD",
+      "%fe": "\xFE",
+      "%Fe": "\xFE",
+      "%fE": "\xFE",
+      "%FE": "\xFE",
+      "%ff": "\xFF",
+      "%Ff": "\xFF",
+      "%fF": "\xFF",
+      "%FF": "\xFF"
+    };
+    function encodedReplacer(match) {
+      return EncodedLookup[match];
+    }
+    var STATE_KEY = 0;
+    var STATE_VALUE = 1;
+    var STATE_CHARSET = 2;
+    var STATE_LANG = 3;
+    function parseParams(str) {
+      const res = [];
+      let state = STATE_KEY;
+      let charset = "";
+      let inquote = false;
+      let escaping = false;
+      let p = 0;
+      let tmp = "";
+      const len = str.length;
+      for (var i = 0; i < len; ++i) {
+        const char = str[i];
+        if (char === "\\" && inquote) {
+          if (escaping) {
+            escaping = false;
+          } else {
+            escaping = true;
+            continue;
+          }
+        } else if (char === '"') {
+          if (!escaping) {
+            if (inquote) {
+              inquote = false;
+              state = STATE_KEY;
+            } else {
+              inquote = true;
+            }
+            continue;
+          } else {
+            escaping = false;
+          }
+        } else {
+          if (escaping && inquote) {
+            tmp += "\\";
+          }
+          escaping = false;
+          if ((state === STATE_CHARSET || state === STATE_LANG) && char === "'") {
+            if (state === STATE_CHARSET) {
+              state = STATE_LANG;
+              charset = tmp.substring(1);
+            } else {
+              state = STATE_VALUE;
+            }
+            tmp = "";
+            continue;
+          } else if (state === STATE_KEY && (char === "*" || char === "=") && res.length) {
+            state = char === "*" ? STATE_CHARSET : STATE_VALUE;
+            res[p] = [tmp, void 0];
+            tmp = "";
+            continue;
+          } else if (!inquote && char === ";") {
+            state = STATE_KEY;
+            if (charset) {
+              if (tmp.length) {
+                tmp = decodeText(
+                  tmp.replace(RE_ENCODED, encodedReplacer),
+                  "binary",
+                  charset
+                );
+              }
+              charset = "";
+            } else if (tmp.length) {
+              tmp = decodeText(tmp, "binary", "utf8");
+            }
+            if (res[p] === void 0) {
+              res[p] = tmp;
+            } else {
+              res[p][1] = tmp;
+            }
+            tmp = "";
+            ++p;
+            continue;
+          } else if (!inquote && (char === " " || char === "	")) {
+            continue;
+          }
+        }
+        tmp += char;
+      }
+      if (charset && tmp.length) {
+        tmp = decodeText(
+          tmp.replace(RE_ENCODED, encodedReplacer),
+          "binary",
+          charset
+        );
+      } else if (tmp) {
+        tmp = decodeText(tmp, "binary", "utf8");
+      }
+      if (res[p] === void 0) {
+        if (tmp) {
+          res[p] = tmp;
+        }
+      } else {
+        res[p][1] = tmp;
+      }
+      return res;
+    }
+    module2.exports = parseParams;
+  }
+});
+
+// node_modules/@fastify/busboy/lib/utils/basename.js
+var require_basename = __commonJS({
+  "node_modules/@fastify/busboy/lib/utils/basename.js"(exports2, module2) {
+    "use strict";
+    module2.exports = function basename(path) {
+      if (typeof path !== "string") {
+        return "";
+      }
+      for (var i = path.length - 1; i >= 0; --i) {
+        switch (path.charCodeAt(i)) {
+          case 47:
+          // '/'
+          case 92:
+            path = path.slice(i + 1);
+            return path === ".." || path === "." ? "" : path;
+        }
+      }
+      return path === ".." || path === "." ? "" : path;
+    };
+  }
+});
+
+// node_modules/@fastify/busboy/lib/types/multipart.js
+var require_multipart = __commonJS({
+  "node_modules/@fastify/busboy/lib/types/multipart.js"(exports2, module2) {
+    "use strict";
+    var { Readable: Readable2 } = require("stream");
+    var { inherits: inherits2 } = require("util");
+    var Dicer = require_Dicer();
+    var parseParams = require_parseParams();
+    var decodeText = require_decodeText();
+    var basename = require_basename();
+    var getLimit = require_getLimit();
+    var RE_BOUNDARY = /^boundary$/i;
+    var RE_FIELD = /^form-data$/i;
+    var RE_CHARSET = /^charset$/i;
+    var RE_FILENAME = /^filename$/i;
+    var RE_NAME = /^name$/i;
+    Multipart.detect = /^multipart\/form-data/i;
+    function Multipart(boy, cfg) {
+      let i;
+      let len;
+      const self2 = this;
+      let boundary;
+      const limits = cfg.limits;
+      const isPartAFile = cfg.isPartAFile || ((fieldName, contentType, fileName) => contentType === "application/octet-stream" || fileName !== void 0);
+      const parsedConType = cfg.parsedConType || [];
+      const defCharset = cfg.defCharset || "utf8";
+      const preservePath = cfg.preservePath;
+      const fileOpts = { highWaterMark: cfg.fileHwm };
+      for (i = 0, len = parsedConType.length; i < len; ++i) {
+        if (Array.isArray(parsedConType[i]) && RE_BOUNDARY.test(parsedConType[i][0])) {
+          boundary = parsedConType[i][1];
+          break;
+        }
+      }
+      function checkFinished() {
+        if (nends === 0 && finished && !boy._done) {
+          finished = false;
+          self2.end();
+        }
+      }
+      if (typeof boundary !== "string") {
+        throw new Error("Multipart: Boundary not found");
+      }
+      const fieldSizeLimit = getLimit(limits, "fieldSize", 1 * 1024 * 1024);
+      const fileSizeLimit = getLimit(limits, "fileSize", Infinity);
+      const filesLimit = getLimit(limits, "files", Infinity);
+      const fieldsLimit = getLimit(limits, "fields", Infinity);
+      const partsLimit = getLimit(limits, "parts", Infinity);
+      const headerPairsLimit = getLimit(limits, "headerPairs", 2e3);
+      const headerSizeLimit = getLimit(limits, "headerSize", 80 * 1024);
+      let nfiles = 0;
+      let nfields = 0;
+      let nends = 0;
+      let curFile;
+      let curField;
+      let finished = false;
+      this._needDrain = false;
+      this._pause = false;
+      this._cb = void 0;
+      this._nparts = 0;
+      this._boy = boy;
+      const parserCfg = {
+        boundary,
+        maxHeaderPairs: headerPairsLimit,
+        maxHeaderSize: headerSizeLimit,
+        partHwm: fileOpts.highWaterMark,
+        highWaterMark: cfg.highWaterMark
+      };
+      this.parser = new Dicer(parserCfg);
+      this.parser.on("drain", function() {
+        self2._needDrain = false;
+        if (self2._cb && !self2._pause) {
+          const cb = self2._cb;
+          self2._cb = void 0;
+          cb();
+        }
+      }).on("part", function onPart(part) {
+        if (++self2._nparts > partsLimit) {
+          self2.parser.removeListener("part", onPart);
+          self2.parser.on("part", skipPart);
+          boy.hitPartsLimit = true;
+          boy.emit("partsLimit");
+          return skipPart(part);
+        }
+        if (curField) {
+          const field = curField;
+          field.emit("end");
+          field.removeAllListeners("end");
+        }
+        part.on("header", function(header) {
+          let contype;
+          let fieldname;
+          let parsed;
+          let charset;
+          let encoding;
+          let filename;
+          let nsize = 0;
+          if (header["content-type"]) {
+            parsed = parseParams(header["content-type"][0]);
+            if (parsed[0]) {
+              contype = parsed[0].toLowerCase();
+              for (i = 0, len = parsed.length; i < len; ++i) {
+                if (RE_CHARSET.test(parsed[i][0])) {
+                  charset = parsed[i][1].toLowerCase();
+                  break;
+                }
+              }
+            }
+          }
+          if (contype === void 0) {
+            contype = "text/plain";
+          }
+          if (charset === void 0) {
+            charset = defCharset;
+          }
+          if (header["content-disposition"]) {
+            parsed = parseParams(header["content-disposition"][0]);
+            if (!RE_FIELD.test(parsed[0])) {
+              return skipPart(part);
+            }
+            for (i = 0, len = parsed.length; i < len; ++i) {
+              if (RE_NAME.test(parsed[i][0])) {
+                fieldname = parsed[i][1];
+              } else if (RE_FILENAME.test(parsed[i][0])) {
+                filename = parsed[i][1];
+                if (!preservePath) {
+                  filename = basename(filename);
+                }
+              }
+            }
+          } else {
+            return skipPart(part);
+          }
+          if (header["content-transfer-encoding"]) {
+            encoding = header["content-transfer-encoding"][0].toLowerCase();
+          } else {
+            encoding = "7bit";
+          }
+          let onData, onEnd;
+          if (isPartAFile(fieldname, contype, filename)) {
+            if (nfiles === filesLimit) {
+              if (!boy.hitFilesLimit) {
+                boy.hitFilesLimit = true;
+                boy.emit("filesLimit");
+              }
+              return skipPart(part);
+            }
+            ++nfiles;
+            if (boy.listenerCount("file") === 0) {
+              self2.parser._ignore();
+              return;
+            }
+            ++nends;
+            const file = new FileStream(fileOpts);
+            curFile = file;
+            file.on("end", function() {
+              --nends;
+              self2._pause = false;
+              checkFinished();
+              if (self2._cb && !self2._needDrain) {
+                const cb = self2._cb;
+                self2._cb = void 0;
+                cb();
+              }
+            });
+            file._read = function(n) {
+              if (!self2._pause) {
+                return;
+              }
+              self2._pause = false;
+              if (self2._cb && !self2._needDrain) {
+                const cb = self2._cb;
+                self2._cb = void 0;
+                cb();
+              }
+            };
+            boy.emit("file", fieldname, file, filename, encoding, contype);
+            onData = function(data) {
+              if ((nsize += data.length) > fileSizeLimit) {
+                const extralen = fileSizeLimit - nsize + data.length;
+                if (extralen > 0) {
+                  file.push(data.slice(0, extralen));
+                }
+                file.truncated = true;
+                file.bytesRead = fileSizeLimit;
+                part.removeAllListeners("data");
+                file.emit("limit");
+                return;
+              } else if (!file.push(data)) {
+                self2._pause = true;
+              }
+              file.bytesRead = nsize;
+            };
+            onEnd = function() {
+              curFile = void 0;
+              file.push(null);
+            };
+          } else {
+            if (nfields === fieldsLimit) {
+              if (!boy.hitFieldsLimit) {
+                boy.hitFieldsLimit = true;
+                boy.emit("fieldsLimit");
+              }
+              return skipPart(part);
+            }
+            ++nfields;
+            ++nends;
+            let buffer = "";
+            let truncated = false;
+            curField = part;
+            onData = function(data) {
+              if ((nsize += data.length) > fieldSizeLimit) {
+                const extralen = fieldSizeLimit - (nsize - data.length);
+                buffer += data.toString("binary", 0, extralen);
+                truncated = true;
+                part.removeAllListeners("data");
+              } else {
+                buffer += data.toString("binary");
+              }
+            };
+            onEnd = function() {
+              curField = void 0;
+              if (buffer.length) {
+                buffer = decodeText(buffer, "binary", charset);
+              }
+              boy.emit("field", fieldname, buffer, false, truncated, encoding, contype);
+              --nends;
+              checkFinished();
+            };
+          }
+          part._readableState.sync = false;
+          part.on("data", onData);
+          part.on("end", onEnd);
+        }).on("error", function(err) {
+          if (curFile) {
+            curFile.emit("error", err);
+          }
+        });
+      }).on("error", function(err) {
+        boy.emit("error", err);
+      }).on("finish", function() {
+        finished = true;
+        checkFinished();
+      });
+    }
+    Multipart.prototype.write = function(chunk, cb) {
+      const r = this.parser.write(chunk);
+      if (r && !this._pause) {
+        cb();
+      } else {
+        this._needDrain = !r;
+        this._cb = cb;
+      }
+    };
+    Multipart.prototype.end = function() {
+      const self2 = this;
+      if (self2.parser.writable) {
+        self2.parser.end();
+      } else if (!self2._boy._done) {
+        process.nextTick(function() {
+          self2._boy._done = true;
+          self2._boy.emit("finish");
+        });
+      }
+    };
+    function skipPart(part) {
+      part.resume();
+    }
+    function FileStream(opts) {
+      Readable2.call(this, opts);
+      this.bytesRead = 0;
+      this.truncated = false;
+    }
+    inherits2(FileStream, Readable2);
+    FileStream.prototype._read = function(n) {
+    };
+    module2.exports = Multipart;
+  }
+});
+
+// node_modules/@fastify/busboy/lib/utils/Decoder.js
+var require_Decoder = __commonJS({
+  "node_modules/@fastify/busboy/lib/utils/Decoder.js"(exports2, module2) {
+    "use strict";
+    var RE_PLUS = /\+/g;
+    var HEX = [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ];
+    function Decoder() {
+      this.buffer = void 0;
+    }
+    Decoder.prototype.write = function(str) {
+      str = str.replace(RE_PLUS, " ");
+      let res = "";
+      let i = 0;
+      let p = 0;
+      const len = str.length;
+      for (; i < len; ++i) {
+        if (this.buffer !== void 0) {
+          if (!HEX[str.charCodeAt(i)]) {
+            res += "%" + this.buffer;
+            this.buffer = void 0;
+            --i;
+          } else {
+            this.buffer += str[i];
+            ++p;
+            if (this.buffer.length === 2) {
+              res += String.fromCharCode(parseInt(this.buffer, 16));
+              this.buffer = void 0;
+            }
+          }
+        } else if (str[i] === "%") {
+          if (i > p) {
+            res += str.substring(p, i);
+            p = i;
+          }
+          this.buffer = "";
+          ++p;
+        }
+      }
+      if (p < len && this.buffer === void 0) {
+        res += str.substring(p);
+      }
+      return res;
+    };
+    Decoder.prototype.reset = function() {
+      this.buffer = void 0;
+    };
+    module2.exports = Decoder;
+  }
+});
+
+// node_modules/@fastify/busboy/lib/types/urlencoded.js
+var require_urlencoded = __commonJS({
+  "node_modules/@fastify/busboy/lib/types/urlencoded.js"(exports2, module2) {
+    "use strict";
+    var Decoder = require_Decoder();
+    var decodeText = require_decodeText();
+    var getLimit = require_getLimit();
+    var RE_CHARSET = /^charset$/i;
+    UrlEncoded.detect = /^application\/x-www-form-urlencoded/i;
+    function UrlEncoded(boy, cfg) {
+      const limits = cfg.limits;
+      const parsedConType = cfg.parsedConType;
+      this.boy = boy;
+      this.fieldSizeLimit = getLimit(limits, "fieldSize", 1 * 1024 * 1024);
+      this.fieldNameSizeLimit = getLimit(limits, "fieldNameSize", 100);
+      this.fieldsLimit = getLimit(limits, "fields", Infinity);
+      let charset;
+      for (var i = 0, len = parsedConType.length; i < len; ++i) {
+        if (Array.isArray(parsedConType[i]) && RE_CHARSET.test(parsedConType[i][0])) {
+          charset = parsedConType[i][1].toLowerCase();
+          break;
+        }
+      }
+      if (charset === void 0) {
+        charset = cfg.defCharset || "utf8";
+      }
+      this.decoder = new Decoder();
+      this.charset = charset;
+      this._fields = 0;
+      this._state = "key";
+      this._checkingBytes = true;
+      this._bytesKey = 0;
+      this._bytesVal = 0;
+      this._key = "";
+      this._val = "";
+      this._keyTrunc = false;
+      this._valTrunc = false;
+      this._hitLimit = false;
+    }
+    UrlEncoded.prototype.write = function(data, cb) {
+      if (this._fields === this.fieldsLimit) {
+        if (!this.boy.hitFieldsLimit) {
+          this.boy.hitFieldsLimit = true;
+          this.boy.emit("fieldsLimit");
+        }
+        return cb();
+      }
+      let idxeq;
+      let idxamp;
+      let i;
+      let p = 0;
+      const len = data.length;
+      while (p < len) {
+        if (this._state === "key") {
+          idxeq = idxamp = void 0;
+          for (i = p; i < len; ++i) {
+            if (!this._checkingBytes) {
+              ++p;
+            }
+            if (data[i] === 61) {
+              idxeq = i;
+              break;
+            } else if (data[i] === 38) {
+              idxamp = i;
+              break;
+            }
+            if (this._checkingBytes && this._bytesKey === this.fieldNameSizeLimit) {
+              this._hitLimit = true;
+              break;
+            } else if (this._checkingBytes) {
+              ++this._bytesKey;
+            }
+          }
+          if (idxeq !== void 0) {
+            if (idxeq > p) {
+              this._key += this.decoder.write(data.toString("binary", p, idxeq));
+            }
+            this._state = "val";
+            this._hitLimit = false;
+            this._checkingBytes = true;
+            this._val = "";
+            this._bytesVal = 0;
+            this._valTrunc = false;
+            this.decoder.reset();
+            p = idxeq + 1;
+          } else if (idxamp !== void 0) {
+            ++this._fields;
+            let key;
+            const keyTrunc = this._keyTrunc;
+            if (idxamp > p) {
+              key = this._key += this.decoder.write(data.toString("binary", p, idxamp));
+            } else {
+              key = this._key;
+            }
+            this._hitLimit = false;
+            this._checkingBytes = true;
+            this._key = "";
+            this._bytesKey = 0;
+            this._keyTrunc = false;
+            this.decoder.reset();
+            if (key.length) {
+              this.boy.emit(
+                "field",
+                decodeText(key, "binary", this.charset),
+                "",
+                keyTrunc,
+                false
+              );
+            }
+            p = idxamp + 1;
+            if (this._fields === this.fieldsLimit) {
+              return cb();
+            }
+          } else if (this._hitLimit) {
+            if (i > p) {
+              this._key += this.decoder.write(data.toString("binary", p, i));
+            }
+            p = i;
+            if ((this._bytesKey = this._key.length) === this.fieldNameSizeLimit) {
+              this._checkingBytes = false;
+              this._keyTrunc = true;
+            }
+          } else {
+            if (p < len) {
+              this._key += this.decoder.write(data.toString("binary", p));
+            }
+            p = len;
+          }
+        } else {
+          idxamp = void 0;
+          for (i = p; i < len; ++i) {
+            if (!this._checkingBytes) {
+              ++p;
+            }
+            if (data[i] === 38) {
+              idxamp = i;
+              break;
+            }
+            if (this._checkingBytes && this._bytesVal === this.fieldSizeLimit) {
+              this._hitLimit = true;
+              break;
+            } else if (this._checkingBytes) {
+              ++this._bytesVal;
+            }
+          }
+          if (idxamp !== void 0) {
+            ++this._fields;
+            if (idxamp > p) {
+              this._val += this.decoder.write(data.toString("binary", p, idxamp));
+            }
+            this.boy.emit(
+              "field",
+              decodeText(this._key, "binary", this.charset),
+              decodeText(this._val, "binary", this.charset),
+              this._keyTrunc,
+              this._valTrunc
+            );
+            this._state = "key";
+            this._hitLimit = false;
+            this._checkingBytes = true;
+            this._key = "";
+            this._bytesKey = 0;
+            this._keyTrunc = false;
+            this.decoder.reset();
+            p = idxamp + 1;
+            if (this._fields === this.fieldsLimit) {
+              return cb();
+            }
+          } else if (this._hitLimit) {
+            if (i > p) {
+              this._val += this.decoder.write(data.toString("binary", p, i));
+            }
+            p = i;
+            if (this._val === "" && this.fieldSizeLimit === 0 || (this._bytesVal = this._val.length) === this.fieldSizeLimit) {
+              this._checkingBytes = false;
+              this._valTrunc = true;
+            }
+          } else {
+            if (p < len) {
+              this._val += this.decoder.write(data.toString("binary", p));
+            }
+            p = len;
+          }
+        }
+      }
+      cb();
+    };
+    UrlEncoded.prototype.end = function() {
+      if (this.boy._done) {
+        return;
+      }
+      if (this._state === "key" && this._key.length > 0) {
+        this.boy.emit(
+          "field",
+          decodeText(this._key, "binary", this.charset),
+          "",
+          this._keyTrunc,
+          false
+        );
+      } else if (this._state === "val") {
+        this.boy.emit(
+          "field",
+          decodeText(this._key, "binary", this.charset),
+          decodeText(this._val, "binary", this.charset),
+          this._keyTrunc,
+          this._valTrunc
+        );
+      }
+      this.boy._done = true;
+      this.boy.emit("finish");
+    };
+    module2.exports = UrlEncoded;
+  }
+});
+
+// node_modules/@fastify/busboy/lib/main.js
+var require_main = __commonJS({
+  "node_modules/@fastify/busboy/lib/main.js"(exports2, module2) {
+    "use strict";
+    var WritableStream = require("stream").Writable;
+    var { inherits: inherits2 } = require("util");
+    var Dicer = require_Dicer();
+    var MultipartParser = require_multipart();
+    var UrlencodedParser = require_urlencoded();
+    var parseParams = require_parseParams();
+    function Busboy(opts) {
+      if (!(this instanceof Busboy)) {
+        return new Busboy(opts);
+      }
+      if (typeof opts !== "object") {
+        throw new TypeError("Busboy expected an options-Object.");
+      }
+      if (typeof opts.headers !== "object") {
+        throw new TypeError("Busboy expected an options-Object with headers-attribute.");
+      }
+      if (typeof opts.headers["content-type"] !== "string") {
+        throw new TypeError("Missing Content-Type-header.");
+      }
+      const {
+        headers,
+        ...streamOptions
+      } = opts;
+      this.opts = {
+        autoDestroy: false,
+        ...streamOptions
+      };
+      WritableStream.call(this, this.opts);
+      this._done = false;
+      this._parser = this.getParserByHeaders(headers);
+      this._finished = false;
+    }
+    inherits2(Busboy, WritableStream);
+    Busboy.prototype.emit = function(ev) {
+      if (ev === "finish") {
+        if (!this._done) {
+          this._parser?.end();
+          return;
+        } else if (this._finished) {
+          return;
+        }
+        this._finished = true;
+      }
+      WritableStream.prototype.emit.apply(this, arguments);
+    };
+    Busboy.prototype.getParserByHeaders = function(headers) {
+      const parsed = parseParams(headers["content-type"]);
+      const cfg = {
+        defCharset: this.opts.defCharset,
+        fileHwm: this.opts.fileHwm,
+        headers,
+        highWaterMark: this.opts.highWaterMark,
+        isPartAFile: this.opts.isPartAFile,
+        limits: this.opts.limits,
+        parsedConType: parsed,
+        preservePath: this.opts.preservePath
+      };
+      if (MultipartParser.detect.test(parsed[0])) {
+        return new MultipartParser(this, cfg);
+      }
+      if (UrlencodedParser.detect.test(parsed[0])) {
+        return new UrlencodedParser(this, cfg);
+      }
+      throw new Error("Unsupported Content-Type.");
+    };
+    Busboy.prototype._write = function(chunk, encoding, cb) {
+      this._parser.write(chunk, cb);
+    };
+    module2.exports = Busboy;
+    module2.exports.default = Busboy;
+    module2.exports.Busboy = Busboy;
+    module2.exports.Dicer = Dicer;
+  }
+});
+
+// node_modules/@fastify/multipart/lib/generateId.js
+var require_generateId = __commonJS({
+  "node_modules/@fastify/multipart/lib/generateId.js"(exports2, module2) {
+    "use strict";
+    var HEX = [
+      "00",
+      "01",
+      "02",
+      "03",
+      "04",
+      "05",
+      "06",
+      "07",
+      "08",
+      "09",
+      "0a",
+      "0b",
+      "0c",
+      "0d",
+      "0e",
+      "0f",
+      "10",
+      "11",
+      "12",
+      "13",
+      "14",
+      "15",
+      "16",
+      "17",
+      "18",
+      "19",
+      "1a",
+      "1b",
+      "1c",
+      "1d",
+      "1e",
+      "1f",
+      "20",
+      "21",
+      "22",
+      "23",
+      "24",
+      "25",
+      "26",
+      "27",
+      "28",
+      "29",
+      "2a",
+      "2b",
+      "2c",
+      "2d",
+      "2e",
+      "2f",
+      "30",
+      "31",
+      "32",
+      "33",
+      "34",
+      "35",
+      "36",
+      "37",
+      "38",
+      "39",
+      "3a",
+      "3b",
+      "3c",
+      "3d",
+      "3e",
+      "3f",
+      "40",
+      "41",
+      "42",
+      "43",
+      "44",
+      "45",
+      "46",
+      "47",
+      "48",
+      "49",
+      "4a",
+      "4b",
+      "4c",
+      "4d",
+      "4e",
+      "4f",
+      "50",
+      "51",
+      "52",
+      "53",
+      "54",
+      "55",
+      "56",
+      "57",
+      "58",
+      "59",
+      "5a",
+      "5b",
+      "5c",
+      "5d",
+      "5e",
+      "5f",
+      "60",
+      "61",
+      "62",
+      "63",
+      "64",
+      "65",
+      "66",
+      "67",
+      "68",
+      "69",
+      "6a",
+      "6b",
+      "6c",
+      "6d",
+      "6e",
+      "6f",
+      "70",
+      "71",
+      "72",
+      "73",
+      "74",
+      "75",
+      "76",
+      "77",
+      "78",
+      "79",
+      "7a",
+      "7b",
+      "7c",
+      "7d",
+      "7e",
+      "7f",
+      "80",
+      "81",
+      "82",
+      "83",
+      "84",
+      "85",
+      "86",
+      "87",
+      "88",
+      "89",
+      "8a",
+      "8b",
+      "8c",
+      "8d",
+      "8e",
+      "8f",
+      "90",
+      "91",
+      "92",
+      "93",
+      "94",
+      "95",
+      "96",
+      "97",
+      "98",
+      "99",
+      "9a",
+      "9b",
+      "9c",
+      "9d",
+      "9e",
+      "9f",
+      "a0",
+      "a1",
+      "a2",
+      "a3",
+      "a4",
+      "a5",
+      "a6",
+      "a7",
+      "a8",
+      "a9",
+      "aa",
+      "ab",
+      "ac",
+      "ad",
+      "ae",
+      "af",
+      "b0",
+      "b1",
+      "b2",
+      "b3",
+      "b4",
+      "b5",
+      "b6",
+      "b7",
+      "b8",
+      "b9",
+      "ba",
+      "bb",
+      "bc",
+      "bd",
+      "be",
+      "bf",
+      "c0",
+      "c1",
+      "c2",
+      "c3",
+      "c4",
+      "c5",
+      "c6",
+      "c7",
+      "c8",
+      "c9",
+      "ca",
+      "cb",
+      "cc",
+      "cd",
+      "ce",
+      "cf",
+      "d0",
+      "d1",
+      "d2",
+      "d3",
+      "d4",
+      "d5",
+      "d6",
+      "d7",
+      "d8",
+      "d9",
+      "da",
+      "db",
+      "dc",
+      "dd",
+      "de",
+      "df",
+      "e0",
+      "e1",
+      "e2",
+      "e3",
+      "e4",
+      "e5",
+      "e6",
+      "e7",
+      "e8",
+      "e9",
+      "ea",
+      "eb",
+      "ec",
+      "ed",
+      "ee",
+      "ef",
+      "f0",
+      "f1",
+      "f2",
+      "f3",
+      "f4",
+      "f5",
+      "f6",
+      "f7",
+      "f8",
+      "f9",
+      "fa",
+      "fb",
+      "fc",
+      "fd",
+      "fe",
+      "ff"
+    ];
+    var random = Math.random;
+    function seed() {
+      return HEX[255 * random() | 0] + HEX[255 * random() | 0] + HEX[255 * random() | 0] + HEX[255 * random() | 0] + HEX[255 * random() | 0] + HEX[255 * random() | 0] + HEX[255 * random() | 0];
+    }
+    module2.exports.generateId = function generateIdFn() {
+      let num = 0;
+      let str = seed();
+      return function generateId() {
+        return num === 255 ? (str = seed()) + HEX[num = 0] : str + HEX[++num];
+      };
+    }();
+  }
+});
+
+// node_modules/@fastify/multipart/node_modules/@fastify/error/index.js
+var require_error3 = __commonJS({
+  "node_modules/@fastify/multipart/node_modules/@fastify/error/index.js"(exports2, module2) {
+    "use strict";
+    var { format } = require("util");
+    function toString3() {
+      return `${this.name} [${this.code}]: ${this.message}`;
+    }
+    var FastifyGenericErrorSymbol = Symbol.for("fastify-error-generic");
+    function createError(code, message, statusCode = 500, Base = Error, captureStackTrace = createError.captureStackTrace) {
+      const shouldCreateFastifyGenericError = code === FastifyGenericErrorSymbol;
+      if (shouldCreateFastifyGenericError) {
+        code = "FST_ERR";
+      }
+      if (!code) throw new Error("Fastify error code must not be empty");
+      if (!message) throw new Error("Fastify error message must not be empty");
+      code = code.toUpperCase();
+      !statusCode && (statusCode = void 0);
+      const FastifySpecificErrorSymbol = Symbol.for(`fastify-error ${code}`);
+      function FastifyError(...args) {
+        if (!new.target) {
+          return new FastifyError(...args);
+        }
+        this.code = code;
+        this.name = "FastifyError";
+        this.statusCode = statusCode;
+        const lastElement = args.length - 1;
+        if (lastElement !== -1 && args[lastElement] && typeof args[lastElement] === "object" && "cause" in args[lastElement]) {
+          this.cause = args.pop().cause;
+        }
+        this.message = format(message, ...args);
+        Error.stackTraceLimit && captureStackTrace && Error.captureStackTrace(this, FastifyError);
+      }
+      FastifyError.prototype = Object.create(Base.prototype, {
+        constructor: {
+          value: FastifyError,
+          enumerable: false,
+          writable: true,
+          configurable: true
+        },
+        [FastifyGenericErrorSymbol]: {
+          value: true,
+          enumerable: false,
+          writable: false,
+          configurable: false
+        },
+        [FastifySpecificErrorSymbol]: {
+          value: true,
+          enumerable: false,
+          writable: false,
+          configurable: false
+        }
+      });
+      if (shouldCreateFastifyGenericError) {
+        Object.defineProperty(FastifyError, Symbol.hasInstance, {
+          value(instance) {
+            return instance && instance[FastifyGenericErrorSymbol];
+          },
+          configurable: false,
+          writable: false,
+          enumerable: false
+        });
+      } else {
+        Object.defineProperty(FastifyError, Symbol.hasInstance, {
+          value(instance) {
+            return instance && instance[FastifySpecificErrorSymbol];
+          },
+          configurable: false,
+          writable: false,
+          enumerable: false
+        });
+      }
+      FastifyError.prototype[Symbol.toStringTag] = "Error";
+      FastifyError.prototype.toString = toString3;
+      return FastifyError;
+    }
+    createError.captureStackTrace = true;
+    var FastifyErrorConstructor = createError(FastifyGenericErrorSymbol, "Fastify Error", 500, Error);
+    module2.exports = createError;
+    module2.exports.FastifyError = FastifyErrorConstructor;
+    module2.exports.default = createError;
+    module2.exports.createError = createError;
+  }
+});
+
+// node_modules/stream-wormhole/index.js
+var require_stream_wormhole = __commonJS({
+  "node_modules/stream-wormhole/index.js"(exports2, module2) {
+    "use strict";
+    module2.exports = (stream4, throwError) => {
+      return new Promise((resolve, reject) => {
+        if (typeof stream4.resume !== "function") {
+          return resolve();
+        }
+        stream4.unpipe && stream4.unpipe();
+        stream4.resume();
+        if (stream4._readableState && stream4._readableState.ended) {
+          return resolve();
+        }
+        if (!stream4.readable || stream4.destroyed) {
+          return resolve();
+        }
+        function cleanup() {
+          stream4.removeListener("end", onEnd);
+          stream4.removeListener("close", onEnd);
+          stream4.removeListener("error", onError);
+        }
+        function onEnd() {
+          cleanup();
+          resolve();
+        }
+        function onError(err) {
+          cleanup();
+          if (throwError) {
+            reject(err);
+          } else {
+            resolve();
+          }
+        }
+        stream4.on("end", onEnd);
+        stream4.on("close", onEnd);
+        stream4.on("error", onError);
+      });
+    };
+  }
+});
+
+// node_modules/@fastify/deepmerge/index.js
+var require_deepmerge = __commonJS({
+  "node_modules/@fastify/deepmerge/index.js"(exports2, module2) {
+    "use strict";
+    var JSON_PROTO = Object.getPrototypeOf({});
+    function deepmergeConstructor(options) {
+      function isNotPrototypeKey(value) {
+        return value !== "constructor" && value !== "prototype" && value !== "__proto__";
+      }
+      function cloneArray(value) {
+        let i = 0;
+        const il = value.length;
+        const result = new Array(il);
+        for (i; i < il; ++i) {
+          result[i] = clone(value[i]);
+        }
+        return result;
+      }
+      function cloneObject(target) {
+        const result = {};
+        if (cloneProtoObject && Object.getPrototypeOf(target) !== JSON_PROTO) {
+          return cloneProtoObject(target);
+        }
+        const targetKeys = getKeys(target);
+        let i, il, key;
+        for (i = 0, il = targetKeys.length; i < il; ++i) {
+          isNotPrototypeKey(key = targetKeys[i]) && (result[key] = clone(target[key]));
+        }
+        return result;
+      }
+      function concatArrays(target, source) {
+        const tl = target.length;
+        const sl = source.length;
+        let i = 0;
+        const result = new Array(tl + sl);
+        for (i; i < tl; ++i) {
+          result[i] = clone(target[i]);
+        }
+        for (i = 0; i < sl; ++i) {
+          result[i + tl] = clone(source[i]);
+        }
+        return result;
+      }
+      const propertyIsEnumerable = Object.prototype.propertyIsEnumerable;
+      function getSymbolsAndKeys(value) {
+        const result = Object.keys(value);
+        const keys = Object.getOwnPropertySymbols(value);
+        for (let i = 0, il = keys.length; i < il; ++i) {
+          propertyIsEnumerable.call(value, keys[i]) && result.push(keys[i]);
+        }
+        return result;
+      }
+      const getKeys = options?.symbols ? getSymbolsAndKeys : Object.keys;
+      const cloneProtoObject = typeof options?.cloneProtoObject === "function" ? options.cloneProtoObject : void 0;
+      function isMergeableObject(value) {
+        return typeof value === "object" && value !== null && !(value instanceof RegExp) && !(value instanceof Date);
+      }
+      function isPrimitive(value) {
+        return typeof value !== "object" || value === null;
+      }
+      const isPrimitiveOrBuiltIn = typeof Buffer !== "undefined" ? (value) => typeof value !== "object" || value === null || value instanceof RegExp || value instanceof Date || value instanceof Buffer : (value) => typeof value !== "object" || value === null || value instanceof RegExp || value instanceof Date;
+      const mergeArray = options && typeof options.mergeArray === "function" ? options.mergeArray({ clone, deepmerge: _deepmerge, getKeys, isMergeableObject }) : concatArrays;
+      function clone(entry) {
+        return isMergeableObject(entry) ? Array.isArray(entry) ? cloneArray(entry) : cloneObject(entry) : entry;
+      }
+      function mergeObject(target, source) {
+        const result = {};
+        const targetKeys = getKeys(target);
+        const sourceKeys = getKeys(source);
+        let i, il, key;
+        for (i = 0, il = targetKeys.length; i < il; ++i) {
+          isNotPrototypeKey(key = targetKeys[i]) && sourceKeys.indexOf(key) === -1 && (result[key] = clone(target[key]));
+        }
+        for (i = 0, il = sourceKeys.length; i < il; ++i) {
+          if (!isNotPrototypeKey(key = sourceKeys[i])) {
+            continue;
+          }
+          if (key in target) {
+            if (targetKeys.indexOf(key) !== -1) {
+              if (cloneProtoObject && isMergeableObject(source[key]) && Object.getPrototypeOf(source[key]) !== JSON_PROTO) {
+                result[key] = cloneProtoObject(source[key]);
+              } else {
+                result[key] = _deepmerge(target[key], source[key]);
+              }
+            }
+          } else {
+            result[key] = clone(source[key]);
+          }
+        }
+        return result;
+      }
+      function _deepmerge(target, source) {
+        const sourceIsArray = Array.isArray(source);
+        const targetIsArray = Array.isArray(target);
+        if (isPrimitive(source)) {
+          return source;
+        } else if (isPrimitiveOrBuiltIn(target)) {
+          return clone(source);
+        } else if (sourceIsArray && targetIsArray) {
+          return mergeArray(target, source);
+        } else if (sourceIsArray !== targetIsArray) {
+          return clone(source);
+        } else {
+          return mergeObject(target, source);
+        }
+      }
+      function _deepmergeAll() {
+        switch (arguments.length) {
+          case 0:
+            return {};
+          case 1:
+            return clone(arguments[0]);
+          case 2:
+            return _deepmerge(arguments[0], arguments[1]);
+        }
+        let result;
+        for (let i = 0, il = arguments.length; i < il; ++i) {
+          result = _deepmerge(result, arguments[i]);
+        }
+        return result;
+      }
+      return options?.all ? _deepmergeAll : _deepmerge;
+    }
+    module2.exports = deepmergeConstructor;
+    module2.exports.default = deepmergeConstructor;
+    module2.exports.deepmerge = deepmergeConstructor;
+  }
+});
+
+// node_modules/@fastify/multipart/index.js
+var require_multipart2 = __commonJS({
+  "node_modules/@fastify/multipart/index.js"(exports2, module2) {
+    "use strict";
+    var Busboy = require_main();
+    var os = require("os");
+    var fp2 = require_plugin2();
+    var { createWriteStream } = require("fs");
+    var { unlink } = require("fs/promises");
+    var path = require("path");
+    var { generateId } = require_generateId();
+    var util4 = require("util");
+    var createError = require_error3();
+    var sendToWormhole = require_stream_wormhole();
+    var deepmergeAll = require_deepmerge()({ all: true });
+    var { PassThrough, pipeline, Readable: Readable2 } = require("stream");
+    var pump = util4.promisify(pipeline);
+    var secureJSON = require_secure_json_parse();
+    var kMultipart = Symbol("multipart");
+    var kMultipartHandler = Symbol("multipartHandler");
+    var PartsLimitError = createError("FST_PARTS_LIMIT", "reach parts limit", 413);
+    var FilesLimitError = createError("FST_FILES_LIMIT", "reach files limit", 413);
+    var FieldsLimitError = createError("FST_FIELDS_LIMIT", "reach fields limit", 413);
+    var RequestFileTooLargeError = createError("FST_REQ_FILE_TOO_LARGE", "request file too large", 413);
+    var PrototypeViolationError = createError("FST_PROTO_VIOLATION", "prototype property is not allowed as field name", 400);
+    var InvalidMultipartContentTypeError = createError("FST_INVALID_MULTIPART_CONTENT_TYPE", "the request is not multipart", 406);
+    var InvalidJSONFieldError = createError("FST_INVALID_JSON_FIELD_ERROR", "a request field is not a valid JSON as declared by its Content-Type", 406);
+    var FileBufferNotFoundError = createError("FST_FILE_BUFFER_NOT_FOUND", "the file buffer was not found", 500);
+    var NoFormData = createError("FST_NO_FORM_DATA", "FormData is not available", 500);
+    function setMultipart(req, payload, done) {
+      req[kMultipart] = true;
+      done();
+    }
+    function busboy(options) {
+      try {
+        return new Busboy(options);
+      } catch (error) {
+        const errorEmitter = new PassThrough();
+        process.nextTick(function() {
+          errorEmitter.emit("error", error);
+        });
+        return errorEmitter;
+      }
+    }
+    function fastifyMultipart(fastify2, options, done) {
+      options.limits = {
+        ...options.limits,
+        parts: options.limits?.parts || 1e3,
+        fileSize: options.limits?.fileSize || fastify2.initialConfig.bodyLimit
+      };
+      const attachFieldsToBody = options.attachFieldsToBody;
+      if (attachFieldsToBody === true || attachFieldsToBody === "keyValues") {
+        if (typeof options.sharedSchemaId === "string" && attachFieldsToBody === true) {
+          fastify2.addSchema({
+            $id: options.sharedSchemaId,
+            type: "object",
+            properties: {
+              fieldname: { type: "string" },
+              encoding: { type: "string" },
+              filename: { type: "string" },
+              mimetype: { type: "string" }
+            }
+          });
+        }
+        fastify2.addHook("preValidation", async function(req, reply) {
+          if (!req.isMultipart()) {
+            return;
+          }
+          for await (const part of req.parts()) {
+            req.body = part.fields;
+            if (part.file) {
+              if (options.onFile) {
+                await options.onFile.call(req, part);
+              } else {
+                await part.toBuffer();
+              }
+            }
+          }
+          if (attachFieldsToBody === "keyValues") {
+            const body = {};
+            if (req.body) {
+              const reqBodyKeys = Object.keys(req.body);
+              for (let i = 0; i < reqBodyKeys.length; ++i) {
+                const key = reqBodyKeys[i];
+                const field = req.body[key];
+                if (field.value !== void 0) {
+                  body[key] = field.value;
+                } else if (field._buf) {
+                  body[key] = field._buf;
+                } else if (Array.isArray(field)) {
+                  const items = [];
+                  for (let i2 = 0; i2 < field.length; ++i2) {
+                    const item = field[i2];
+                    if (item.value !== void 0) {
+                      items.push(item.value);
+                    } else if (item._buf) {
+                      items.push(item._buf);
+                    }
+                  }
+                  if (items.length) {
+                    body[key] = items;
+                  }
+                }
+              }
+            }
+            req.body = body;
+          }
+        });
+        if (globalThis.FormData && !fastify2.hasRequestDecorator("formData")) {
+          fastify2.decorateRequest("formData", async function() {
+            const formData = new FormData();
+            for (const key in this.body) {
+              const value = this.body[key];
+              if (Array.isArray(value)) {
+                for (const item of value) {
+                  await append2(key, item);
+                }
+              } else {
+                await append2(key, value);
+              }
+            }
+            async function append2(key, entry) {
+              if (entry.type === "file" || attachFieldsToBody === "keyValues" && Buffer.isBuffer(entry)) {
+                formData.append(key, new Blob([await entry.toBuffer()], {
+                  type: entry.mimetype
+                }), entry.filename);
+              } else {
+                formData.append(key, entry.value);
+              }
+            }
+            return formData;
+          });
+        }
+      }
+      if (!fastify2.hasRequestDecorator("formData")) {
+        fastify2.decorateRequest("formData", async function() {
+          throw new NoFormData();
+        });
+      }
+      const defaultThrowFileSizeLimit = typeof options.throwFileSizeLimit === "boolean" ? options.throwFileSizeLimit : true;
+      fastify2.decorate("multipartErrors", {
+        PartsLimitError,
+        FilesLimitError,
+        FieldsLimitError,
+        PrototypeViolationError,
+        InvalidMultipartContentTypeError,
+        RequestFileTooLargeError,
+        FileBufferNotFoundError
+      });
+      fastify2.addContentTypeParser("multipart/form-data", setMultipart);
+      fastify2.decorateRequest(kMultipart, false);
+      fastify2.decorateRequest(kMultipartHandler, handleMultipart);
+      fastify2.decorateRequest("parts", getMultipartIterator);
+      fastify2.decorateRequest("isMultipart", isMultipart);
+      fastify2.decorateRequest("tmpUploads", null);
+      fastify2.decorateRequest("savedRequestFiles", null);
+      fastify2.decorateRequest("file", getMultipartFile);
+      fastify2.decorateRequest("files", getMultipartFiles);
+      fastify2.decorateRequest("saveRequestFiles", saveRequestFiles);
+      fastify2.decorateRequest("cleanRequestFiles", cleanRequestFiles);
+      fastify2.addHook("onResponse", async (request, reply) => {
+        await request.cleanRequestFiles();
+      });
+      function isMultipart() {
+        return this[kMultipart];
+      }
+      function handleMultipart(opts = {}) {
+        if (!this.isMultipart()) {
+          throw new InvalidMultipartContentTypeError();
+        }
+        this.log.debug("starting multipart parsing");
+        let values = [];
+        let pendingHandler = null;
+        const ch = (val) => {
+          if (pendingHandler) {
+            pendingHandler(val);
+            pendingHandler = null;
+          } else {
+            values.push(val);
+          }
+        };
+        const handle = (handler) => {
+          if (values.length > 0) {
+            const value = values[0];
+            values = values.slice(1);
+            handler(value);
+          } else {
+            pendingHandler = handler;
+          }
+        };
+        const parts = () => {
+          return new Promise((resolve, reject) => {
+            handle((val) => {
+              if (val instanceof Error) {
+                if (val.message === "Unexpected end of multipart data") {
+                  resolve(null);
+                } else {
+                  reject(val);
+                }
+              } else {
+                resolve(val);
+              }
+            });
+          });
+        };
+        const body = {};
+        let lastError = null;
+        let currentFile = null;
+        const request = this.raw;
+        const busboyOptions = deepmergeAll(
+          { headers: request.headers },
+          options,
+          opts
+        );
+        this.log.trace({ busboyOptions }, "Providing options to busboy");
+        const bb = busboy(busboyOptions);
+        request.on("close", cleanup);
+        request.on("error", cleanup);
+        bb.on("field", onField).on("file", onFile).on("end", cleanup).on("finish", cleanup).on("close", cleanup).on("error", cleanup);
+        bb.on("partsLimit", function() {
+          const err = new PartsLimitError();
+          onError(err);
+          process.nextTick(() => cleanup(err));
+        });
+        bb.on("filesLimit", function() {
+          const err = new FilesLimitError();
+          onError(err);
+          process.nextTick(() => cleanup(err));
+        });
+        bb.on("fieldsLimit", function() {
+          const err = new FieldsLimitError();
+          onError(err);
+          process.nextTick(() => cleanup(err));
+        });
+        request.pipe(bb);
+        function onField(name, fieldValue, fieldnameTruncated, valueTruncated, encoding, contentType) {
+          if (name in Object.prototype) {
+            onError(new PrototypeViolationError());
+            return;
+          }
+          if (contentType.startsWith("application/json")) {
+            if (valueTruncated) {
+              onError(new InvalidJSONFieldError());
+              return;
+            }
+            try {
+              fieldValue = secureJSON.parse(fieldValue);
+              contentType = "application/json";
+            } catch (e) {
+              onError(new InvalidJSONFieldError());
+              return;
+            }
+          }
+          const value = {
+            type: "field",
+            fieldname: name,
+            mimetype: contentType,
+            encoding,
+            value: fieldValue,
+            fieldnameTruncated,
+            valueTruncated,
+            fields: body
+          };
+          if (body[name] === void 0) {
+            body[name] = value;
+          } else if (Array.isArray(body[name])) {
+            body[name].push(value);
+          } else {
+            body[name] = [body[name], value];
+          }
+          ch(value);
+        }
+        function onFile(name, file, filename, encoding, mimetype) {
+          if (name in Object.prototype) {
+            sendToWormhole(file);
+            onError(new PrototypeViolationError());
+            return;
+          }
+          const throwFileSizeLimit = typeof opts.throwFileSizeLimit === "boolean" ? opts.throwFileSizeLimit : defaultThrowFileSizeLimit;
+          const value = {
+            type: "file",
+            fieldname: name,
+            filename,
+            encoding,
+            mimetype,
+            file,
+            fields: body,
+            _buf: null,
+            async toBuffer() {
+              if (this._buf) {
+                return this._buf;
+              }
+              const fileChunks = [];
+              let err;
+              for await (const chunk of this.file) {
+                fileChunks.push(chunk);
+                if (throwFileSizeLimit && this.file.truncated) {
+                  err = new RequestFileTooLargeError();
+                  err.part = this;
+                  onError(err);
+                  fileChunks.length = 0;
+                }
+              }
+              if (err) {
+                throw err;
+              }
+              this._buf = Buffer.concat(fileChunks);
+              return this._buf;
+            }
+          };
+          if (throwFileSizeLimit) {
+            file.on("limit", function() {
+              const err = new RequestFileTooLargeError();
+              err.part = value;
+              onError(err);
+            });
+          }
+          if (body[name] === void 0) {
+            body[name] = value;
+          } else if (Array.isArray(body[name])) {
+            body[name].push(value);
+          } else {
+            body[name] = [body[name], value];
+          }
+          currentFile = file;
+          ch(value);
+        }
+        function onError(err) {
+          lastError = err;
+          currentFile = null;
+        }
+        function cleanup(err) {
+          request.unpipe(bb);
+          if ((err || request.aborted) && currentFile) {
+            currentFile.destroy();
+            currentFile = null;
+          }
+          ch(err || lastError || null);
+        }
+        return parts;
+      }
+      async function saveRequestFiles(options2) {
+        if (this.savedRequestFiles) {
+          return this.savedRequestFiles;
+        }
+        let files;
+        if (attachFieldsToBody === true) {
+          if (!this.body) {
+            return [];
+          }
+          files = filesFromFields.call(this, this.body);
+        } else {
+          files = await this.files(options2);
+        }
+        this.savedRequestFiles = [];
+        const tmpdir = options2 && options2.tmpdir || os.tmpdir();
+        this.tmpUploads = [];
+        let i = 0;
+        for await (const file of files) {
+          const filepath = path.join(tmpdir, generateId() + path.extname(file.filename || "file" + i++));
+          const target = createWriteStream(filepath);
+          try {
+            this.tmpUploads.push(filepath);
+            await pump(file.file, target);
+            this.savedRequestFiles.push({ ...file, filepath });
+          } catch (err) {
+            this.log.error({ err }, "save request file");
+            throw err;
+          }
+        }
+        return this.savedRequestFiles;
+      }
+      function* filesFromFields(container) {
+        try {
+          const fields = Array.isArray(container) ? container : Object.values(container);
+          for (let i = 0; i < fields.length; ++i) {
+            const field = fields[i];
+            if (Array.isArray(field)) {
+              for (const subField of filesFromFields.call(this, field)) {
+                yield subField;
+              }
+            }
+            if (!field.file) {
+              continue;
+            }
+            if (!field._buf) {
+              throw new FileBufferNotFoundError();
+            }
+            field.file = Readable2.from(field._buf);
+            yield field;
+          }
+        } catch (err) {
+          this.log.error({ err }, "save request file failed");
+          throw err;
+        }
+      }
+      async function cleanRequestFiles() {
+        if (!this.tmpUploads) {
+          return;
+        }
+        for (let i = 0; i < this.tmpUploads.length; ++i) {
+          const filepath = this.tmpUploads[i];
+          try {
+            await unlink(filepath);
+          } catch (error) {
+            this.log.error(error, "Could not delete file");
+          }
+        }
+      }
+      async function getMultipartFile(options2) {
+        const parts = this[kMultipartHandler](options2);
+        let part;
+        while ((part = await parts()) != null) {
+          if (part.file) {
+            return part;
+          }
+        }
+      }
+      async function* getMultipartFiles(options2) {
+        const parts = this[kMultipartHandler](options2);
+        let part;
+        while ((part = await parts()) != null) {
+          if (part.file) {
+            yield part;
+          }
+        }
+      }
+      async function* getMultipartIterator(options2) {
+        const parts = this[kMultipartHandler](options2);
+        let part;
+        while ((part = await parts()) != null) {
+          yield part;
+        }
+      }
+      done();
+    }
+    function ajvFilePlugin(ajv) {
+      return ajv.addKeyword({
+        keyword: "isFile",
+        compile: (_schema, parent) => {
+          parent.type = "string";
+          parent.format = "binary";
+          delete parent.isFile;
+          return (field) => !!field.file;
+        },
+        error: {
+          message: "should be a file"
+        }
+      });
+    }
+    module2.exports = fp2(fastifyMultipart, {
+      fastify: "4.x",
+      name: "@fastify/multipart"
+    });
+    module2.exports.default = fastifyMultipart;
+    module2.exports.fastifyMultipart = fastifyMultipart;
+    module2.exports.ajvFilePlugin = ajvFilePlugin;
+  }
+});
+
 // node_modules/dotenv/package.json
 var require_package2 = __commonJS({
   "node_modules/dotenv/package.json"(exports2, module2) {
@@ -35976,7 +38955,7 @@ var require_package2 = __commonJS({
 });
 
 // node_modules/dotenv/lib/main.js
-var require_main = __commonJS({
+var require_main2 = __commonJS({
   "node_modules/dotenv/lib/main.js"(exports2, module2) {
     "use strict";
     var fs = require("fs");
@@ -57217,7 +60196,7 @@ var require_RealtimeClient = __commonJS({
 });
 
 // node_modules/@supabase/realtime-js/dist/main/index.js
-var require_main2 = __commonJS({
+var require_main3 = __commonJS({
   "node_modules/@supabase/realtime-js/dist/main/index.js"(exports2) {
     "use strict";
     var __createBinding = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
@@ -57291,7 +60270,8 @@ var import_fastify = __toESM(require_fastify(), 1);
 var import_cors = __toESM(require_cors(), 1);
 var import_helmet = __toESM(require_helmet2(), 1);
 var import_rate_limit = __toESM(require_rate_limit(), 1);
-var import_dotenv = __toESM(require_main(), 1);
+var import_multipart = __toESM(require_multipart2(), 1);
+var import_dotenv2 = __toESM(require_main2(), 1);
 var import_path = require("path");
 
 // node_modules/axios/lib/helpers/bind.js
@@ -60827,7 +63807,7 @@ var {
 } = import_cjs.default;
 
 // node_modules/@supabase/supabase-js/dist/module/SupabaseClient.js
-var import_realtime_js = __toESM(require_main2());
+var import_realtime_js = __toESM(require_main3());
 
 // node_modules/@supabase/storage-js/dist/module/lib/errors.js
 var StorageError = class extends Error {
@@ -61820,15 +64800,15 @@ var resolveHeadersConstructor = () => {
   }
   return Headers;
 };
-var fetchWithAuth = (supabaseKey, getAccessToken, customFetch) => {
+var fetchWithAuth = (supabaseKey2, getAccessToken, customFetch) => {
   const fetch2 = resolveFetch3(customFetch);
   const HeadersConstructor = resolveHeadersConstructor();
   return (input, init) => __awaiter6(void 0, void 0, void 0, function* () {
     var _a;
-    const accessToken = (_a = yield getAccessToken()) !== null && _a !== void 0 ? _a : supabaseKey;
+    const accessToken = (_a = yield getAccessToken()) !== null && _a !== void 0 ? _a : supabaseKey2;
     let headers = new HeadersConstructor(init === null || init === void 0 ? void 0 : init.headers);
     if (!headers.has("apikey")) {
-      headers.set("apikey", supabaseKey);
+      headers.set("apikey", supabaseKey2);
     }
     if (!headers.has("Authorization")) {
       headers.set("Authorization", `Bearer ${accessToken}`);
@@ -65056,15 +68036,15 @@ var SupabaseClient = class {
    * @param options.global.fetch A custom fetch implementation.
    * @param options.global.headers Any additional headers to send with each network request.
    */
-  constructor(supabaseUrl, supabaseKey, options) {
+  constructor(supabaseUrl2, supabaseKey2, options) {
     var _a, _b, _c;
-    this.supabaseUrl = supabaseUrl;
-    this.supabaseKey = supabaseKey;
-    if (!supabaseUrl)
+    this.supabaseUrl = supabaseUrl2;
+    this.supabaseKey = supabaseKey2;
+    if (!supabaseUrl2)
       throw new Error("supabaseUrl is required.");
-    if (!supabaseKey)
+    if (!supabaseKey2)
       throw new Error("supabaseKey is required.");
-    const _supabaseUrl = ensureTrailingSlash(supabaseUrl);
+    const _supabaseUrl = ensureTrailingSlash(supabaseUrl2);
     const baseUrl = new URL(_supabaseUrl);
     this.realtimeUrl = new URL("realtime/v1", baseUrl);
     this.realtimeUrl.protocol = this.realtimeUrl.protocol.replace("http", "ws");
@@ -65091,7 +68071,7 @@ var SupabaseClient = class {
         }
       });
     }
-    this.fetch = fetchWithAuth(supabaseKey, this._getAccessToken.bind(this), settings.global.fetch);
+    this.fetch = fetchWithAuth(supabaseKey2, this._getAccessToken.bind(this), settings.global.fetch);
     this.realtime = this._initRealtimeClient(Object.assign({ headers: this.headers, accessToken: this._getAccessToken.bind(this) }, settings.realtime));
     this.rest = new PostgrestClient(new URL("rest/v1", baseUrl).href, {
       headers: this.headers,
@@ -65248,9 +68228,9 @@ var SupabaseClient = class {
 };
 
 // node_modules/@supabase/supabase-js/dist/module/index.js
-__reExport(module_exports, __toESM(require_main2()));
-var createClient = (supabaseUrl, supabaseKey, options) => {
-  return new SupabaseClient(supabaseUrl, supabaseKey, options);
+__reExport(module_exports, __toESM(require_main3()));
+var createClient = (supabaseUrl2, supabaseKey2, options) => {
+  return new SupabaseClient(supabaseUrl2, supabaseKey2, options);
 };
 
 // src/modules/llm/llmDispatcher.ts
@@ -65843,25 +68823,25 @@ var llmDispatcher = new LLMDispatcher();
 // src/plugins/supabaseClient.ts
 var import_fastify_plugin = __toESM(require_plugin2(), 1);
 var supabasePlugin = async (fastify2) => {
-  const supabaseUrl = process.env.SUPABASE_URL;
-  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!supabaseUrl || !supabaseKey) {
+  const supabaseUrl2 = process.env.SUPABASE_URL;
+  const supabaseKey2 = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!supabaseUrl2 || !supabaseKey2) {
     throw new Error("\u{1F534} Supabase credentials n\xE3o configuradas");
   }
-  const supabase = createClient(supabaseUrl, supabaseKey, {
+  const supabase2 = createClient(supabaseUrl2, supabaseKey2, {
     auth: {
       autoRefreshToken: false,
       persistSession: false
     }
   });
   try {
-    const { data, error } = await supabase.from("agents").select("count").limit(1);
+    const { data, error } = await supabase2.from("agents").select("count").limit(1);
     if (error) throw error;
     fastify2.log.info("\u2705 Supabase conectado com sucesso");
   } catch (error) {
     fastify2.log.error("\u{1F534} Erro ao conectar com Supabase:", error);
   }
-  fastify2.decorate("supabase", supabase);
+  fastify2.decorate("supabase", supabase2);
 };
 var supabaseClient_default = (0, import_fastify_plugin.default)(supabasePlugin, {
   name: "supabase"
@@ -71753,6 +74733,76 @@ async function ovosRoutes(fastify2) {
 
 // src/routes/logs.ts
 async function logsRoutes(fastify2) {
+  fastify2.get("/", async (request, reply) => {
+    try {
+      const { limit = 50, type, level } = request.query;
+      console.log("\u{1F4CB} Buscando logs gerais do sistema...");
+      const { data: commandLogs, error: commandError } = await fastify2.supabase.from("command_executions").select(`
+          id,
+          command,
+          status,
+          context,
+          created_at,
+          agent_id,
+          user_id,
+          agents(name, type)
+        `).order("created_at", { ascending: false }).limit(Math.min(limit, 100));
+      if (commandError) {
+        console.error("\u274C Erro ao buscar command logs:", commandError);
+      }
+      const systemLogs = [
+        {
+          id: "sys_" + Date.now(),
+          type: "system",
+          level: "info",
+          message: "Sistema iniciado com sucesso",
+          timestamp: (/* @__PURE__ */ new Date()).toISOString(),
+          source: "backend"
+        },
+        {
+          id: "sys_" + (Date.now() - 1e3),
+          type: "api",
+          level: "info",
+          message: "Endpoint /logs acessado",
+          timestamp: new Date(Date.now() - 1e3).toISOString(),
+          source: "api"
+        }
+      ];
+      const allLogs = [
+        ...systemLogs,
+        ...(commandLogs || []).map((log) => ({
+          id: log.id,
+          type: "command",
+          level: log.status === "error" ? "error" : "info",
+          message: `Comando: ${log.command}`,
+          timestamp: log.created_at,
+          source: "agent",
+          details: {
+            agent: log.agents?.name,
+            status: log.status,
+            context: log.context
+          }
+        }))
+      ];
+      const filteredLogs = type ? allLogs.filter((log) => log.type === type) : allLogs;
+      const finalLogs = level ? filteredLogs.filter((log) => log.level === level) : filteredLogs;
+      console.log(`\u2705 ${finalLogs.length} logs carregados`);
+      return reply.code(200).send({
+        success: true,
+        data: finalLogs.slice(0, limit),
+        total: finalLogs.length,
+        timestamp: (/* @__PURE__ */ new Date()).toISOString()
+      });
+    } catch (error) {
+      console.error("\u274C Erro na rota /logs:", error);
+      return reply.code(500).send({
+        success: false,
+        error: "Erro interno do servidor",
+        details: error instanceof Error ? error.message : "Erro desconhecido",
+        timestamp: (/* @__PURE__ */ new Date()).toISOString()
+      });
+    }
+  });
   fastify2.get("/mcp", async (request, reply) => {
     try {
       const {
@@ -72063,6 +75113,119 @@ async function logsRoutes(fastify2) {
         success: false,
         error: "Erro interno do servidor",
         code: "INTERNAL_ERROR"
+      });
+    }
+  });
+}
+
+// src/utils/supabase.ts
+var import_dotenv = __toESM(require_main2(), 1);
+import_dotenv.default.config();
+var supabaseUrl = process.env.SUPABASE_URL;
+var supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+if (!supabaseUrl || !supabaseKey) {
+  throw new Error("\u{1F534} Supabase credentials n\xE3o configuradas");
+}
+var supabase = createClient(supabaseUrl, supabaseKey, {
+  auth: {
+    autoRefreshToken: false,
+    persistSession: false
+  }
+});
+
+// src/routes/analytics.ts
+async function analyticsRoutes(fastify2) {
+  fastify2.get("/", async (request, reply) => {
+    try {
+      console.log("\u{1F4CA} Buscando analytics do sistema...");
+      const { data: users, error: usersError } = await supabase.from("profiles").select("id, created_at, last_sign_in_at").order("created_at", { ascending: false });
+      if (usersError) {
+        console.error("\u274C Erro ao buscar usu\xE1rios:", usersError);
+      }
+      const { data: agents, error: agentsError } = await supabase.from("agents").select("id, name, created_at, status").order("created_at", { ascending: false });
+      if (agentsError) {
+        console.error("\u274C Erro ao buscar agentes:", agentsError);
+      }
+      const totalUsers = users?.length || 0;
+      const totalAgents = agents?.length || 0;
+      const activeAgents = agents?.filter((agent) => agent.status === "active")?.length || 0;
+      const thirtyDaysAgo = /* @__PURE__ */ new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      const activeUsers = users?.filter(
+        (user) => user.last_sign_in_at && new Date(user.last_sign_in_at) > thirtyDaysAgo
+      )?.length || 0;
+      const analytics = {
+        totalUsers,
+        activeUsers,
+        totalAgents,
+        activeAgents,
+        totalInteractions: Math.floor(Math.random() * 1e4) + 5e3,
+        // Simulado
+        systemUptime: "99.9%",
+        avgResponseTime: "150ms",
+        timestamp: (/* @__PURE__ */ new Date()).toISOString(),
+        metrics: {
+          daily: {
+            users: Math.floor(Math.random() * 100) + 50,
+            interactions: Math.floor(Math.random() * 500) + 200,
+            agents_created: Math.floor(Math.random() * 10) + 1
+          },
+          weekly: {
+            users: Math.floor(Math.random() * 500) + 200,
+            interactions: Math.floor(Math.random() * 2e3) + 1e3,
+            agents_created: Math.floor(Math.random() * 50) + 10
+          },
+          monthly: {
+            users: totalUsers,
+            interactions: Math.floor(Math.random() * 8e3) + 4e3,
+            agents_created: totalAgents
+          }
+        }
+      };
+      console.log("\u2705 Analytics carregados:", analytics);
+      return reply.code(200).send({
+        success: true,
+        data: analytics,
+        timestamp: (/* @__PURE__ */ new Date()).toISOString()
+      });
+    } catch (error) {
+      console.error("\u274C Erro na rota /analytics:", error);
+      return reply.code(500).send({
+        success: false,
+        error: "Erro interno do servidor",
+        details: error instanceof Error ? error.message : "Erro desconhecido",
+        timestamp: (/* @__PURE__ */ new Date()).toISOString()
+      });
+    }
+  });
+  fastify2.get("/dashboard", async (request, reply) => {
+    try {
+      console.log("\u{1F4CA} Buscando analytics do dashboard...");
+      const dashboardMetrics = {
+        activeUsers: Math.floor(Math.random() * 100) + 50,
+        totalVisions: Math.floor(Math.random() * 50) + 20,
+        totalInteractions: Math.floor(Math.random() * 5e3) + 2e3,
+        systemHealth: {
+          cpu: Math.floor(Math.random() * 30) + 20,
+          memory: Math.floor(Math.random() * 40) + 30,
+          network: Math.floor(Math.random() * 20) + 10,
+          agents: Math.floor(Math.random() * 10) + 5
+        },
+        uptime: "99.9%",
+        timestamp: (/* @__PURE__ */ new Date()).toISOString()
+      };
+      return reply.code(200).send({
+        success: true,
+        data: dashboardMetrics,
+        timestamp: (/* @__PURE__ */ new Date()).toISOString()
+      });
+    } catch (error) {
+      console.error("\u274C Erro na rota /analytics/dashboard:", error);
+      return reply.code(500).send({
+        success: false,
+        error: "Erro interno do servidor",
+        details: error instanceof Error ? error.message : "Erro desconhecido",
+        timestamp: (/* @__PURE__ */ new Date()).toISOString()
       });
     }
   });
@@ -73282,12 +76445,11 @@ async function badgesRoutes(fastify2) {
 async function agentsRoutes(fastify2) {
   fastify2.get("/", async (request, reply) => {
     try {
-      const { type, is_active, plan_required } = request.query;
+      const { type, status } = request.query;
       let query = fastify2.supabase.from("agents").select("*");
       if (type) query = query.eq("type", type);
-      if (is_active !== void 0) query = query.eq("is_active", is_active);
-      if (plan_required) query = query.eq("plan_required", plan_required);
-      const { data: agents, error } = await query.order("created_at", { ascending: false });
+      if (status) query = query.eq("status", status);
+      const { data: agents, error } = await query.order("created_date", { ascending: false });
       if (error) {
         fastify2.log.error("Erro ao buscar agentes:", error);
         return reply.code(500).send({
@@ -73313,12 +76475,15 @@ async function agentsRoutes(fastify2) {
     try {
       const agentData = request.body;
       const { data, error } = await fastify2.supabase.from("agents").insert({
-        ...agentData,
-        capabilities: agentData.capabilities || [],
-        is_active: agentData.is_active !== false,
-        plan_required: agentData.plan_required || "free",
-        created_at: (/* @__PURE__ */ new Date()).toISOString(),
-        updated_at: (/* @__PURE__ */ new Date()).toISOString()
+        name: agentData.name,
+        type: agentData.type,
+        description: agentData.description || "",
+        capabilities: agentData.capabilities || null,
+        icon: agentData.icon || null,
+        color: agentData.color || "#3B82F6",
+        status: agentData.status || "active",
+        config: agentData.config || {},
+        created_date: (/* @__PURE__ */ new Date()).toISOString()
       }).select().single();
       if (error) {
         fastify2.log.error("Erro ao criar agente:", error);
@@ -73343,13 +76508,44 @@ async function agentsRoutes(fastify2) {
       });
     }
   });
+  fastify2.get("/:id", async (request, reply) => {
+    try {
+      const { id } = request.params;
+      const { data, error } = await fastify2.supabase.from("agents").select("*").eq("id", id).single();
+      if (error) {
+        fastify2.log.error("Erro ao buscar agente:", error);
+        return reply.code(404).send({
+          success: false,
+          error: "Agente n\xE3o encontrado",
+          code: "AGENT_NOT_FOUND"
+        });
+      }
+      return reply.send({
+        success: true,
+        data
+      });
+    } catch (error) {
+      fastify2.log.error("Erro na busca de agente:", error);
+      return reply.code(500).send({
+        success: false,
+        error: "Erro interno do servidor",
+        code: "INTERNAL_ERROR"
+      });
+    }
+  });
   fastify2.put("/:id", async (request, reply) => {
     try {
       const { id } = request.params;
       const updateData = request.body;
       const { data, error } = await fastify2.supabase.from("agents").update({
-        ...updateData,
-        updated_at: (/* @__PURE__ */ new Date()).toISOString()
+        name: updateData.name,
+        type: updateData.type,
+        description: updateData.description,
+        capabilities: updateData.capabilities,
+        icon: updateData.icon,
+        color: updateData.color,
+        status: updateData.status,
+        config: updateData.config
       }).eq("id", id).select().single();
       if (error) {
         fastify2.log.error("Erro ao atualizar agente:", error);
@@ -73400,30 +76596,57 @@ async function agentsRoutes(fastify2) {
   fastify2.post("/:id/upload-image", async (request, reply) => {
     try {
       const { id } = request.params;
-      const mockImageUrl = `/assets/images/agents/agent_${id}.png`;
-      const { data, error } = await fastify2.supabase.from("agents").update({
-        image: mockImageUrl,
-        updated_at: (/* @__PURE__ */ new Date()).toISOString()
+      fastify2.log.info(`\u{1F504} Iniciando upload de imagem para agente: ${id}`);
+      const data = await request.file();
+      if (!data) {
+        fastify2.log.warn("\u274C Nenhum arquivo enviado na requisi\xE7\xE3o");
+        return reply.code(400).send({
+          success: false,
+          error: "Nenhum arquivo enviado",
+          code: "NO_FILE"
+        });
+      }
+      fastify2.log.info(`\u{1F4C1} Arquivo recebido: ${data.filename}, tipo: ${data.mimetype}`);
+      if (!data.mimetype.startsWith("image/")) {
+        fastify2.log.warn(`\u274C Tipo de arquivo inv\xE1lido: ${data.mimetype}`);
+        return reply.code(400).send({
+          success: false,
+          error: "Arquivo deve ser uma imagem",
+          code: "INVALID_FILE_TYPE"
+        });
+      }
+      fastify2.log.info("\u{1F504} Convertendo arquivo para base64...");
+      const buffer = await data.toBuffer();
+      const base64Image = `data:${data.mimetype};base64,${buffer.toString("base64")}`;
+      fastify2.log.info(`\u2705 Arquivo convertido para base64 (${buffer.length} bytes)`);
+      fastify2.log.info(`\u{1F504} Atualizando agente ${id} no banco de dados...`);
+      const { data: agentData, error } = await fastify2.supabase.from("agents").update({
+        image_url: base64Image
       }).eq("id", id).select().single();
       if (error) {
-        fastify2.log.error("Erro ao atualizar imagem do agente:", error);
+        fastify2.log.error("\u274C Erro ao atualizar imagem do agente no Supabase:", error);
         return reply.code(500).send({
           success: false,
           error: "Erro ao atualizar imagem",
-          code: "UPLOAD_ERROR"
+          code: "UPLOAD_ERROR",
+          details: error.message
         });
       }
+      fastify2.log.info(`\u2705 Imagem do agente ${id} atualizada com sucesso`);
       return reply.send({
         success: true,
-        data,
+        data: agentData,
+        image_url: base64Image,
         message: "Imagem atualizada com sucesso"
       });
     } catch (error) {
-      fastify2.log.error("Erro no upload de imagem:", error);
+      fastify2.log.error("\u274C Erro cr\xEDtico no upload de imagem:", error);
+      fastify2.log.error("Stack trace:", error.stack);
       return reply.code(500).send({
         success: false,
         error: "Erro interno do servidor",
-        code: "INTERNAL_ERROR"
+        code: "INTERNAL_ERROR",
+        details: error.message
       });
     }
   });
@@ -73891,7 +77114,7 @@ var envPaths = [
 var envLoaded = false;
 for (const envPath of envPaths) {
   try {
-    (0, import_dotenv.config)({ path: envPath });
+    (0, import_dotenv2.config)({ path: envPath });
     if (process.env.SUPABASE_URL) {
       console.log("\u{1F7E2} Vari\xE1veis carregadas de:", envPath);
       envLoaded = true;
@@ -73902,7 +77125,7 @@ for (const envPath of envPaths) {
 }
 if (!envLoaded) {
   console.log("\u26A0\uFE0F Tentando carregar .env padr\xE3o...");
-  (0, import_dotenv.config)();
+  (0, import_dotenv2.config)();
 }
 console.log("\u{1F50D} DEBUG - Vari\xE1veis de ambiente:");
 console.log("- SUPABASE_URL:", process.env.SUPABASE_URL ? "\u2705 Definida" : "\u274C N\xE3o encontrada");
@@ -73924,8 +77147,16 @@ fastify.addHook("preHandler", async (request, reply) => {
   if (request.url === "/health" || request.url === "/config/health") {
     return;
   }
-  const apiKey = request.headers["x-api-key"];
+  if (process.env.NODE_ENV === "development") {
+    fastify.log.warn("\u26A0\uFE0F MODO DESENVOLVIMENTO - Autentica\xE7\xE3o desabilitada temporariamente");
+    return;
+  }
   const expectedApiKey = process.env.API_KEY;
+  if (!expectedApiKey && process.env.NODE_ENV === "development") {
+    fastify.log.warn("\u26A0\uFE0F API_KEY n\xE3o configurada - modo desenvolvimento ativo");
+    return;
+  }
+  const apiKey = request.headers["x-api-key"];
   if (!expectedApiKey) {
     fastify.log.warn("\u26A0\uFE0F API_KEY n\xE3o configurada no ambiente");
     return;
@@ -73942,8 +77173,10 @@ async function setupSecurity() {
   await fastify.register(import_cors.default, {
     origin: [
       "https://www.autvisionai.com",
+      "https://autvisionai.vercel.app",
       "https://autvisionai-real.vercel.app",
       "http://localhost:3002",
+      "http://localhost:3003",
       "http://localhost:5173",
       "http://localhost:5174",
       "http://localhost:5175",
@@ -73953,6 +77186,7 @@ async function setupSecurity() {
       "http://localhost:5182",
       "http://localhost:3000",
       "http://127.0.0.1:3002",
+      "http://127.0.0.1:3003",
       "http://127.0.0.1:5173",
       "http://127.0.0.1:5174",
       "http://127.0.0.1:5175",
@@ -73978,8 +77212,7 @@ async function setupSecurity() {
       "x-api-key",
       "Origin",
       "Accept",
-      "access-control-allow-methods",
-      "access-control-allow-headers"
+      "Access-Control-Allow-Origin"
     ],
     optionsSuccessStatus: 200,
     preflightContinue: false
@@ -73989,7 +77222,7 @@ async function setupSecurity() {
     crossOriginEmbedderPolicy: false
   });
   await fastify.register(import_rate_limit.default, {
-    max: 100,
+    max: process.env.NODE_ENV === "production" ? 200 : 1e3,
     timeWindow: "1 minute",
     errorResponseBuilder: (request, context) => ({
       success: false,
@@ -74000,7 +77233,17 @@ async function setupSecurity() {
   });
 }
 async function setupPlugins() {
+  console.log("\u{1F527} Registrando plugin multipart...");
+  await fastify.register(import_multipart.default, {
+    limits: {
+      fileSize: 5 * 1024 * 1024
+      // 5MB
+    }
+  });
+  console.log("\u2705 Plugin multipart registrado com sucesso");
+  console.log("\u{1F527} Registrando plugin Supabase...");
   await fastify.register(supabaseClient_default);
+  console.log("\u2705 Plugin Supabase registrado com sucesso");
 }
 async function setupRoutes() {
   fastify.get("/", async (request, reply) => {
@@ -74040,6 +77283,7 @@ async function setupRoutes() {
   await fastify.register(n8nRoutes, { prefix: "/n8n" });
   await fastify.register(ovosRoutes, { prefix: "/ovos" });
   await fastify.register(logsRoutes, { prefix: "/logs" });
+  await fastify.register(analyticsRoutes, { prefix: "/analytics" });
   await fastify.register(configRoutes, { prefix: "/config" });
   await fastify.register(supremoRoutes, { prefix: "/supremo" });
   await fastify.register(tutorialsRoutes, { prefix: "/tutorials" });

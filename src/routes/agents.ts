@@ -7,22 +7,18 @@ import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 
 interface AgentQuery {
   type?: string;
-  is_active?: boolean;
-  plan_required?: string;
+  status?: string;
 }
 
 interface AgentBody {
   name: string;
   type: string;
   description?: string;
-  capabilities?: string[];
-  plan_required?: string;
-  is_active?: boolean;
+  capabilities?: any;
   icon?: string;
-  image?: string;
-  image_url?: string;
-  prompt?: string;
   color?: string;
+  status?: string;
+  config?: any;
 }
 
 export default async function agentsRoutes(fastify: FastifyInstance) {
@@ -35,17 +31,16 @@ export default async function agentsRoutes(fastify: FastifyInstance) {
     Querystring: AgentQuery
   }>('/', async (request: FastifyRequest<{Querystring: AgentQuery}>, reply: FastifyReply) => {
     try {
-      const { type, is_active, plan_required } = request.query;
+      const { type, status } = request.query;
       
-      // Query base
+      // Query base - CORRIGIDO: usar schema real da tabela 'agents'
       let query = fastify.supabase.from('agents').select('*');
       
-      // Aplicar filtros se fornecidos
+      // Aplicar filtros se fornecidos (usar colunas que realmente existem)
       if (type) query = query.eq('type', type);
-      if (is_active !== undefined) query = query.eq('is_active', is_active);
-      if (plan_required) query = query.eq('plan_required', plan_required);
+      if (status) query = query.eq('status', status);
       
-      const { data: agents, error } = await query.order('created_at', { ascending: false });
+      const { data: agents, error } = await query.order('created_date', { ascending: false });
 
       if (error) {
         fastify.log.error('Erro ao buscar agentes:', error);
@@ -84,12 +79,15 @@ export default async function agentsRoutes(fastify: FastifyInstance) {
       const { data, error } = await fastify.supabase
         .from('agents')
         .insert({
-          ...agentData,
-          capabilities: agentData.capabilities || [],
-          is_active: agentData.is_active !== false,
-          plan_required: agentData.plan_required || 'free',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
+          name: agentData.name,
+          type: agentData.type,
+          description: agentData.description || '',
+          capabilities: agentData.capabilities || null,
+          icon: agentData.icon || null,
+          color: agentData.color || '#3B82F6',
+          status: agentData.status || 'active',
+          config: agentData.config || {},
+          created_date: new Date().toISOString()
         })
         .select()
         .single();
@@ -121,6 +119,46 @@ export default async function agentsRoutes(fastify: FastifyInstance) {
   });
 
   /**
+   * 📋 GET /agents/:id
+   * Busca agente específico por ID
+   */
+  fastify.get<{
+    Params: { id: string }
+  }>('/:id', async (request: FastifyRequest<{Params: { id: string }}>, reply: FastifyReply) => {
+    try {
+      const { id } = request.params;
+      
+      const { data, error } = await fastify.supabase
+        .from('agents')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (error) {
+        fastify.log.error('Erro ao buscar agente:', error);
+        return reply.code(404).send({
+          success: false,
+          error: 'Agente não encontrado',
+          code: 'AGENT_NOT_FOUND'
+        });
+      }
+
+      return reply.send({
+        success: true,
+        data
+      });
+
+    } catch (error) {
+      fastify.log.error('Erro na busca de agente:', error);
+      return reply.code(500).send({
+        success: false,
+        error: 'Erro interno do servidor',
+        code: 'INTERNAL_ERROR'
+      });
+    }
+  });
+
+  /**
    * 🔄 PUT /agents/:id
    * Atualiza agente existente
    */
@@ -135,8 +173,14 @@ export default async function agentsRoutes(fastify: FastifyInstance) {
       const { data, error } = await fastify.supabase
         .from('agents')
         .update({
-          ...updateData,
-          updated_at: new Date().toISOString()
+          name: updateData.name,
+          type: updateData.type,
+          description: updateData.description,
+          capabilities: updateData.capabilities,
+          icon: updateData.icon,
+          color: updateData.color,
+          status: updateData.status,
+          config: updateData.config
         })
         .eq('id', id)
         .select()
@@ -214,41 +258,73 @@ export default async function agentsRoutes(fastify: FastifyInstance) {
   }>('/:id/upload-image', async (request: FastifyRequest<{Params: { id: string }}>, reply: FastifyReply) => {
     try {
       const { id } = request.params;
+      fastify.log.info(`🔄 Iniciando upload de imagem para agente: ${id}`);
       
-      // Por enquanto simulamos upload - implementar upload real depois
-      const mockImageUrl = `/assets/images/agents/agent_${id}.png`;
+      // Verificar se há arquivo na requisição
+      const data = await request.file();
+      if (!data) {
+        fastify.log.warn('❌ Nenhum arquivo enviado na requisição');
+        return reply.code(400).send({
+          success: false,
+          error: 'Nenhum arquivo enviado',
+          code: 'NO_FILE'
+        });
+      }
+
+      fastify.log.info(`📁 Arquivo recebido: ${data.filename}, tipo: ${data.mimetype}`);
+
+      // Validar tipo de arquivo
+      if (!data.mimetype.startsWith('image/')) {
+        fastify.log.warn(`❌ Tipo de arquivo inválido: ${data.mimetype}`);
+        return reply.code(400).send({
+          success: false,
+          error: 'Arquivo deve ser uma imagem',
+          code: 'INVALID_FILE_TYPE'
+        });
+      }
+
+      // Converter arquivo para base64 para armazenar no banco
+      fastify.log.info('🔄 Convertendo arquivo para base64...');
+      const buffer = await data.toBuffer();
+      const base64Image = `data:${data.mimetype};base64,${buffer.toString('base64')}`;
+      fastify.log.info(`✅ Arquivo convertido para base64 (${buffer.length} bytes)`);
       
-      const { data, error } = await fastify.supabase
+      fastify.log.info(`🔄 Atualizando agente ${id} no banco de dados...`);
+      const { data: agentData, error } = await fastify.supabase
         .from('agents')
         .update({
-          image: mockImageUrl,
-          updated_at: new Date().toISOString()
+          image_url: base64Image
         })
         .eq('id', id)
         .select()
         .single();
 
       if (error) {
-        fastify.log.error('Erro ao atualizar imagem do agente:', error);
+        fastify.log.error('❌ Erro ao atualizar imagem do agente no Supabase:', error);
         return reply.code(500).send({
           success: false,
           error: 'Erro ao atualizar imagem',
-          code: 'UPLOAD_ERROR'
+          code: 'UPLOAD_ERROR',
+          details: error.message
         });
       }
 
+      fastify.log.info(`✅ Imagem do agente ${id} atualizada com sucesso`);
       return reply.send({
         success: true,
-        data,
+        data: agentData,
+        image_url: base64Image,
         message: 'Imagem atualizada com sucesso'
       });
 
     } catch (error) {
-      fastify.log.error('Erro no upload de imagem:', error);
+      fastify.log.error('❌ Erro crítico no upload de imagem:', error);
+      fastify.log.error('Stack trace:', error.stack);
       return reply.code(500).send({
         success: false,
         error: 'Erro interno do servidor',
-        code: 'INTERNAL_ERROR'
+        code: 'INTERNAL_ERROR',
+        details: error.message
       });
     }
   });

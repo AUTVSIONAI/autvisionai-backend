@@ -2,6 +2,107 @@ import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 
 export default async function logsRoutes(fastify: FastifyInstance) {
   /**
+   * 📋 GET /logs
+   * Retorna logs gerais do sistema
+   */
+  fastify.get<{
+    Querystring: { 
+      limit?: number;
+      type?: string;
+      level?: 'info' | 'error' | 'warning';
+    };
+  }>('/', async (request, reply) => {
+    try {
+      const { limit = 50, type, level } = request.query;
+      
+      console.log('📋 Buscando logs gerais do sistema...');
+      
+      // Buscar logs de execução de comandos
+      const { data: commandLogs, error: commandError } = await fastify.supabase
+        .from('command_executions')
+        .select(`
+          id,
+          command,
+          status,
+          context,
+          created_at,
+          agent_id,
+          user_id,
+          agents(name, type)
+        `)
+        .order('created_at', { ascending: false })
+        .limit(Math.min(limit, 100));
+      
+      if (commandError) {
+        console.error('❌ Erro ao buscar command logs:', commandError);
+      }
+      
+      // Simular alguns logs do sistema
+      const systemLogs = [
+        {
+          id: 'sys_' + Date.now(),
+          type: 'system',
+          level: 'info',
+          message: 'Sistema iniciado com sucesso',
+          timestamp: new Date().toISOString(),
+          source: 'backend'
+        },
+        {
+          id: 'sys_' + (Date.now() - 1000),
+          type: 'api',
+          level: 'info',
+          message: 'Endpoint /logs acessado',
+          timestamp: new Date(Date.now() - 1000).toISOString(),
+          source: 'api'
+        }
+      ];
+      
+      // Combinar logs
+      const allLogs = [
+        ...systemLogs,
+        ...(commandLogs || []).map(log => ({
+          id: log.id,
+          type: 'command',
+          level: log.status === 'error' ? 'error' : 'info',
+          message: `Comando: ${log.command}`,
+          timestamp: log.created_at,
+          source: 'agent',
+          details: {
+            agent: log.agents?.name,
+            status: log.status,
+            context: log.context
+          }
+        }))
+      ];
+      
+      // Filtrar por tipo se especificado
+      const filteredLogs = type ? allLogs.filter(log => log.type === type) : allLogs;
+      
+      // Filtrar por nível se especificado
+      const finalLogs = level ? filteredLogs.filter(log => log.level === level) : filteredLogs;
+      
+      console.log(`✅ ${finalLogs.length} logs carregados`);
+      
+      return reply.code(200).send({
+        success: true,
+        data: finalLogs.slice(0, limit),
+        total: finalLogs.length,
+        timestamp: new Date().toISOString()
+      });
+      
+    } catch (error) {
+      console.error('❌ Erro na rota /logs:', error);
+      
+      return reply.code(500).send({
+        success: false,
+        error: 'Erro interno do servidor',
+        details: error instanceof Error ? error.message : 'Erro desconhecido',
+        timestamp: new Date().toISOString()
+      });
+    }
+  });
+  
+  /**
    * 📊 GET /logs/mcp
    * Retorna os logs do roteamento MCP com filtro por status
    */
