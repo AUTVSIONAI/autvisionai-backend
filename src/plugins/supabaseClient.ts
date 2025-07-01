@@ -10,7 +10,7 @@ declare module 'fastify' {
 
 const supabasePlugin: FastifyPluginAsync = async (fastify: FastifyInstance) => {
   const supabaseUrl = process.env.SUPABASE_URL;
-  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const supabaseKey = process.env.SUPABASE_ANON_KEY; // 🔥 CORREÇÃO: usar ANON_KEY ao invés de SERVICE_ROLE_KEY
 
   if (!supabaseUrl || !supabaseKey) {
     throw new Error('🔴 Supabase credentials não configuradas');
