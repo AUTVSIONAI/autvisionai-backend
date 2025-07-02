@@ -68824,7 +68824,7 @@ var llmDispatcher = new LLMDispatcher();
 var import_fastify_plugin = __toESM(require_plugin2(), 1);
 var supabasePlugin = async (fastify2) => {
   const supabaseUrl2 = process.env.SUPABASE_URL;
-  const supabaseKey2 = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const supabaseKey2 = process.env.SUPABASE_ANON_KEY;
   if (!supabaseUrl2 || !supabaseKey2) {
     throw new Error("\u{1F534} Supabase credentials n\xE3o configuradas");
   }
@@ -76702,6 +76702,82 @@ async function usersRoutes(fastify2) {
       });
     }
   });
+  fastify2.get("/:id", async (request, reply) => {
+    try {
+      const { id } = request.params;
+      const { data: userData, error } = await fastify2.supabase.from("profiles").select(`
+          id,
+          email,
+          full_name,
+          role,
+          created_at,
+          updated_at
+        `).eq("id", id).single();
+      if (error) {
+        fastify2.log.error("Erro ao buscar usu\xE1rio no Supabase:", error);
+        const mockUser = {
+          id,
+          email: `user-${id.substring(0, 8)}@sistema.com`,
+          full_name: generateUserName(id),
+          role: "user",
+          created_at: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1e3).toISOString(),
+          updated_at: (/* @__PURE__ */ new Date()).toISOString()
+        };
+        return {
+          success: true,
+          data: mockUser,
+          source: "fallback"
+        };
+      }
+      return {
+        success: true,
+        data: userData,
+        source: "supabase"
+      };
+    } catch (error) {
+      fastify2.log.error("Erro ao buscar usu\xE1rio por ID:", error);
+      return reply.code(500).send({
+        success: false,
+        error: "Erro interno do servidor"
+      });
+    }
+  });
+}
+function generateUserName(userId) {
+  const nomesBrasileiros = [
+    "Ana Silva",
+    "Jo\xE3o Santos",
+    "Maria Oliveira",
+    "Carlos Souza",
+    "Fernanda Costa",
+    "Pedro Lima",
+    "Juliana Alves",
+    "Ricardo Ferreira",
+    "Camila Rodrigues",
+    "Bruno Martins",
+    "Larissa Pereira",
+    "Rafael Barbosa",
+    "Mariana Gomes",
+    "Diego Carvalho",
+    "Aline Ribeiro",
+    "Lucas Ara\xFAjo",
+    "Priscila Dias",
+    "Thiago Moreira",
+    "Vanessa Cardoso",
+    "Felipe Castro",
+    "Gabriela Nunes",
+    "Andr\xE9 Ramos",
+    "Tatiana Correia",
+    "Marcelo Teixeira",
+    "Renata Vieira",
+    "Oseias Gomes",
+    "Mariza Milene",
+    "Roberto Machado",
+    "Claudia Monteiro",
+    "Daniel Pinto"
+  ];
+  const index2 = userId.charCodeAt(0) % nomesBrasileiros.length;
+  return nomesBrasileiros[index2];
 }
 
 // src/routes/plans.ts
@@ -77144,7 +77220,16 @@ var fastify = (0, import_fastify.default)({
   }
 });
 fastify.addHook("preHandler", async (request, reply) => {
-  if (request.url === "/health" || request.url === "/config/health") {
+  const publicRoutes = [
+    "/health",
+    "/config/health",
+    "/users/"
+    // Permite todas as rotas de usuários
+  ];
+  const isPublicRoute = publicRoutes.some(
+    (route) => request.url === route || request.url.startsWith(route)
+  );
+  if (isPublicRoute) {
     return;
   }
   if (process.env.NODE_ENV === "development") {

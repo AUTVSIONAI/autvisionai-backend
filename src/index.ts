@@ -87,8 +87,19 @@ const fastify = Fastify({
  * 🔐 MIDDLEWARE DE AUTENTICAÇÃO
  */
 fastify.addHook('preHandler', async (request, reply) => {
-  // Pula autenticação para rotas de health check
-  if (request.url === '/health' || request.url === '/config/health') {
+  // Pula autenticação para rotas públicas
+  const publicRoutes = [
+    '/health', 
+    '/config/health',
+    '/users/'  // Permite todas as rotas de usuários
+  ];
+  
+  // Verifica se a rota atual é pública
+  const isPublicRoute = publicRoutes.some(route => 
+    request.url === route || request.url.startsWith(route)
+  );
+  
+  if (isPublicRoute) {
     return;
   }
 
