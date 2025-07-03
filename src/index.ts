@@ -258,6 +258,35 @@ async function setupRoutes() {
       memory: process.memoryUsage(),
       timestamp: new Date().toISOString()
     };
+  });
+
+  // Config health check público (sem autenticação)
+  fastify.get('/config/health', async (request, reply) => {
+    try {
+      return {
+        success: true,
+        status: 'healthy',
+        service: 'AUTVISION Backend',
+        uptime: process.uptime(),
+        memory: process.memoryUsage(),
+        timestamp: new Date().toISOString(),
+        environment: process.env.NODE_ENV || 'development',
+        supabase: {
+          configured: !!process.env.SUPABASE_URL,
+          url: process.env.SUPABASE_URL ? '✅ Configurado' : '❌ Não configurado'
+        },
+        llm: {
+          openrouter: process.env.OPENROUTER_API_KEY ? '✅ Configurado' : '❌ Não configurado',
+          together: process.env.TOGETHER_API_KEY ? '✅ Configurado' : '❌ Não configurado'
+        }
+      };
+    } catch (error) {
+      return reply.status(500).send({
+        success: false,
+        status: 'error',
+        error: error.message
+      });
+    }
   });  // Registro das rotas principais
   await fastify.register(commandRoutes, { prefix: '/command' });
   await fastify.register(llmRoutes, { prefix: '/llm' });

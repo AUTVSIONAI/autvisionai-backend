@@ -79503,6 +79503,33 @@ async function setupRoutes() {
       timestamp: (/* @__PURE__ */ new Date()).toISOString()
     };
   });
+  fastify.get("/config/health", async (request, reply) => {
+    try {
+      return {
+        success: true,
+        status: "healthy",
+        service: "AUTVISION Backend",
+        uptime: process.uptime(),
+        memory: process.memoryUsage(),
+        timestamp: (/* @__PURE__ */ new Date()).toISOString(),
+        environment: process.env.NODE_ENV || "development",
+        supabase: {
+          configured: !!process.env.SUPABASE_URL,
+          url: process.env.SUPABASE_URL ? "\u2705 Configurado" : "\u274C N\xE3o configurado"
+        },
+        llm: {
+          openrouter: process.env.OPENROUTER_API_KEY ? "\u2705 Configurado" : "\u274C N\xE3o configurado",
+          together: process.env.TOGETHER_API_KEY ? "\u2705 Configurado" : "\u274C N\xE3o configurado"
+        }
+      };
+    } catch (error) {
+      return reply.status(500).send({
+        success: false,
+        status: "error",
+        error: error.message
+      });
+    }
+  });
   await fastify.register(commandRoutes, { prefix: "/command" });
   await fastify.register(llmRoutes, { prefix: "/llm" });
   await fastify.register(n8nRoutes, { prefix: "/n8n" });
