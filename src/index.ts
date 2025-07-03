@@ -134,6 +134,7 @@ async function setupSecurity() {
     origin: [
       'https://www.autvisionai.com',
       'https://autvisionai.vercel.app',
+      'https://autvisionai-backend-five.vercel.app',
       'https://autvisionai-real.vercel.app',
       'http://localhost:3002',
       'http://localhost:3003',
@@ -160,6 +161,7 @@ async function setupSecurity() {
       'https://autvisionai-real-kdt1okwaj-maumautremeterra-gmailcoms-projects.vercel.app',
       'https://autvisionai-real-l4qsyx5h9-maumautremeterra-gmailcoms-projects.vercel.app',
       'https://autvisionai-real-qnbo9afel-maumautremeterra-gmailcoms-projects.vercel.app',
+      /^https:\/\/autvisionai.*\.vercel\.app$/,
       /\.autvision\.ai$/,
       /\.autvisionai\.com$/,
       /\.vercel\.app$/
