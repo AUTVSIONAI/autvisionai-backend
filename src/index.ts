@@ -69,6 +69,8 @@ import routinesRoutes from './routes/routines';
 import missionsRoutes from './routes/missions';
 import badgesRoutes from './routes/badges';
 import agentsRoutes from './routes/agents';
+import voiceDispatcherRoutes from './routes/voice-dispatcher';
+import sqlExecutorRoutes from './routes/sql-executor';
 // 🔥 NOVAS ROTAS
 import usersRoutes from './routes/users';
 import plansRoutes from './routes/plans';
@@ -76,6 +78,8 @@ import integrationsRoutes from './routes/integrations';
 import affiliatesRoutes from './routes/affiliates';
 import llmConfigRoutes from './routes/llm-config';
 import platformConfigRoutes from './routes/platform-config';
+import visionsRoutes from './routes/visions';
+import adminRoutes from './routes/admin';
 
 const fastify = Fastify({
   logger: {
@@ -87,19 +91,8 @@ const fastify = Fastify({
  * 🔐 MIDDLEWARE DE AUTENTICAÇÃO
  */
 fastify.addHook('preHandler', async (request, reply) => {
-  // Pula autenticação para rotas públicas
-  const publicRoutes = [
-    '/health', 
-    '/config/health',
-    '/users/'  // Permite todas as rotas de usuários
-  ];
-  
-  // Verifica se a rota atual é pública
-  const isPublicRoute = publicRoutes.some(route => 
-    request.url === route || request.url.startsWith(route)
-  );
-  
-  if (isPublicRoute) {
+  // Pula autenticação para rotas de health check
+  if (request.url === '/health' || request.url === '/config/health') {
     return;
   }
 
@@ -233,7 +226,8 @@ async function setupRoutes() {
       service: 'AUTVISION Backend',
       version: '1.0.0',
       status: 'running',
-      timestamp: new Date().toISOString(),      endpoints: {
+      timestamp: new Date().toISOString(),
+      endpoints: {
         commands: '/command/*',
         llm: '/llm/*',
         n8n: '/n8n/*', 
@@ -245,7 +239,10 @@ async function setupRoutes() {
         routines: '/routines/*',
         missions: '/missions/*',
         badges: '/badges/*',
-        agents: '/agents/*'
+        agents: '/agents/*',
+        voiceDispatcher: '/voice-dispatcher/*',
+        visions: '/visions/*',
+        admin: '/admin/*'
       }
     };
   });
@@ -273,6 +270,8 @@ async function setupRoutes() {
   await fastify.register(missionsRoutes, { prefix: '/missions' });
   await fastify.register(badgesRoutes, { prefix: '/badges' });
   await fastify.register(agentsRoutes, { prefix: '/agents' });
+  await fastify.register(voiceDispatcherRoutes, { prefix: '/voice-dispatcher' });
+  await fastify.register(sqlExecutorRoutes, { prefix: '/sql' });
   
   // 🔥 NOVAS ROTAS QUE ESTAVAM FALTANDO
   await fastify.register(usersRoutes, { prefix: '/users' });
@@ -281,6 +280,8 @@ async function setupRoutes() {
   await fastify.register(affiliatesRoutes, { prefix: '/affiliates' });
   await fastify.register(llmConfigRoutes, { prefix: '/llm-config' });
   await fastify.register(platformConfigRoutes, { prefix: '/platform-config' });
+  await fastify.register(visionsRoutes, { prefix: '/visions' });
+  await fastify.register(adminRoutes, { prefix: '/admin' });
 }
 
 /**

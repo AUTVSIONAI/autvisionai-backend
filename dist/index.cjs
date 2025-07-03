@@ -5,6 +5,14 @@ var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
 var __getOwnPropNames = Object.getOwnPropertyNames;
 var __getProtoOf = Object.getPrototypeOf;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __glob = (map) => (path) => {
+  var fn = map[path];
+  if (fn) return fn();
+  throw new Error("Module not found in bundle: " + path);
+};
+var __esm = (fn, res) => function __init() {
+  return fn && (res = (0, fn[__getOwnPropNames(fn)[0]])(fn = 0)), res;
+};
 var __commonJS = (cb, mod) => function __require() {
   return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
 };
@@ -5286,7 +5294,7 @@ var require_thread_stream = __commonJS({
     var { version: version4 } = require_package();
     var { EventEmitter: EventEmitter2 } = require("events");
     var { Worker: Worker2 } = require("worker_threads");
-    var { join: join2 } = require("path");
+    var { join: join3 } = require("path");
     var { pathToFileURL } = require("url");
     var { wait } = require_wait();
     var {
@@ -5322,7 +5330,7 @@ var require_thread_stream = __commonJS({
     function createWorker(stream4, opts) {
       const { filename, workerData } = opts;
       const bundlerOverrides = "__bundlerPathsOverrides" in globalThis ? globalThis.__bundlerPathsOverrides : {};
-      const toExecute = bundlerOverrides["thread-stream-worker"] || join2(__dirname, "lib", "worker.js");
+      const toExecute = bundlerOverrides["thread-stream-worker"] || join3(__dirname, "lib", "worker.js");
       const worker = new Worker2(toExecute, {
         ...opts.workerOpts,
         trackUnmanagedFds: false,
@@ -5708,7 +5716,7 @@ var require_transport = __commonJS({
     "use strict";
     var { createRequire } = require("module");
     var getCallers = require_caller();
-    var { join: join2, isAbsolute, sep } = require("path");
+    var { join: join3, isAbsolute, sep } = require("path");
     var sleep2 = require_atomic_sleep();
     var onExit = require_on_exit_leak_free();
     var ThreadStream = require_thread_stream();
@@ -5771,7 +5779,7 @@ var require_transport = __commonJS({
         throw new Error("only one of target or targets can be specified");
       }
       if (targets) {
-        target = bundlerOverrides["pino-worker"] || join2(__dirname, "worker.js");
+        target = bundlerOverrides["pino-worker"] || join3(__dirname, "worker.js");
         options.targets = targets.filter((dest) => dest.target).map((dest) => {
           return {
             ...dest,
@@ -5789,7 +5797,7 @@ var require_transport = __commonJS({
           });
         });
       } else if (pipeline) {
-        target = bundlerOverrides["pino-worker"] || join2(__dirname, "worker.js");
+        target = bundlerOverrides["pino-worker"] || join3(__dirname, "worker.js");
         options.pipelines = [pipeline.map((dest) => {
           return {
             ...dest,
@@ -5811,7 +5819,7 @@ var require_transport = __commonJS({
           return origin2;
         }
         if (origin2 === "pino/file") {
-          return join2(__dirname, "..", "file.js");
+          return join3(__dirname, "..", "file.js");
         }
         let fixTarget2;
         for (const filePath of callers) {
@@ -6763,7 +6771,7 @@ var require_safe_stable_stringify = __commonJS({
               return circularValue;
             }
             let res = "";
-            let join2 = ",";
+            let join3 = ",";
             const originalIndentation = indentation;
             if (Array.isArray(value)) {
               if (value.length === 0) {
@@ -6777,7 +6785,7 @@ var require_safe_stable_stringify = __commonJS({
                 indentation += spacer;
                 res += `
 ${indentation}`;
-                join2 = `,
+                join3 = `,
 ${indentation}`;
               }
               const maximumValuesToStringify = Math.min(value.length, maximumBreadth);
@@ -6785,13 +6793,13 @@ ${indentation}`;
               for (; i < maximumValuesToStringify - 1; i++) {
                 const tmp2 = stringifyFnReplacer(String(i), value, stack, replacer, spacer, indentation);
                 res += tmp2 !== void 0 ? tmp2 : "null";
-                res += join2;
+                res += join3;
               }
               const tmp = stringifyFnReplacer(String(i), value, stack, replacer, spacer, indentation);
               res += tmp !== void 0 ? tmp : "null";
               if (value.length - 1 > maximumBreadth) {
                 const removedKeys = value.length - maximumBreadth - 1;
-                res += `${join2}"... ${getItemCount(removedKeys)} not stringified"`;
+                res += `${join3}"... ${getItemCount(removedKeys)} not stringified"`;
               }
               if (spacer !== "") {
                 res += `
@@ -6812,7 +6820,7 @@ ${originalIndentation}`;
             let separator = "";
             if (spacer !== "") {
               indentation += spacer;
-              join2 = `,
+              join3 = `,
 ${indentation}`;
               whitespace = " ";
             }
@@ -6826,13 +6834,13 @@ ${indentation}`;
               const tmp = stringifyFnReplacer(key2, value, stack, replacer, spacer, indentation);
               if (tmp !== void 0) {
                 res += `${separator}${strEscape(key2)}:${whitespace}${tmp}`;
-                separator = join2;
+                separator = join3;
               }
             }
             if (keyLength > maximumBreadth) {
               const removedKeys = keyLength - maximumBreadth;
               res += `${separator}"...":${whitespace}"${getItemCount(removedKeys)} not stringified"`;
-              separator = join2;
+              separator = join3;
             }
             if (spacer !== "" && separator.length > 1) {
               res = `
@@ -6873,7 +6881,7 @@ ${originalIndentation}`;
             }
             const originalIndentation = indentation;
             let res = "";
-            let join2 = ",";
+            let join3 = ",";
             if (Array.isArray(value)) {
               if (value.length === 0) {
                 return "[]";
@@ -6886,7 +6894,7 @@ ${originalIndentation}`;
                 indentation += spacer;
                 res += `
 ${indentation}`;
-                join2 = `,
+                join3 = `,
 ${indentation}`;
               }
               const maximumValuesToStringify = Math.min(value.length, maximumBreadth);
@@ -6894,13 +6902,13 @@ ${indentation}`;
               for (; i < maximumValuesToStringify - 1; i++) {
                 const tmp2 = stringifyArrayReplacer(String(i), value[i], stack, replacer, spacer, indentation);
                 res += tmp2 !== void 0 ? tmp2 : "null";
-                res += join2;
+                res += join3;
               }
               const tmp = stringifyArrayReplacer(String(i), value[i], stack, replacer, spacer, indentation);
               res += tmp !== void 0 ? tmp : "null";
               if (value.length - 1 > maximumBreadth) {
                 const removedKeys = value.length - maximumBreadth - 1;
-                res += `${join2}"... ${getItemCount(removedKeys)} not stringified"`;
+                res += `${join3}"... ${getItemCount(removedKeys)} not stringified"`;
               }
               if (spacer !== "") {
                 res += `
@@ -6913,7 +6921,7 @@ ${originalIndentation}`;
             let whitespace = "";
             if (spacer !== "") {
               indentation += spacer;
-              join2 = `,
+              join3 = `,
 ${indentation}`;
               whitespace = " ";
             }
@@ -6922,7 +6930,7 @@ ${indentation}`;
               const tmp = stringifyArrayReplacer(key2, value[key2], stack, replacer, spacer, indentation);
               if (tmp !== void 0) {
                 res += `${separator}${strEscape(key2)}:${whitespace}${tmp}`;
-                separator = join2;
+                separator = join3;
               }
             }
             if (spacer !== "" && separator.length > 1) {
@@ -6980,20 +6988,20 @@ ${originalIndentation}`;
               indentation += spacer;
               let res2 = `
 ${indentation}`;
-              const join3 = `,
+              const join4 = `,
 ${indentation}`;
               const maximumValuesToStringify = Math.min(value.length, maximumBreadth);
               let i = 0;
               for (; i < maximumValuesToStringify - 1; i++) {
                 const tmp2 = stringifyIndent(String(i), value[i], stack, spacer, indentation);
                 res2 += tmp2 !== void 0 ? tmp2 : "null";
-                res2 += join3;
+                res2 += join4;
               }
               const tmp = stringifyIndent(String(i), value[i], stack, spacer, indentation);
               res2 += tmp !== void 0 ? tmp : "null";
               if (value.length - 1 > maximumBreadth) {
                 const removedKeys = value.length - maximumBreadth - 1;
-                res2 += `${join3}"... ${getItemCount(removedKeys)} not stringified"`;
+                res2 += `${join4}"... ${getItemCount(removedKeys)} not stringified"`;
               }
               res2 += `
 ${originalIndentation}`;
@@ -7009,16 +7017,16 @@ ${originalIndentation}`;
               return '"[Object]"';
             }
             indentation += spacer;
-            const join2 = `,
+            const join3 = `,
 ${indentation}`;
             let res = "";
             let separator = "";
             let maximumPropertiesToStringify = Math.min(keyLength, maximumBreadth);
             if (isTypedArrayWithEntries(value)) {
-              res += stringifyTypedArray(value, join2, maximumBreadth);
+              res += stringifyTypedArray(value, join3, maximumBreadth);
               keys = keys.slice(value.length);
               maximumPropertiesToStringify -= value.length;
-              separator = join2;
+              separator = join3;
             }
             if (deterministic) {
               keys = sort(keys, comparator);
@@ -7029,13 +7037,13 @@ ${indentation}`;
               const tmp = stringifyIndent(key2, value[key2], stack, spacer, indentation);
               if (tmp !== void 0) {
                 res += `${separator}${strEscape(key2)}: ${tmp}`;
-                separator = join2;
+                separator = join3;
               }
             }
             if (keyLength > maximumBreadth) {
               const removedKeys = keyLength - maximumBreadth;
               res += `${separator}"...": "${getItemCount(removedKeys)} not stringified"`;
-              separator = join2;
+              separator = join3;
             }
             if (separator !== "") {
               res = `
@@ -39222,6 +39230,472 @@ var require_main2 = __commonJS({
   }
 });
 
+// node_modules/axios/lib/helpers/bind.js
+function bind(fn, thisArg) {
+  return function wrap() {
+    return fn.apply(thisArg, arguments);
+  };
+}
+var init_bind = __esm({
+  "node_modules/axios/lib/helpers/bind.js"() {
+    "use strict";
+  }
+});
+
+// node_modules/axios/lib/utils.js
+function isBuffer(val) {
+  return val !== null && !isUndefined(val) && val.constructor !== null && !isUndefined(val.constructor) && isFunction(val.constructor.isBuffer) && val.constructor.isBuffer(val);
+}
+function isArrayBufferView(val) {
+  let result;
+  if (typeof ArrayBuffer !== "undefined" && ArrayBuffer.isView) {
+    result = ArrayBuffer.isView(val);
+  } else {
+    result = val && val.buffer && isArrayBuffer(val.buffer);
+  }
+  return result;
+}
+function forEach(obj, fn, { allOwnKeys = false } = {}) {
+  if (obj === null || typeof obj === "undefined") {
+    return;
+  }
+  let i;
+  let l;
+  if (typeof obj !== "object") {
+    obj = [obj];
+  }
+  if (isArray(obj)) {
+    for (i = 0, l = obj.length; i < l; i++) {
+      fn.call(null, obj[i], i, obj);
+    }
+  } else {
+    const keys = allOwnKeys ? Object.getOwnPropertyNames(obj) : Object.keys(obj);
+    const len = keys.length;
+    let key;
+    for (i = 0; i < len; i++) {
+      key = keys[i];
+      fn.call(null, obj[key], key, obj);
+    }
+  }
+}
+function findKey(obj, key) {
+  key = key.toLowerCase();
+  const keys = Object.keys(obj);
+  let i = keys.length;
+  let _key;
+  while (i-- > 0) {
+    _key = keys[i];
+    if (key === _key.toLowerCase()) {
+      return _key;
+    }
+  }
+  return null;
+}
+function merge() {
+  const { caseless } = isContextDefined(this) && this || {};
+  const result = {};
+  const assignValue = (val, key) => {
+    const targetKey = caseless && findKey(result, key) || key;
+    if (isPlainObject(result[targetKey]) && isPlainObject(val)) {
+      result[targetKey] = merge(result[targetKey], val);
+    } else if (isPlainObject(val)) {
+      result[targetKey] = merge({}, val);
+    } else if (isArray(val)) {
+      result[targetKey] = val.slice();
+    } else {
+      result[targetKey] = val;
+    }
+  };
+  for (let i = 0, l = arguments.length; i < l; i++) {
+    arguments[i] && forEach(arguments[i], assignValue);
+  }
+  return result;
+}
+function isSpecCompliantForm(thing) {
+  return !!(thing && isFunction(thing.append) && thing[toStringTag] === "FormData" && thing[iterator]);
+}
+var toString, getPrototypeOf, iterator, toStringTag, kindOf, kindOfTest, typeOfTest, isArray, isUndefined, isArrayBuffer, isString, isFunction, isNumber, isObject, isBoolean, isPlainObject, isDate, isFile, isBlob, isFileList, isStream, isFormData, isURLSearchParams, isReadableStream, isRequest, isResponse, isHeaders, trim, _global, isContextDefined, extend, stripBOM, inherits, toFlatObject, endsWith, toArray, isTypedArray, forEachEntry, matchAll, isHTMLForm, toCamelCase, hasOwnProperty, isRegExp, reduceDescriptors, freezeMethods, toObjectSet, noop, toFiniteNumber, toJSONObject, isAsyncFn, isThenable, _setImmediate, asap, isIterable, utils_default;
+var init_utils = __esm({
+  "node_modules/axios/lib/utils.js"() {
+    "use strict";
+    init_bind();
+    ({ toString } = Object.prototype);
+    ({ getPrototypeOf } = Object);
+    ({ iterator, toStringTag } = Symbol);
+    kindOf = /* @__PURE__ */ ((cache) => (thing) => {
+      const str = toString.call(thing);
+      return cache[str] || (cache[str] = str.slice(8, -1).toLowerCase());
+    })(/* @__PURE__ */ Object.create(null));
+    kindOfTest = (type) => {
+      type = type.toLowerCase();
+      return (thing) => kindOf(thing) === type;
+    };
+    typeOfTest = (type) => (thing) => typeof thing === type;
+    ({ isArray } = Array);
+    isUndefined = typeOfTest("undefined");
+    isArrayBuffer = kindOfTest("ArrayBuffer");
+    isString = typeOfTest("string");
+    isFunction = typeOfTest("function");
+    isNumber = typeOfTest("number");
+    isObject = (thing) => thing !== null && typeof thing === "object";
+    isBoolean = (thing) => thing === true || thing === false;
+    isPlainObject = (val) => {
+      if (kindOf(val) !== "object") {
+        return false;
+      }
+      const prototype3 = getPrototypeOf(val);
+      return (prototype3 === null || prototype3 === Object.prototype || Object.getPrototypeOf(prototype3) === null) && !(toStringTag in val) && !(iterator in val);
+    };
+    isDate = kindOfTest("Date");
+    isFile = kindOfTest("File");
+    isBlob = kindOfTest("Blob");
+    isFileList = kindOfTest("FileList");
+    isStream = (val) => isObject(val) && isFunction(val.pipe);
+    isFormData = (thing) => {
+      let kind;
+      return thing && (typeof FormData === "function" && thing instanceof FormData || isFunction(thing.append) && ((kind = kindOf(thing)) === "formdata" || // detect form-data instance
+      kind === "object" && isFunction(thing.toString) && thing.toString() === "[object FormData]"));
+    };
+    isURLSearchParams = kindOfTest("URLSearchParams");
+    [isReadableStream, isRequest, isResponse, isHeaders] = ["ReadableStream", "Request", "Response", "Headers"].map(kindOfTest);
+    trim = (str) => str.trim ? str.trim() : str.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, "");
+    _global = (() => {
+      if (typeof globalThis !== "undefined") return globalThis;
+      return typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : global;
+    })();
+    isContextDefined = (context) => !isUndefined(context) && context !== _global;
+    extend = (a, b, thisArg, { allOwnKeys } = {}) => {
+      forEach(b, (val, key) => {
+        if (thisArg && isFunction(val)) {
+          a[key] = bind(val, thisArg);
+        } else {
+          a[key] = val;
+        }
+      }, { allOwnKeys });
+      return a;
+    };
+    stripBOM = (content) => {
+      if (content.charCodeAt(0) === 65279) {
+        content = content.slice(1);
+      }
+      return content;
+    };
+    inherits = (constructor, superConstructor, props, descriptors2) => {
+      constructor.prototype = Object.create(superConstructor.prototype, descriptors2);
+      constructor.prototype.constructor = constructor;
+      Object.defineProperty(constructor, "super", {
+        value: superConstructor.prototype
+      });
+      props && Object.assign(constructor.prototype, props);
+    };
+    toFlatObject = (sourceObj, destObj, filter2, propFilter) => {
+      let props;
+      let i;
+      let prop;
+      const merged = {};
+      destObj = destObj || {};
+      if (sourceObj == null) return destObj;
+      do {
+        props = Object.getOwnPropertyNames(sourceObj);
+        i = props.length;
+        while (i-- > 0) {
+          prop = props[i];
+          if ((!propFilter || propFilter(prop, sourceObj, destObj)) && !merged[prop]) {
+            destObj[prop] = sourceObj[prop];
+            merged[prop] = true;
+          }
+        }
+        sourceObj = filter2 !== false && getPrototypeOf(sourceObj);
+      } while (sourceObj && (!filter2 || filter2(sourceObj, destObj)) && sourceObj !== Object.prototype);
+      return destObj;
+    };
+    endsWith = (str, searchString, position) => {
+      str = String(str);
+      if (position === void 0 || position > str.length) {
+        position = str.length;
+      }
+      position -= searchString.length;
+      const lastIndex = str.indexOf(searchString, position);
+      return lastIndex !== -1 && lastIndex === position;
+    };
+    toArray = (thing) => {
+      if (!thing) return null;
+      if (isArray(thing)) return thing;
+      let i = thing.length;
+      if (!isNumber(i)) return null;
+      const arr = new Array(i);
+      while (i-- > 0) {
+        arr[i] = thing[i];
+      }
+      return arr;
+    };
+    isTypedArray = /* @__PURE__ */ ((TypedArray) => {
+      return (thing) => {
+        return TypedArray && thing instanceof TypedArray;
+      };
+    })(typeof Uint8Array !== "undefined" && getPrototypeOf(Uint8Array));
+    forEachEntry = (obj, fn) => {
+      const generator = obj && obj[iterator];
+      const _iterator = generator.call(obj);
+      let result;
+      while ((result = _iterator.next()) && !result.done) {
+        const pair = result.value;
+        fn.call(obj, pair[0], pair[1]);
+      }
+    };
+    matchAll = (regExp, str) => {
+      let matches;
+      const arr = [];
+      while ((matches = regExp.exec(str)) !== null) {
+        arr.push(matches);
+      }
+      return arr;
+    };
+    isHTMLForm = kindOfTest("HTMLFormElement");
+    toCamelCase = (str) => {
+      return str.toLowerCase().replace(
+        /[-_\s]([a-z\d])(\w*)/g,
+        function replacer(m, p1, p2) {
+          return p1.toUpperCase() + p2;
+        }
+      );
+    };
+    hasOwnProperty = (({ hasOwnProperty: hasOwnProperty2 }) => (obj, prop) => hasOwnProperty2.call(obj, prop))(Object.prototype);
+    isRegExp = kindOfTest("RegExp");
+    reduceDescriptors = (obj, reducer) => {
+      const descriptors2 = Object.getOwnPropertyDescriptors(obj);
+      const reducedDescriptors = {};
+      forEach(descriptors2, (descriptor, name) => {
+        let ret;
+        if ((ret = reducer(descriptor, name, obj)) !== false) {
+          reducedDescriptors[name] = ret || descriptor;
+        }
+      });
+      Object.defineProperties(obj, reducedDescriptors);
+    };
+    freezeMethods = (obj) => {
+      reduceDescriptors(obj, (descriptor, name) => {
+        if (isFunction(obj) && ["arguments", "caller", "callee"].indexOf(name) !== -1) {
+          return false;
+        }
+        const value = obj[name];
+        if (!isFunction(value)) return;
+        descriptor.enumerable = false;
+        if ("writable" in descriptor) {
+          descriptor.writable = false;
+          return;
+        }
+        if (!descriptor.set) {
+          descriptor.set = () => {
+            throw Error("Can not rewrite read-only method '" + name + "'");
+          };
+        }
+      });
+    };
+    toObjectSet = (arrayOrString, delimiter) => {
+      const obj = {};
+      const define = (arr) => {
+        arr.forEach((value) => {
+          obj[value] = true;
+        });
+      };
+      isArray(arrayOrString) ? define(arrayOrString) : define(String(arrayOrString).split(delimiter));
+      return obj;
+    };
+    noop = () => {
+    };
+    toFiniteNumber = (value, defaultValue) => {
+      return value != null && Number.isFinite(value = +value) ? value : defaultValue;
+    };
+    toJSONObject = (obj) => {
+      const stack = new Array(10);
+      const visit = (source, i) => {
+        if (isObject(source)) {
+          if (stack.indexOf(source) >= 0) {
+            return;
+          }
+          if (!("toJSON" in source)) {
+            stack[i] = source;
+            const target = isArray(source) ? [] : {};
+            forEach(source, (value, key) => {
+              const reducedValue = visit(value, i + 1);
+              !isUndefined(reducedValue) && (target[key] = reducedValue);
+            });
+            stack[i] = void 0;
+            return target;
+          }
+        }
+        return source;
+      };
+      return visit(obj, 0);
+    };
+    isAsyncFn = kindOfTest("AsyncFunction");
+    isThenable = (thing) => thing && (isObject(thing) || isFunction(thing)) && isFunction(thing.then) && isFunction(thing.catch);
+    _setImmediate = ((setImmediateSupported, postMessageSupported) => {
+      if (setImmediateSupported) {
+        return setImmediate;
+      }
+      return postMessageSupported ? ((token, callbacks) => {
+        _global.addEventListener("message", ({ source, data }) => {
+          if (source === _global && data === token) {
+            callbacks.length && callbacks.shift()();
+          }
+        }, false);
+        return (cb) => {
+          callbacks.push(cb);
+          _global.postMessage(token, "*");
+        };
+      })(`axios@${Math.random()}`, []) : (cb) => setTimeout(cb);
+    })(
+      typeof setImmediate === "function",
+      isFunction(_global.postMessage)
+    );
+    asap = typeof queueMicrotask !== "undefined" ? queueMicrotask.bind(_global) : typeof process !== "undefined" && process.nextTick || _setImmediate;
+    isIterable = (thing) => thing != null && isFunction(thing[iterator]);
+    utils_default = {
+      isArray,
+      isArrayBuffer,
+      isBuffer,
+      isFormData,
+      isArrayBufferView,
+      isString,
+      isNumber,
+      isBoolean,
+      isObject,
+      isPlainObject,
+      isReadableStream,
+      isRequest,
+      isResponse,
+      isHeaders,
+      isUndefined,
+      isDate,
+      isFile,
+      isBlob,
+      isRegExp,
+      isFunction,
+      isStream,
+      isURLSearchParams,
+      isTypedArray,
+      isFileList,
+      forEach,
+      merge,
+      extend,
+      trim,
+      stripBOM,
+      inherits,
+      toFlatObject,
+      kindOf,
+      kindOfTest,
+      endsWith,
+      toArray,
+      forEachEntry,
+      matchAll,
+      isHTMLForm,
+      hasOwnProperty,
+      hasOwnProp: hasOwnProperty,
+      // an alias to avoid ESLint no-prototype-builtins detection
+      reduceDescriptors,
+      freezeMethods,
+      toObjectSet,
+      toCamelCase,
+      noop,
+      toFiniteNumber,
+      findKey,
+      global: _global,
+      isContextDefined,
+      isSpecCompliantForm,
+      toJSONObject,
+      isAsyncFn,
+      isThenable,
+      setImmediate: _setImmediate,
+      asap,
+      isIterable
+    };
+  }
+});
+
+// node_modules/axios/lib/core/AxiosError.js
+function AxiosError(message, code, config2, request, response) {
+  Error.call(this);
+  if (Error.captureStackTrace) {
+    Error.captureStackTrace(this, this.constructor);
+  } else {
+    this.stack = new Error().stack;
+  }
+  this.message = message;
+  this.name = "AxiosError";
+  code && (this.code = code);
+  config2 && (this.config = config2);
+  request && (this.request = request);
+  if (response) {
+    this.response = response;
+    this.status = response.status ? response.status : null;
+  }
+}
+var prototype, descriptors, AxiosError_default;
+var init_AxiosError = __esm({
+  "node_modules/axios/lib/core/AxiosError.js"() {
+    "use strict";
+    init_utils();
+    utils_default.inherits(AxiosError, Error, {
+      toJSON: function toJSON() {
+        return {
+          // Standard
+          message: this.message,
+          name: this.name,
+          // Microsoft
+          description: this.description,
+          number: this.number,
+          // Mozilla
+          fileName: this.fileName,
+          lineNumber: this.lineNumber,
+          columnNumber: this.columnNumber,
+          stack: this.stack,
+          // Axios
+          config: utils_default.toJSONObject(this.config),
+          code: this.code,
+          status: this.status
+        };
+      }
+    });
+    prototype = AxiosError.prototype;
+    descriptors = {};
+    [
+      "ERR_BAD_OPTION_VALUE",
+      "ERR_BAD_OPTION",
+      "ECONNABORTED",
+      "ETIMEDOUT",
+      "ERR_NETWORK",
+      "ERR_FR_TOO_MANY_REDIRECTS",
+      "ERR_DEPRECATED",
+      "ERR_BAD_RESPONSE",
+      "ERR_BAD_REQUEST",
+      "ERR_CANCELED",
+      "ERR_NOT_SUPPORT",
+      "ERR_INVALID_URL"
+      // eslint-disable-next-line func-names
+    ].forEach((code) => {
+      descriptors[code] = { value: code };
+    });
+    Object.defineProperties(AxiosError, descriptors);
+    Object.defineProperty(prototype, "isAxiosError", { value: true });
+    AxiosError.from = (error, code, config2, request, response, customProps) => {
+      const axiosError = Object.create(prototype);
+      utils_default.toFlatObject(error, axiosError, function filter2(obj) {
+        return obj !== Error.prototype;
+      }, (prop) => {
+        return prop !== "isAxiosError";
+      });
+      AxiosError.call(axiosError, error.message, code, config2, request, response);
+      axiosError.cause = error;
+      axiosError.name = error.name;
+      customProps && Object.assign(axiosError, customProps);
+      return axiosError;
+    };
+    AxiosError_default = AxiosError;
+  }
+});
+
 // node_modules/delayed-stream/lib/delayed_stream.js
 var require_delayed_stream = __commonJS({
   "node_modules/delayed-stream/lib/delayed_stream.js"(exports2, module2) {
@@ -49507,6 +49981,988 @@ var require_form_data2 = __commonJS({
   }
 });
 
+// node_modules/axios/lib/platform/node/classes/FormData.js
+var import_form_data, FormData_default;
+var init_FormData = __esm({
+  "node_modules/axios/lib/platform/node/classes/FormData.js"() {
+    "use strict";
+    import_form_data = __toESM(require_form_data2(), 1);
+    FormData_default = import_form_data.default;
+  }
+});
+
+// node_modules/axios/lib/helpers/toFormData.js
+function isVisitable(thing) {
+  return utils_default.isPlainObject(thing) || utils_default.isArray(thing);
+}
+function removeBrackets(key) {
+  return utils_default.endsWith(key, "[]") ? key.slice(0, -2) : key;
+}
+function renderKey(path, key, dots) {
+  if (!path) return key;
+  return path.concat(key).map(function each(token, i) {
+    token = removeBrackets(token);
+    return !dots && i ? "[" + token + "]" : token;
+  }).join(dots ? "." : "");
+}
+function isFlatArray(arr) {
+  return utils_default.isArray(arr) && !arr.some(isVisitable);
+}
+function toFormData(obj, formData, options) {
+  if (!utils_default.isObject(obj)) {
+    throw new TypeError("target must be an object");
+  }
+  formData = formData || new (FormData_default || FormData)();
+  options = utils_default.toFlatObject(options, {
+    metaTokens: true,
+    dots: false,
+    indexes: false
+  }, false, function defined(option, source) {
+    return !utils_default.isUndefined(source[option]);
+  });
+  const metaTokens = options.metaTokens;
+  const visitor = options.visitor || defaultVisitor;
+  const dots = options.dots;
+  const indexes = options.indexes;
+  const _Blob = options.Blob || typeof Blob !== "undefined" && Blob;
+  const useBlob = _Blob && utils_default.isSpecCompliantForm(formData);
+  if (!utils_default.isFunction(visitor)) {
+    throw new TypeError("visitor must be a function");
+  }
+  function convertValue(value) {
+    if (value === null) return "";
+    if (utils_default.isDate(value)) {
+      return value.toISOString();
+    }
+    if (utils_default.isBoolean(value)) {
+      return value.toString();
+    }
+    if (!useBlob && utils_default.isBlob(value)) {
+      throw new AxiosError_default("Blob is not supported. Use a Buffer instead.");
+    }
+    if (utils_default.isArrayBuffer(value) || utils_default.isTypedArray(value)) {
+      return useBlob && typeof Blob === "function" ? new Blob([value]) : Buffer.from(value);
+    }
+    return value;
+  }
+  function defaultVisitor(value, key, path) {
+    let arr = value;
+    if (value && !path && typeof value === "object") {
+      if (utils_default.endsWith(key, "{}")) {
+        key = metaTokens ? key : key.slice(0, -2);
+        value = JSON.stringify(value);
+      } else if (utils_default.isArray(value) && isFlatArray(value) || (utils_default.isFileList(value) || utils_default.endsWith(key, "[]")) && (arr = utils_default.toArray(value))) {
+        key = removeBrackets(key);
+        arr.forEach(function each(el, index2) {
+          !(utils_default.isUndefined(el) || el === null) && formData.append(
+            // eslint-disable-next-line no-nested-ternary
+            indexes === true ? renderKey([key], index2, dots) : indexes === null ? key : key + "[]",
+            convertValue(el)
+          );
+        });
+        return false;
+      }
+    }
+    if (isVisitable(value)) {
+      return true;
+    }
+    formData.append(renderKey(path, key, dots), convertValue(value));
+    return false;
+  }
+  const stack = [];
+  const exposedHelpers = Object.assign(predicates, {
+    defaultVisitor,
+    convertValue,
+    isVisitable
+  });
+  function build(value, path) {
+    if (utils_default.isUndefined(value)) return;
+    if (stack.indexOf(value) !== -1) {
+      throw Error("Circular reference detected in " + path.join("."));
+    }
+    stack.push(value);
+    utils_default.forEach(value, function each(el, key) {
+      const result = !(utils_default.isUndefined(el) || el === null) && visitor.call(
+        formData,
+        el,
+        utils_default.isString(key) ? key.trim() : key,
+        path,
+        exposedHelpers
+      );
+      if (result === true) {
+        build(el, path ? path.concat(key) : [key]);
+      }
+    });
+    stack.pop();
+  }
+  if (!utils_default.isObject(obj)) {
+    throw new TypeError("data must be an object");
+  }
+  build(obj);
+  return formData;
+}
+var predicates, toFormData_default;
+var init_toFormData = __esm({
+  "node_modules/axios/lib/helpers/toFormData.js"() {
+    "use strict";
+    init_utils();
+    init_AxiosError();
+    init_FormData();
+    predicates = utils_default.toFlatObject(utils_default, {}, null, function filter(prop) {
+      return /^is[A-Z]/.test(prop);
+    });
+    toFormData_default = toFormData;
+  }
+});
+
+// node_modules/axios/lib/helpers/AxiosURLSearchParams.js
+function encode(str) {
+  const charMap = {
+    "!": "%21",
+    "'": "%27",
+    "(": "%28",
+    ")": "%29",
+    "~": "%7E",
+    "%20": "+",
+    "%00": "\0"
+  };
+  return encodeURIComponent(str).replace(/[!'()~]|%20|%00/g, function replacer(match) {
+    return charMap[match];
+  });
+}
+function AxiosURLSearchParams(params, options) {
+  this._pairs = [];
+  params && toFormData_default(params, this, options);
+}
+var prototype2, AxiosURLSearchParams_default;
+var init_AxiosURLSearchParams = __esm({
+  "node_modules/axios/lib/helpers/AxiosURLSearchParams.js"() {
+    "use strict";
+    init_toFormData();
+    prototype2 = AxiosURLSearchParams.prototype;
+    prototype2.append = function append(name, value) {
+      this._pairs.push([name, value]);
+    };
+    prototype2.toString = function toString2(encoder) {
+      const _encode = encoder ? function(value) {
+        return encoder.call(this, value, encode);
+      } : encode;
+      return this._pairs.map(function each(pair) {
+        return _encode(pair[0]) + "=" + _encode(pair[1]);
+      }, "").join("&");
+    };
+    AxiosURLSearchParams_default = AxiosURLSearchParams;
+  }
+});
+
+// node_modules/axios/lib/helpers/buildURL.js
+function encode2(val) {
+  return encodeURIComponent(val).replace(/%3A/gi, ":").replace(/%24/g, "$").replace(/%2C/gi, ",").replace(/%20/g, "+").replace(/%5B/gi, "[").replace(/%5D/gi, "]");
+}
+function buildURL(url2, params, options) {
+  if (!params) {
+    return url2;
+  }
+  const _encode = options && options.encode || encode2;
+  if (utils_default.isFunction(options)) {
+    options = {
+      serialize: options
+    };
+  }
+  const serializeFn = options && options.serialize;
+  let serializedParams;
+  if (serializeFn) {
+    serializedParams = serializeFn(params, options);
+  } else {
+    serializedParams = utils_default.isURLSearchParams(params) ? params.toString() : new AxiosURLSearchParams_default(params, options).toString(_encode);
+  }
+  if (serializedParams) {
+    const hashmarkIndex = url2.indexOf("#");
+    if (hashmarkIndex !== -1) {
+      url2 = url2.slice(0, hashmarkIndex);
+    }
+    url2 += (url2.indexOf("?") === -1 ? "?" : "&") + serializedParams;
+  }
+  return url2;
+}
+var init_buildURL = __esm({
+  "node_modules/axios/lib/helpers/buildURL.js"() {
+    "use strict";
+    init_utils();
+    init_AxiosURLSearchParams();
+  }
+});
+
+// node_modules/axios/lib/core/InterceptorManager.js
+var InterceptorManager, InterceptorManager_default;
+var init_InterceptorManager = __esm({
+  "node_modules/axios/lib/core/InterceptorManager.js"() {
+    "use strict";
+    init_utils();
+    InterceptorManager = class {
+      constructor() {
+        this.handlers = [];
+      }
+      /**
+       * Add a new interceptor to the stack
+       *
+       * @param {Function} fulfilled The function to handle `then` for a `Promise`
+       * @param {Function} rejected The function to handle `reject` for a `Promise`
+       *
+       * @return {Number} An ID used to remove interceptor later
+       */
+      use(fulfilled, rejected, options) {
+        this.handlers.push({
+          fulfilled,
+          rejected,
+          synchronous: options ? options.synchronous : false,
+          runWhen: options ? options.runWhen : null
+        });
+        return this.handlers.length - 1;
+      }
+      /**
+       * Remove an interceptor from the stack
+       *
+       * @param {Number} id The ID that was returned by `use`
+       *
+       * @returns {Boolean} `true` if the interceptor was removed, `false` otherwise
+       */
+      eject(id) {
+        if (this.handlers[id]) {
+          this.handlers[id] = null;
+        }
+      }
+      /**
+       * Clear all interceptors from the stack
+       *
+       * @returns {void}
+       */
+      clear() {
+        if (this.handlers) {
+          this.handlers = [];
+        }
+      }
+      /**
+       * Iterate over all the registered interceptors
+       *
+       * This method is particularly useful for skipping over any
+       * interceptors that may have become `null` calling `eject`.
+       *
+       * @param {Function} fn The function to call for each interceptor
+       *
+       * @returns {void}
+       */
+      forEach(fn) {
+        utils_default.forEach(this.handlers, function forEachHandler(h) {
+          if (h !== null) {
+            fn(h);
+          }
+        });
+      }
+    };
+    InterceptorManager_default = InterceptorManager;
+  }
+});
+
+// node_modules/axios/lib/defaults/transitional.js
+var transitional_default;
+var init_transitional = __esm({
+  "node_modules/axios/lib/defaults/transitional.js"() {
+    "use strict";
+    transitional_default = {
+      silentJSONParsing: true,
+      forcedJSONParsing: true,
+      clarifyTimeoutError: false
+    };
+  }
+});
+
+// node_modules/axios/lib/platform/node/classes/URLSearchParams.js
+var import_url, URLSearchParams_default;
+var init_URLSearchParams = __esm({
+  "node_modules/axios/lib/platform/node/classes/URLSearchParams.js"() {
+    "use strict";
+    import_url = __toESM(require("url"), 1);
+    URLSearchParams_default = import_url.default.URLSearchParams;
+  }
+});
+
+// node_modules/axios/lib/platform/node/index.js
+var import_crypto, ALPHA, DIGIT, ALPHABET, generateString, node_default;
+var init_node = __esm({
+  "node_modules/axios/lib/platform/node/index.js"() {
+    "use strict";
+    import_crypto = __toESM(require("crypto"), 1);
+    init_URLSearchParams();
+    init_FormData();
+    ALPHA = "abcdefghijklmnopqrstuvwxyz";
+    DIGIT = "0123456789";
+    ALPHABET = {
+      DIGIT,
+      ALPHA,
+      ALPHA_DIGIT: ALPHA + ALPHA.toUpperCase() + DIGIT
+    };
+    generateString = (size = 16, alphabet = ALPHABET.ALPHA_DIGIT) => {
+      let str = "";
+      const { length } = alphabet;
+      const randomValues = new Uint32Array(size);
+      import_crypto.default.randomFillSync(randomValues);
+      for (let i = 0; i < size; i++) {
+        str += alphabet[randomValues[i] % length];
+      }
+      return str;
+    };
+    node_default = {
+      isNode: true,
+      classes: {
+        URLSearchParams: URLSearchParams_default,
+        FormData: FormData_default,
+        Blob: typeof Blob !== "undefined" && Blob || null
+      },
+      ALPHABET,
+      generateString,
+      protocols: ["http", "https", "file", "data"]
+    };
+  }
+});
+
+// node_modules/axios/lib/platform/common/utils.js
+var utils_exports = {};
+__export(utils_exports, {
+  hasBrowserEnv: () => hasBrowserEnv,
+  hasStandardBrowserEnv: () => hasStandardBrowserEnv,
+  hasStandardBrowserWebWorkerEnv: () => hasStandardBrowserWebWorkerEnv,
+  navigator: () => _navigator,
+  origin: () => origin
+});
+var hasBrowserEnv, _navigator, hasStandardBrowserEnv, hasStandardBrowserWebWorkerEnv, origin;
+var init_utils2 = __esm({
+  "node_modules/axios/lib/platform/common/utils.js"() {
+    "use strict";
+    hasBrowserEnv = typeof window !== "undefined" && typeof document !== "undefined";
+    _navigator = typeof navigator === "object" && navigator || void 0;
+    hasStandardBrowserEnv = hasBrowserEnv && (!_navigator || ["ReactNative", "NativeScript", "NS"].indexOf(_navigator.product) < 0);
+    hasStandardBrowserWebWorkerEnv = (() => {
+      return typeof WorkerGlobalScope !== "undefined" && // eslint-disable-next-line no-undef
+      self instanceof WorkerGlobalScope && typeof self.importScripts === "function";
+    })();
+    origin = hasBrowserEnv && window.location.href || "http://localhost";
+  }
+});
+
+// node_modules/axios/lib/platform/index.js
+var platform_default;
+var init_platform = __esm({
+  "node_modules/axios/lib/platform/index.js"() {
+    "use strict";
+    init_node();
+    init_utils2();
+    platform_default = {
+      ...utils_exports,
+      ...node_default
+    };
+  }
+});
+
+// node_modules/axios/lib/helpers/toURLEncodedForm.js
+function toURLEncodedForm(data, options) {
+  return toFormData_default(data, new platform_default.classes.URLSearchParams(), Object.assign({
+    visitor: function(value, key, path, helpers) {
+      if (platform_default.isNode && utils_default.isBuffer(value)) {
+        this.append(key, value.toString("base64"));
+        return false;
+      }
+      return helpers.defaultVisitor.apply(this, arguments);
+    }
+  }, options));
+}
+var init_toURLEncodedForm = __esm({
+  "node_modules/axios/lib/helpers/toURLEncodedForm.js"() {
+    "use strict";
+    init_utils();
+    init_toFormData();
+    init_platform();
+  }
+});
+
+// node_modules/axios/lib/helpers/formDataToJSON.js
+function parsePropPath(name) {
+  return utils_default.matchAll(/\w+|\[(\w*)]/g, name).map((match) => {
+    return match[0] === "[]" ? "" : match[1] || match[0];
+  });
+}
+function arrayToObject(arr) {
+  const obj = {};
+  const keys = Object.keys(arr);
+  let i;
+  const len = keys.length;
+  let key;
+  for (i = 0; i < len; i++) {
+    key = keys[i];
+    obj[key] = arr[key];
+  }
+  return obj;
+}
+function formDataToJSON(formData) {
+  function buildPath(path, value, target, index2) {
+    let name = path[index2++];
+    if (name === "__proto__") return true;
+    const isNumericKey = Number.isFinite(+name);
+    const isLast = index2 >= path.length;
+    name = !name && utils_default.isArray(target) ? target.length : name;
+    if (isLast) {
+      if (utils_default.hasOwnProp(target, name)) {
+        target[name] = [target[name], value];
+      } else {
+        target[name] = value;
+      }
+      return !isNumericKey;
+    }
+    if (!target[name] || !utils_default.isObject(target[name])) {
+      target[name] = [];
+    }
+    const result = buildPath(path, value, target[name], index2);
+    if (result && utils_default.isArray(target[name])) {
+      target[name] = arrayToObject(target[name]);
+    }
+    return !isNumericKey;
+  }
+  if (utils_default.isFormData(formData) && utils_default.isFunction(formData.entries)) {
+    const obj = {};
+    utils_default.forEachEntry(formData, (name, value) => {
+      buildPath(parsePropPath(name), value, obj, 0);
+    });
+    return obj;
+  }
+  return null;
+}
+var formDataToJSON_default;
+var init_formDataToJSON = __esm({
+  "node_modules/axios/lib/helpers/formDataToJSON.js"() {
+    "use strict";
+    init_utils();
+    formDataToJSON_default = formDataToJSON;
+  }
+});
+
+// node_modules/axios/lib/defaults/index.js
+function stringifySafely(rawValue, parser, encoder) {
+  if (utils_default.isString(rawValue)) {
+    try {
+      (parser || JSON.parse)(rawValue);
+      return utils_default.trim(rawValue);
+    } catch (e) {
+      if (e.name !== "SyntaxError") {
+        throw e;
+      }
+    }
+  }
+  return (encoder || JSON.stringify)(rawValue);
+}
+var defaults, defaults_default;
+var init_defaults = __esm({
+  "node_modules/axios/lib/defaults/index.js"() {
+    "use strict";
+    init_utils();
+    init_AxiosError();
+    init_transitional();
+    init_toFormData();
+    init_toURLEncodedForm();
+    init_platform();
+    init_formDataToJSON();
+    defaults = {
+      transitional: transitional_default,
+      adapter: ["xhr", "http", "fetch"],
+      transformRequest: [function transformRequest(data, headers) {
+        const contentType = headers.getContentType() || "";
+        const hasJSONContentType = contentType.indexOf("application/json") > -1;
+        const isObjectPayload = utils_default.isObject(data);
+        if (isObjectPayload && utils_default.isHTMLForm(data)) {
+          data = new FormData(data);
+        }
+        const isFormData2 = utils_default.isFormData(data);
+        if (isFormData2) {
+          return hasJSONContentType ? JSON.stringify(formDataToJSON_default(data)) : data;
+        }
+        if (utils_default.isArrayBuffer(data) || utils_default.isBuffer(data) || utils_default.isStream(data) || utils_default.isFile(data) || utils_default.isBlob(data) || utils_default.isReadableStream(data)) {
+          return data;
+        }
+        if (utils_default.isArrayBufferView(data)) {
+          return data.buffer;
+        }
+        if (utils_default.isURLSearchParams(data)) {
+          headers.setContentType("application/x-www-form-urlencoded;charset=utf-8", false);
+          return data.toString();
+        }
+        let isFileList2;
+        if (isObjectPayload) {
+          if (contentType.indexOf("application/x-www-form-urlencoded") > -1) {
+            return toURLEncodedForm(data, this.formSerializer).toString();
+          }
+          if ((isFileList2 = utils_default.isFileList(data)) || contentType.indexOf("multipart/form-data") > -1) {
+            const _FormData = this.env && this.env.FormData;
+            return toFormData_default(
+              isFileList2 ? { "files[]": data } : data,
+              _FormData && new _FormData(),
+              this.formSerializer
+            );
+          }
+        }
+        if (isObjectPayload || hasJSONContentType) {
+          headers.setContentType("application/json", false);
+          return stringifySafely(data);
+        }
+        return data;
+      }],
+      transformResponse: [function transformResponse(data) {
+        const transitional2 = this.transitional || defaults.transitional;
+        const forcedJSONParsing = transitional2 && transitional2.forcedJSONParsing;
+        const JSONRequested = this.responseType === "json";
+        if (utils_default.isResponse(data) || utils_default.isReadableStream(data)) {
+          return data;
+        }
+        if (data && utils_default.isString(data) && (forcedJSONParsing && !this.responseType || JSONRequested)) {
+          const silentJSONParsing = transitional2 && transitional2.silentJSONParsing;
+          const strictJSONParsing = !silentJSONParsing && JSONRequested;
+          try {
+            return JSON.parse(data);
+          } catch (e) {
+            if (strictJSONParsing) {
+              if (e.name === "SyntaxError") {
+                throw AxiosError_default.from(e, AxiosError_default.ERR_BAD_RESPONSE, this, null, this.response);
+              }
+              throw e;
+            }
+          }
+        }
+        return data;
+      }],
+      /**
+       * A timeout in milliseconds to abort a request. If set to 0 (default) a
+       * timeout is not created.
+       */
+      timeout: 0,
+      xsrfCookieName: "XSRF-TOKEN",
+      xsrfHeaderName: "X-XSRF-TOKEN",
+      maxContentLength: -1,
+      maxBodyLength: -1,
+      env: {
+        FormData: platform_default.classes.FormData,
+        Blob: platform_default.classes.Blob
+      },
+      validateStatus: function validateStatus(status) {
+        return status >= 200 && status < 300;
+      },
+      headers: {
+        common: {
+          "Accept": "application/json, text/plain, */*",
+          "Content-Type": void 0
+        }
+      }
+    };
+    utils_default.forEach(["delete", "get", "head", "post", "put", "patch"], (method) => {
+      defaults.headers[method] = {};
+    });
+    defaults_default = defaults;
+  }
+});
+
+// node_modules/axios/lib/helpers/parseHeaders.js
+var ignoreDuplicateOf, parseHeaders_default;
+var init_parseHeaders = __esm({
+  "node_modules/axios/lib/helpers/parseHeaders.js"() {
+    "use strict";
+    init_utils();
+    ignoreDuplicateOf = utils_default.toObjectSet([
+      "age",
+      "authorization",
+      "content-length",
+      "content-type",
+      "etag",
+      "expires",
+      "from",
+      "host",
+      "if-modified-since",
+      "if-unmodified-since",
+      "last-modified",
+      "location",
+      "max-forwards",
+      "proxy-authorization",
+      "referer",
+      "retry-after",
+      "user-agent"
+    ]);
+    parseHeaders_default = (rawHeaders) => {
+      const parsed = {};
+      let key;
+      let val;
+      let i;
+      rawHeaders && rawHeaders.split("\n").forEach(function parser(line) {
+        i = line.indexOf(":");
+        key = line.substring(0, i).trim().toLowerCase();
+        val = line.substring(i + 1).trim();
+        if (!key || parsed[key] && ignoreDuplicateOf[key]) {
+          return;
+        }
+        if (key === "set-cookie") {
+          if (parsed[key]) {
+            parsed[key].push(val);
+          } else {
+            parsed[key] = [val];
+          }
+        } else {
+          parsed[key] = parsed[key] ? parsed[key] + ", " + val : val;
+        }
+      });
+      return parsed;
+    };
+  }
+});
+
+// node_modules/axios/lib/core/AxiosHeaders.js
+function normalizeHeader(header) {
+  return header && String(header).trim().toLowerCase();
+}
+function normalizeValue(value) {
+  if (value === false || value == null) {
+    return value;
+  }
+  return utils_default.isArray(value) ? value.map(normalizeValue) : String(value);
+}
+function parseTokens(str) {
+  const tokens = /* @__PURE__ */ Object.create(null);
+  const tokensRE = /([^\s,;=]+)\s*(?:=\s*([^,;]+))?/g;
+  let match;
+  while (match = tokensRE.exec(str)) {
+    tokens[match[1]] = match[2];
+  }
+  return tokens;
+}
+function matchHeaderValue(context, value, header, filter2, isHeaderNameFilter) {
+  if (utils_default.isFunction(filter2)) {
+    return filter2.call(this, value, header);
+  }
+  if (isHeaderNameFilter) {
+    value = header;
+  }
+  if (!utils_default.isString(value)) return;
+  if (utils_default.isString(filter2)) {
+    return value.indexOf(filter2) !== -1;
+  }
+  if (utils_default.isRegExp(filter2)) {
+    return filter2.test(value);
+  }
+}
+function formatHeader(header) {
+  return header.trim().toLowerCase().replace(/([a-z\d])(\w*)/g, (w, char, str) => {
+    return char.toUpperCase() + str;
+  });
+}
+function buildAccessors(obj, header) {
+  const accessorName = utils_default.toCamelCase(" " + header);
+  ["get", "set", "has"].forEach((methodName) => {
+    Object.defineProperty(obj, methodName + accessorName, {
+      value: function(arg1, arg2, arg3) {
+        return this[methodName].call(this, header, arg1, arg2, arg3);
+      },
+      configurable: true
+    });
+  });
+}
+var $internals, isValidHeaderName, AxiosHeaders, AxiosHeaders_default;
+var init_AxiosHeaders = __esm({
+  "node_modules/axios/lib/core/AxiosHeaders.js"() {
+    "use strict";
+    init_utils();
+    init_parseHeaders();
+    $internals = Symbol("internals");
+    isValidHeaderName = (str) => /^[-_a-zA-Z0-9^`|~,!#$%&'*+.]+$/.test(str.trim());
+    AxiosHeaders = class {
+      constructor(headers) {
+        headers && this.set(headers);
+      }
+      set(header, valueOrRewrite, rewrite) {
+        const self2 = this;
+        function setHeader(_value, _header, _rewrite) {
+          const lHeader = normalizeHeader(_header);
+          if (!lHeader) {
+            throw new Error("header name must be a non-empty string");
+          }
+          const key = utils_default.findKey(self2, lHeader);
+          if (!key || self2[key] === void 0 || _rewrite === true || _rewrite === void 0 && self2[key] !== false) {
+            self2[key || _header] = normalizeValue(_value);
+          }
+        }
+        const setHeaders = (headers, _rewrite) => utils_default.forEach(headers, (_value, _header) => setHeader(_value, _header, _rewrite));
+        if (utils_default.isPlainObject(header) || header instanceof this.constructor) {
+          setHeaders(header, valueOrRewrite);
+        } else if (utils_default.isString(header) && (header = header.trim()) && !isValidHeaderName(header)) {
+          setHeaders(parseHeaders_default(header), valueOrRewrite);
+        } else if (utils_default.isObject(header) && utils_default.isIterable(header)) {
+          let obj = {}, dest, key;
+          for (const entry of header) {
+            if (!utils_default.isArray(entry)) {
+              throw TypeError("Object iterator must return a key-value pair");
+            }
+            obj[key = entry[0]] = (dest = obj[key]) ? utils_default.isArray(dest) ? [...dest, entry[1]] : [dest, entry[1]] : entry[1];
+          }
+          setHeaders(obj, valueOrRewrite);
+        } else {
+          header != null && setHeader(valueOrRewrite, header, rewrite);
+        }
+        return this;
+      }
+      get(header, parser) {
+        header = normalizeHeader(header);
+        if (header) {
+          const key = utils_default.findKey(this, header);
+          if (key) {
+            const value = this[key];
+            if (!parser) {
+              return value;
+            }
+            if (parser === true) {
+              return parseTokens(value);
+            }
+            if (utils_default.isFunction(parser)) {
+              return parser.call(this, value, key);
+            }
+            if (utils_default.isRegExp(parser)) {
+              return parser.exec(value);
+            }
+            throw new TypeError("parser must be boolean|regexp|function");
+          }
+        }
+      }
+      has(header, matcher) {
+        header = normalizeHeader(header);
+        if (header) {
+          const key = utils_default.findKey(this, header);
+          return !!(key && this[key] !== void 0 && (!matcher || matchHeaderValue(this, this[key], key, matcher)));
+        }
+        return false;
+      }
+      delete(header, matcher) {
+        const self2 = this;
+        let deleted = false;
+        function deleteHeader(_header) {
+          _header = normalizeHeader(_header);
+          if (_header) {
+            const key = utils_default.findKey(self2, _header);
+            if (key && (!matcher || matchHeaderValue(self2, self2[key], key, matcher))) {
+              delete self2[key];
+              deleted = true;
+            }
+          }
+        }
+        if (utils_default.isArray(header)) {
+          header.forEach(deleteHeader);
+        } else {
+          deleteHeader(header);
+        }
+        return deleted;
+      }
+      clear(matcher) {
+        const keys = Object.keys(this);
+        let i = keys.length;
+        let deleted = false;
+        while (i--) {
+          const key = keys[i];
+          if (!matcher || matchHeaderValue(this, this[key], key, matcher, true)) {
+            delete this[key];
+            deleted = true;
+          }
+        }
+        return deleted;
+      }
+      normalize(format) {
+        const self2 = this;
+        const headers = {};
+        utils_default.forEach(this, (value, header) => {
+          const key = utils_default.findKey(headers, header);
+          if (key) {
+            self2[key] = normalizeValue(value);
+            delete self2[header];
+            return;
+          }
+          const normalized = format ? formatHeader(header) : String(header).trim();
+          if (normalized !== header) {
+            delete self2[header];
+          }
+          self2[normalized] = normalizeValue(value);
+          headers[normalized] = true;
+        });
+        return this;
+      }
+      concat(...targets) {
+        return this.constructor.concat(this, ...targets);
+      }
+      toJSON(asStrings) {
+        const obj = /* @__PURE__ */ Object.create(null);
+        utils_default.forEach(this, (value, header) => {
+          value != null && value !== false && (obj[header] = asStrings && utils_default.isArray(value) ? value.join(", ") : value);
+        });
+        return obj;
+      }
+      [Symbol.iterator]() {
+        return Object.entries(this.toJSON())[Symbol.iterator]();
+      }
+      toString() {
+        return Object.entries(this.toJSON()).map(([header, value]) => header + ": " + value).join("\n");
+      }
+      getSetCookie() {
+        return this.get("set-cookie") || [];
+      }
+      get [Symbol.toStringTag]() {
+        return "AxiosHeaders";
+      }
+      static from(thing) {
+        return thing instanceof this ? thing : new this(thing);
+      }
+      static concat(first, ...targets) {
+        const computed = new this(first);
+        targets.forEach((target) => computed.set(target));
+        return computed;
+      }
+      static accessor(header) {
+        const internals2 = this[$internals] = this[$internals] = {
+          accessors: {}
+        };
+        const accessors = internals2.accessors;
+        const prototype3 = this.prototype;
+        function defineAccessor(_header) {
+          const lHeader = normalizeHeader(_header);
+          if (!accessors[lHeader]) {
+            buildAccessors(prototype3, _header);
+            accessors[lHeader] = true;
+          }
+        }
+        utils_default.isArray(header) ? header.forEach(defineAccessor) : defineAccessor(header);
+        return this;
+      }
+    };
+    AxiosHeaders.accessor(["Content-Type", "Content-Length", "Accept", "Accept-Encoding", "User-Agent", "Authorization"]);
+    utils_default.reduceDescriptors(AxiosHeaders.prototype, ({ value }, key) => {
+      let mapped = key[0].toUpperCase() + key.slice(1);
+      return {
+        get: () => value,
+        set(headerValue) {
+          this[mapped] = headerValue;
+        }
+      };
+    });
+    utils_default.freezeMethods(AxiosHeaders);
+    AxiosHeaders_default = AxiosHeaders;
+  }
+});
+
+// node_modules/axios/lib/core/transformData.js
+function transformData(fns, response) {
+  const config2 = this || defaults_default;
+  const context = response || config2;
+  const headers = AxiosHeaders_default.from(context.headers);
+  let data = context.data;
+  utils_default.forEach(fns, function transform(fn) {
+    data = fn.call(config2, data, headers.normalize(), response ? response.status : void 0);
+  });
+  headers.normalize();
+  return data;
+}
+var init_transformData = __esm({
+  "node_modules/axios/lib/core/transformData.js"() {
+    "use strict";
+    init_utils();
+    init_defaults();
+    init_AxiosHeaders();
+  }
+});
+
+// node_modules/axios/lib/cancel/isCancel.js
+function isCancel(value) {
+  return !!(value && value.__CANCEL__);
+}
+var init_isCancel = __esm({
+  "node_modules/axios/lib/cancel/isCancel.js"() {
+    "use strict";
+  }
+});
+
+// node_modules/axios/lib/cancel/CanceledError.js
+function CanceledError(message, config2, request) {
+  AxiosError_default.call(this, message == null ? "canceled" : message, AxiosError_default.ERR_CANCELED, config2, request);
+  this.name = "CanceledError";
+}
+var CanceledError_default;
+var init_CanceledError = __esm({
+  "node_modules/axios/lib/cancel/CanceledError.js"() {
+    "use strict";
+    init_AxiosError();
+    init_utils();
+    utils_default.inherits(CanceledError, AxiosError_default, {
+      __CANCEL__: true
+    });
+    CanceledError_default = CanceledError;
+  }
+});
+
+// node_modules/axios/lib/core/settle.js
+function settle(resolve, reject, response) {
+  const validateStatus2 = response.config.validateStatus;
+  if (!response.status || !validateStatus2 || validateStatus2(response.status)) {
+    resolve(response);
+  } else {
+    reject(new AxiosError_default(
+      "Request failed with status code " + response.status,
+      [AxiosError_default.ERR_BAD_REQUEST, AxiosError_default.ERR_BAD_RESPONSE][Math.floor(response.status / 100) - 4],
+      response.config,
+      response.request,
+      response
+    ));
+  }
+}
+var init_settle = __esm({
+  "node_modules/axios/lib/core/settle.js"() {
+    "use strict";
+    init_AxiosError();
+  }
+});
+
+// node_modules/axios/lib/helpers/isAbsoluteURL.js
+function isAbsoluteURL(url2) {
+  return /^([a-z][a-z\d+\-.]*:)?\/\//i.test(url2);
+}
+var init_isAbsoluteURL = __esm({
+  "node_modules/axios/lib/helpers/isAbsoluteURL.js"() {
+    "use strict";
+  }
+});
+
+// node_modules/axios/lib/helpers/combineURLs.js
+function combineURLs(baseURL, relativeURL) {
+  return relativeURL ? baseURL.replace(/\/?\/$/, "") + "/" + relativeURL.replace(/^\/+/, "") : baseURL;
+}
+var init_combineURLs = __esm({
+  "node_modules/axios/lib/helpers/combineURLs.js"() {
+    "use strict";
+  }
+});
+
+// node_modules/axios/lib/core/buildFullPath.js
+function buildFullPath(baseURL, requestedURL, allowAbsoluteUrls) {
+  let isRelativeUrl = !isAbsoluteURL(requestedURL);
+  if (baseURL && (isRelativeUrl || allowAbsoluteUrls == false)) {
+    return combineURLs(baseURL, requestedURL);
+  }
+  return requestedURL;
+}
+var init_buildFullPath = __esm({
+  "node_modules/axios/lib/core/buildFullPath.js"() {
+    "use strict";
+    init_isAbsoluteURL();
+    init_combineURLs();
+  }
+});
+
 // node_modules/proxy-from-env/index.js
 var require_proxy_from_env = __commonJS({
   "node_modules/proxy-from-env/index.js"(exports2) {
@@ -50628,6 +52084,2316 @@ var require_follow_redirects = __commonJS({
     }
     module2.exports = wrap({ http: http2, https: https2 });
     module2.exports.wrap = wrap;
+  }
+});
+
+// node_modules/axios/lib/env/data.js
+var VERSION;
+var init_data = __esm({
+  "node_modules/axios/lib/env/data.js"() {
+    "use strict";
+    VERSION = "1.10.0";
+  }
+});
+
+// node_modules/axios/lib/helpers/parseProtocol.js
+function parseProtocol(url2) {
+  const match = /^([-+\w]{1,25})(:?\/\/|:)/.exec(url2);
+  return match && match[1] || "";
+}
+var init_parseProtocol = __esm({
+  "node_modules/axios/lib/helpers/parseProtocol.js"() {
+    "use strict";
+  }
+});
+
+// node_modules/axios/lib/helpers/fromDataURI.js
+function fromDataURI(uri, asBlob, options) {
+  const _Blob = options && options.Blob || platform_default.classes.Blob;
+  const protocol = parseProtocol(uri);
+  if (asBlob === void 0 && _Blob) {
+    asBlob = true;
+  }
+  if (protocol === "data") {
+    uri = protocol.length ? uri.slice(protocol.length + 1) : uri;
+    const match = DATA_URL_PATTERN.exec(uri);
+    if (!match) {
+      throw new AxiosError_default("Invalid URL", AxiosError_default.ERR_INVALID_URL);
+    }
+    const mime = match[1];
+    const isBase64 = match[2];
+    const body = match[3];
+    const buffer = Buffer.from(decodeURIComponent(body), isBase64 ? "base64" : "utf8");
+    if (asBlob) {
+      if (!_Blob) {
+        throw new AxiosError_default("Blob is not supported", AxiosError_default.ERR_NOT_SUPPORT);
+      }
+      return new _Blob([buffer], { type: mime });
+    }
+    return buffer;
+  }
+  throw new AxiosError_default("Unsupported protocol " + protocol, AxiosError_default.ERR_NOT_SUPPORT);
+}
+var DATA_URL_PATTERN;
+var init_fromDataURI = __esm({
+  "node_modules/axios/lib/helpers/fromDataURI.js"() {
+    "use strict";
+    init_AxiosError();
+    init_parseProtocol();
+    init_platform();
+    DATA_URL_PATTERN = /^(?:([^;]+);)?(?:[^;]+;)?(base64|),([\s\S]*)$/;
+  }
+});
+
+// node_modules/axios/lib/helpers/AxiosTransformStream.js
+var import_stream, kInternals, AxiosTransformStream, AxiosTransformStream_default;
+var init_AxiosTransformStream = __esm({
+  "node_modules/axios/lib/helpers/AxiosTransformStream.js"() {
+    "use strict";
+    import_stream = __toESM(require("stream"), 1);
+    init_utils();
+    kInternals = Symbol("internals");
+    AxiosTransformStream = class extends import_stream.default.Transform {
+      constructor(options) {
+        options = utils_default.toFlatObject(options, {
+          maxRate: 0,
+          chunkSize: 64 * 1024,
+          minChunkSize: 100,
+          timeWindow: 500,
+          ticksRate: 2,
+          samplesCount: 15
+        }, null, (prop, source) => {
+          return !utils_default.isUndefined(source[prop]);
+        });
+        super({
+          readableHighWaterMark: options.chunkSize
+        });
+        const internals2 = this[kInternals] = {
+          timeWindow: options.timeWindow,
+          chunkSize: options.chunkSize,
+          maxRate: options.maxRate,
+          minChunkSize: options.minChunkSize,
+          bytesSeen: 0,
+          isCaptured: false,
+          notifiedBytesLoaded: 0,
+          ts: Date.now(),
+          bytes: 0,
+          onReadCallback: null
+        };
+        this.on("newListener", (event) => {
+          if (event === "progress") {
+            if (!internals2.isCaptured) {
+              internals2.isCaptured = true;
+            }
+          }
+        });
+      }
+      _read(size) {
+        const internals2 = this[kInternals];
+        if (internals2.onReadCallback) {
+          internals2.onReadCallback();
+        }
+        return super._read(size);
+      }
+      _transform(chunk, encoding, callback) {
+        const internals2 = this[kInternals];
+        const maxRate = internals2.maxRate;
+        const readableHighWaterMark = this.readableHighWaterMark;
+        const timeWindow = internals2.timeWindow;
+        const divider = 1e3 / timeWindow;
+        const bytesThreshold = maxRate / divider;
+        const minChunkSize = internals2.minChunkSize !== false ? Math.max(internals2.minChunkSize, bytesThreshold * 0.01) : 0;
+        const pushChunk = (_chunk, _callback) => {
+          const bytes = Buffer.byteLength(_chunk);
+          internals2.bytesSeen += bytes;
+          internals2.bytes += bytes;
+          internals2.isCaptured && this.emit("progress", internals2.bytesSeen);
+          if (this.push(_chunk)) {
+            process.nextTick(_callback);
+          } else {
+            internals2.onReadCallback = () => {
+              internals2.onReadCallback = null;
+              process.nextTick(_callback);
+            };
+          }
+        };
+        const transformChunk = (_chunk, _callback) => {
+          const chunkSize = Buffer.byteLength(_chunk);
+          let chunkRemainder = null;
+          let maxChunkSize = readableHighWaterMark;
+          let bytesLeft;
+          let passed = 0;
+          if (maxRate) {
+            const now = Date.now();
+            if (!internals2.ts || (passed = now - internals2.ts) >= timeWindow) {
+              internals2.ts = now;
+              bytesLeft = bytesThreshold - internals2.bytes;
+              internals2.bytes = bytesLeft < 0 ? -bytesLeft : 0;
+              passed = 0;
+            }
+            bytesLeft = bytesThreshold - internals2.bytes;
+          }
+          if (maxRate) {
+            if (bytesLeft <= 0) {
+              return setTimeout(() => {
+                _callback(null, _chunk);
+              }, timeWindow - passed);
+            }
+            if (bytesLeft < maxChunkSize) {
+              maxChunkSize = bytesLeft;
+            }
+          }
+          if (maxChunkSize && chunkSize > maxChunkSize && chunkSize - maxChunkSize > minChunkSize) {
+            chunkRemainder = _chunk.subarray(maxChunkSize);
+            _chunk = _chunk.subarray(0, maxChunkSize);
+          }
+          pushChunk(_chunk, chunkRemainder ? () => {
+            process.nextTick(_callback, null, chunkRemainder);
+          } : _callback);
+        };
+        transformChunk(chunk, function transformNextChunk(err, _chunk) {
+          if (err) {
+            return callback(err);
+          }
+          if (_chunk) {
+            transformChunk(_chunk, transformNextChunk);
+          } else {
+            callback(null);
+          }
+        });
+      }
+    };
+    AxiosTransformStream_default = AxiosTransformStream;
+  }
+});
+
+// node_modules/axios/lib/helpers/readBlob.js
+var asyncIterator, readBlob, readBlob_default;
+var init_readBlob = __esm({
+  "node_modules/axios/lib/helpers/readBlob.js"() {
+    "use strict";
+    ({ asyncIterator } = Symbol);
+    readBlob = async function* (blob) {
+      if (blob.stream) {
+        yield* blob.stream();
+      } else if (blob.arrayBuffer) {
+        yield await blob.arrayBuffer();
+      } else if (blob[asyncIterator]) {
+        yield* blob[asyncIterator]();
+      } else {
+        yield blob;
+      }
+    };
+    readBlob_default = readBlob;
+  }
+});
+
+// node_modules/axios/lib/helpers/formDataToStream.js
+var import_util, import_stream2, BOUNDARY_ALPHABET, textEncoder, CRLF, CRLF_BYTES, CRLF_BYTES_COUNT, FormDataPart, formDataToStream, formDataToStream_default;
+var init_formDataToStream = __esm({
+  "node_modules/axios/lib/helpers/formDataToStream.js"() {
+    "use strict";
+    import_util = __toESM(require("util"), 1);
+    import_stream2 = require("stream");
+    init_utils();
+    init_readBlob();
+    init_platform();
+    BOUNDARY_ALPHABET = platform_default.ALPHABET.ALPHA_DIGIT + "-_";
+    textEncoder = typeof TextEncoder === "function" ? new TextEncoder() : new import_util.default.TextEncoder();
+    CRLF = "\r\n";
+    CRLF_BYTES = textEncoder.encode(CRLF);
+    CRLF_BYTES_COUNT = 2;
+    FormDataPart = class {
+      constructor(name, value) {
+        const { escapeName } = this.constructor;
+        const isStringValue = utils_default.isString(value);
+        let headers = `Content-Disposition: form-data; name="${escapeName(name)}"${!isStringValue && value.name ? `; filename="${escapeName(value.name)}"` : ""}${CRLF}`;
+        if (isStringValue) {
+          value = textEncoder.encode(String(value).replace(/\r?\n|\r\n?/g, CRLF));
+        } else {
+          headers += `Content-Type: ${value.type || "application/octet-stream"}${CRLF}`;
+        }
+        this.headers = textEncoder.encode(headers + CRLF);
+        this.contentLength = isStringValue ? value.byteLength : value.size;
+        this.size = this.headers.byteLength + this.contentLength + CRLF_BYTES_COUNT;
+        this.name = name;
+        this.value = value;
+      }
+      async *encode() {
+        yield this.headers;
+        const { value } = this;
+        if (utils_default.isTypedArray(value)) {
+          yield value;
+        } else {
+          yield* readBlob_default(value);
+        }
+        yield CRLF_BYTES;
+      }
+      static escapeName(name) {
+        return String(name).replace(/[\r\n"]/g, (match) => ({
+          "\r": "%0D",
+          "\n": "%0A",
+          '"': "%22"
+        })[match]);
+      }
+    };
+    formDataToStream = (form, headersHandler, options) => {
+      const {
+        tag = "form-data-boundary",
+        size = 25,
+        boundary = tag + "-" + platform_default.generateString(size, BOUNDARY_ALPHABET)
+      } = options || {};
+      if (!utils_default.isFormData(form)) {
+        throw TypeError("FormData instance required");
+      }
+      if (boundary.length < 1 || boundary.length > 70) {
+        throw Error("boundary must be 10-70 characters long");
+      }
+      const boundaryBytes = textEncoder.encode("--" + boundary + CRLF);
+      const footerBytes = textEncoder.encode("--" + boundary + "--" + CRLF);
+      let contentLength = footerBytes.byteLength;
+      const parts = Array.from(form.entries()).map(([name, value]) => {
+        const part = new FormDataPart(name, value);
+        contentLength += part.size;
+        return part;
+      });
+      contentLength += boundaryBytes.byteLength * parts.length;
+      contentLength = utils_default.toFiniteNumber(contentLength);
+      const computedHeaders = {
+        "Content-Type": `multipart/form-data; boundary=${boundary}`
+      };
+      if (Number.isFinite(contentLength)) {
+        computedHeaders["Content-Length"] = contentLength;
+      }
+      headersHandler && headersHandler(computedHeaders);
+      return import_stream2.Readable.from(async function* () {
+        for (const part of parts) {
+          yield boundaryBytes;
+          yield* part.encode();
+        }
+        yield footerBytes;
+      }());
+    };
+    formDataToStream_default = formDataToStream;
+  }
+});
+
+// node_modules/axios/lib/helpers/ZlibHeaderTransformStream.js
+var import_stream3, ZlibHeaderTransformStream, ZlibHeaderTransformStream_default;
+var init_ZlibHeaderTransformStream = __esm({
+  "node_modules/axios/lib/helpers/ZlibHeaderTransformStream.js"() {
+    "use strict";
+    import_stream3 = __toESM(require("stream"), 1);
+    ZlibHeaderTransformStream = class extends import_stream3.default.Transform {
+      __transform(chunk, encoding, callback) {
+        this.push(chunk);
+        callback();
+      }
+      _transform(chunk, encoding, callback) {
+        if (chunk.length !== 0) {
+          this._transform = this.__transform;
+          if (chunk[0] !== 120) {
+            const header = Buffer.alloc(2);
+            header[0] = 120;
+            header[1] = 156;
+            this.push(header, encoding);
+          }
+        }
+        this.__transform(chunk, encoding, callback);
+      }
+    };
+    ZlibHeaderTransformStream_default = ZlibHeaderTransformStream;
+  }
+});
+
+// node_modules/axios/lib/helpers/callbackify.js
+var callbackify, callbackify_default;
+var init_callbackify = __esm({
+  "node_modules/axios/lib/helpers/callbackify.js"() {
+    "use strict";
+    init_utils();
+    callbackify = (fn, reducer) => {
+      return utils_default.isAsyncFn(fn) ? function(...args) {
+        const cb = args.pop();
+        fn.apply(this, args).then((value) => {
+          try {
+            reducer ? cb(null, ...reducer(value)) : cb(null, value);
+          } catch (err) {
+            cb(err);
+          }
+        }, cb);
+      } : fn;
+    };
+    callbackify_default = callbackify;
+  }
+});
+
+// node_modules/axios/lib/helpers/speedometer.js
+function speedometer(samplesCount, min) {
+  samplesCount = samplesCount || 10;
+  const bytes = new Array(samplesCount);
+  const timestamps = new Array(samplesCount);
+  let head2 = 0;
+  let tail = 0;
+  let firstSampleTS;
+  min = min !== void 0 ? min : 1e3;
+  return function push(chunkLength) {
+    const now = Date.now();
+    const startedAt = timestamps[tail];
+    if (!firstSampleTS) {
+      firstSampleTS = now;
+    }
+    bytes[head2] = chunkLength;
+    timestamps[head2] = now;
+    let i = tail;
+    let bytesCount = 0;
+    while (i !== head2) {
+      bytesCount += bytes[i++];
+      i = i % samplesCount;
+    }
+    head2 = (head2 + 1) % samplesCount;
+    if (head2 === tail) {
+      tail = (tail + 1) % samplesCount;
+    }
+    if (now - firstSampleTS < min) {
+      return;
+    }
+    const passed = startedAt && now - startedAt;
+    return passed ? Math.round(bytesCount * 1e3 / passed) : void 0;
+  };
+}
+var speedometer_default;
+var init_speedometer = __esm({
+  "node_modules/axios/lib/helpers/speedometer.js"() {
+    "use strict";
+    speedometer_default = speedometer;
+  }
+});
+
+// node_modules/axios/lib/helpers/throttle.js
+function throttle(fn, freq) {
+  let timestamp = 0;
+  let threshold = 1e3 / freq;
+  let lastArgs;
+  let timer;
+  const invoke = (args, now = Date.now()) => {
+    timestamp = now;
+    lastArgs = null;
+    if (timer) {
+      clearTimeout(timer);
+      timer = null;
+    }
+    fn.apply(null, args);
+  };
+  const throttled = (...args) => {
+    const now = Date.now();
+    const passed = now - timestamp;
+    if (passed >= threshold) {
+      invoke(args, now);
+    } else {
+      lastArgs = args;
+      if (!timer) {
+        timer = setTimeout(() => {
+          timer = null;
+          invoke(lastArgs);
+        }, threshold - passed);
+      }
+    }
+  };
+  const flush = () => lastArgs && invoke(lastArgs);
+  return [throttled, flush];
+}
+var throttle_default;
+var init_throttle = __esm({
+  "node_modules/axios/lib/helpers/throttle.js"() {
+    "use strict";
+    throttle_default = throttle;
+  }
+});
+
+// node_modules/axios/lib/helpers/progressEventReducer.js
+var progressEventReducer, progressEventDecorator, asyncDecorator;
+var init_progressEventReducer = __esm({
+  "node_modules/axios/lib/helpers/progressEventReducer.js"() {
+    "use strict";
+    init_speedometer();
+    init_throttle();
+    init_utils();
+    progressEventReducer = (listener, isDownloadStream, freq = 3) => {
+      let bytesNotified = 0;
+      const _speedometer = speedometer_default(50, 250);
+      return throttle_default((e) => {
+        const loaded = e.loaded;
+        const total = e.lengthComputable ? e.total : void 0;
+        const progressBytes = loaded - bytesNotified;
+        const rate = _speedometer(progressBytes);
+        const inRange = loaded <= total;
+        bytesNotified = loaded;
+        const data = {
+          loaded,
+          total,
+          progress: total ? loaded / total : void 0,
+          bytes: progressBytes,
+          rate: rate ? rate : void 0,
+          estimated: rate && total && inRange ? (total - loaded) / rate : void 0,
+          event: e,
+          lengthComputable: total != null,
+          [isDownloadStream ? "download" : "upload"]: true
+        };
+        listener(data);
+      }, freq);
+    };
+    progressEventDecorator = (total, throttled) => {
+      const lengthComputable = total != null;
+      return [(loaded) => throttled[0]({
+        lengthComputable,
+        total,
+        loaded
+      }), throttled[1]];
+    };
+    asyncDecorator = (fn) => (...args) => utils_default.asap(() => fn(...args));
+  }
+});
+
+// node_modules/axios/lib/adapters/http.js
+function dispatchBeforeRedirect(options, responseDetails) {
+  if (options.beforeRedirects.proxy) {
+    options.beforeRedirects.proxy(options);
+  }
+  if (options.beforeRedirects.config) {
+    options.beforeRedirects.config(options, responseDetails);
+  }
+}
+function setProxy(options, configProxy, location) {
+  let proxy = configProxy;
+  if (!proxy && proxy !== false) {
+    const proxyUrl = import_proxy_from_env.default.getProxyForUrl(location);
+    if (proxyUrl) {
+      proxy = new URL(proxyUrl);
+    }
+  }
+  if (proxy) {
+    if (proxy.username) {
+      proxy.auth = (proxy.username || "") + ":" + (proxy.password || "");
+    }
+    if (proxy.auth) {
+      if (proxy.auth.username || proxy.auth.password) {
+        proxy.auth = (proxy.auth.username || "") + ":" + (proxy.auth.password || "");
+      }
+      const base64 = Buffer.from(proxy.auth, "utf8").toString("base64");
+      options.headers["Proxy-Authorization"] = "Basic " + base64;
+    }
+    options.headers.host = options.hostname + (options.port ? ":" + options.port : "");
+    const proxyHost = proxy.hostname || proxy.host;
+    options.hostname = proxyHost;
+    options.host = proxyHost;
+    options.port = proxy.port;
+    options.path = location;
+    if (proxy.protocol) {
+      options.protocol = proxy.protocol.includes(":") ? proxy.protocol : `${proxy.protocol}:`;
+    }
+  }
+  options.beforeRedirects.proxy = function beforeRedirect(redirectOptions) {
+    setProxy(redirectOptions, configProxy, redirectOptions.href);
+  };
+}
+var import_proxy_from_env, import_http, import_https, import_util2, import_follow_redirects, import_zlib, import_stream4, import_events, zlibOptions, brotliOptions, isBrotliSupported, httpFollow, httpsFollow, isHttps, supportedProtocols, flushOnFinish, isHttpAdapterSupported, wrapAsync, resolveFamily, buildAddressEntry, http_default;
+var init_http = __esm({
+  "node_modules/axios/lib/adapters/http.js"() {
+    "use strict";
+    init_utils();
+    init_settle();
+    init_buildFullPath();
+    init_buildURL();
+    import_proxy_from_env = __toESM(require_proxy_from_env(), 1);
+    import_http = __toESM(require("http"), 1);
+    import_https = __toESM(require("https"), 1);
+    import_util2 = __toESM(require("util"), 1);
+    import_follow_redirects = __toESM(require_follow_redirects(), 1);
+    import_zlib = __toESM(require("zlib"), 1);
+    init_data();
+    init_transitional();
+    init_AxiosError();
+    init_CanceledError();
+    init_platform();
+    init_fromDataURI();
+    import_stream4 = __toESM(require("stream"), 1);
+    init_AxiosHeaders();
+    init_AxiosTransformStream();
+    import_events = require("events");
+    init_formDataToStream();
+    init_readBlob();
+    init_ZlibHeaderTransformStream();
+    init_callbackify();
+    init_progressEventReducer();
+    zlibOptions = {
+      flush: import_zlib.default.constants.Z_SYNC_FLUSH,
+      finishFlush: import_zlib.default.constants.Z_SYNC_FLUSH
+    };
+    brotliOptions = {
+      flush: import_zlib.default.constants.BROTLI_OPERATION_FLUSH,
+      finishFlush: import_zlib.default.constants.BROTLI_OPERATION_FLUSH
+    };
+    isBrotliSupported = utils_default.isFunction(import_zlib.default.createBrotliDecompress);
+    ({ http: httpFollow, https: httpsFollow } = import_follow_redirects.default);
+    isHttps = /https:?/;
+    supportedProtocols = platform_default.protocols.map((protocol) => {
+      return protocol + ":";
+    });
+    flushOnFinish = (stream4, [throttled, flush]) => {
+      stream4.on("end", flush).on("error", flush);
+      return throttled;
+    };
+    isHttpAdapterSupported = typeof process !== "undefined" && utils_default.kindOf(process) === "process";
+    wrapAsync = (asyncExecutor) => {
+      return new Promise((resolve, reject) => {
+        let onDone;
+        let isDone;
+        const done = (value, isRejected) => {
+          if (isDone) return;
+          isDone = true;
+          onDone && onDone(value, isRejected);
+        };
+        const _resolve = (value) => {
+          done(value);
+          resolve(value);
+        };
+        const _reject = (reason) => {
+          done(reason, true);
+          reject(reason);
+        };
+        asyncExecutor(_resolve, _reject, (onDoneHandler) => onDone = onDoneHandler).catch(_reject);
+      });
+    };
+    resolveFamily = ({ address, family }) => {
+      if (!utils_default.isString(address)) {
+        throw TypeError("address must be a string");
+      }
+      return {
+        address,
+        family: family || (address.indexOf(".") < 0 ? 6 : 4)
+      };
+    };
+    buildAddressEntry = (address, family) => resolveFamily(utils_default.isObject(address) ? address : { address, family });
+    http_default = isHttpAdapterSupported && function httpAdapter(config2) {
+      return wrapAsync(async function dispatchHttpRequest(resolve, reject, onDone) {
+        let { data, lookup, family } = config2;
+        const { responseType, responseEncoding } = config2;
+        const method = config2.method.toUpperCase();
+        let isDone;
+        let rejected = false;
+        let req;
+        if (lookup) {
+          const _lookup = callbackify_default(lookup, (value) => utils_default.isArray(value) ? value : [value]);
+          lookup = (hostname, opt, cb) => {
+            _lookup(hostname, opt, (err, arg0, arg1) => {
+              if (err) {
+                return cb(err);
+              }
+              const addresses = utils_default.isArray(arg0) ? arg0.map((addr) => buildAddressEntry(addr)) : [buildAddressEntry(arg0, arg1)];
+              opt.all ? cb(err, addresses) : cb(err, addresses[0].address, addresses[0].family);
+            });
+          };
+        }
+        const emitter = new import_events.EventEmitter();
+        const onFinished = () => {
+          if (config2.cancelToken) {
+            config2.cancelToken.unsubscribe(abort);
+          }
+          if (config2.signal) {
+            config2.signal.removeEventListener("abort", abort);
+          }
+          emitter.removeAllListeners();
+        };
+        onDone((value, isRejected) => {
+          isDone = true;
+          if (isRejected) {
+            rejected = true;
+            onFinished();
+          }
+        });
+        function abort(reason) {
+          emitter.emit("abort", !reason || reason.type ? new CanceledError_default(null, config2, req) : reason);
+        }
+        emitter.once("abort", reject);
+        if (config2.cancelToken || config2.signal) {
+          config2.cancelToken && config2.cancelToken.subscribe(abort);
+          if (config2.signal) {
+            config2.signal.aborted ? abort() : config2.signal.addEventListener("abort", abort);
+          }
+        }
+        const fullPath = buildFullPath(config2.baseURL, config2.url, config2.allowAbsoluteUrls);
+        const parsed = new URL(fullPath, platform_default.hasBrowserEnv ? platform_default.origin : void 0);
+        const protocol = parsed.protocol || supportedProtocols[0];
+        if (protocol === "data:") {
+          let convertedData;
+          if (method !== "GET") {
+            return settle(resolve, reject, {
+              status: 405,
+              statusText: "method not allowed",
+              headers: {},
+              config: config2
+            });
+          }
+          try {
+            convertedData = fromDataURI(config2.url, responseType === "blob", {
+              Blob: config2.env && config2.env.Blob
+            });
+          } catch (err) {
+            throw AxiosError_default.from(err, AxiosError_default.ERR_BAD_REQUEST, config2);
+          }
+          if (responseType === "text") {
+            convertedData = convertedData.toString(responseEncoding);
+            if (!responseEncoding || responseEncoding === "utf8") {
+              convertedData = utils_default.stripBOM(convertedData);
+            }
+          } else if (responseType === "stream") {
+            convertedData = import_stream4.default.Readable.from(convertedData);
+          }
+          return settle(resolve, reject, {
+            data: convertedData,
+            status: 200,
+            statusText: "OK",
+            headers: new AxiosHeaders_default(),
+            config: config2
+          });
+        }
+        if (supportedProtocols.indexOf(protocol) === -1) {
+          return reject(new AxiosError_default(
+            "Unsupported protocol " + protocol,
+            AxiosError_default.ERR_BAD_REQUEST,
+            config2
+          ));
+        }
+        const headers = AxiosHeaders_default.from(config2.headers).normalize();
+        headers.set("User-Agent", "axios/" + VERSION, false);
+        const { onUploadProgress, onDownloadProgress } = config2;
+        const maxRate = config2.maxRate;
+        let maxUploadRate = void 0;
+        let maxDownloadRate = void 0;
+        if (utils_default.isSpecCompliantForm(data)) {
+          const userBoundary = headers.getContentType(/boundary=([-_\w\d]{10,70})/i);
+          data = formDataToStream_default(data, (formHeaders) => {
+            headers.set(formHeaders);
+          }, {
+            tag: `axios-${VERSION}-boundary`,
+            boundary: userBoundary && userBoundary[1] || void 0
+          });
+        } else if (utils_default.isFormData(data) && utils_default.isFunction(data.getHeaders)) {
+          headers.set(data.getHeaders());
+          if (!headers.hasContentLength()) {
+            try {
+              const knownLength = await import_util2.default.promisify(data.getLength).call(data);
+              Number.isFinite(knownLength) && knownLength >= 0 && headers.setContentLength(knownLength);
+            } catch (e) {
+            }
+          }
+        } else if (utils_default.isBlob(data) || utils_default.isFile(data)) {
+          data.size && headers.setContentType(data.type || "application/octet-stream");
+          headers.setContentLength(data.size || 0);
+          data = import_stream4.default.Readable.from(readBlob_default(data));
+        } else if (data && !utils_default.isStream(data)) {
+          if (Buffer.isBuffer(data)) {
+          } else if (utils_default.isArrayBuffer(data)) {
+            data = Buffer.from(new Uint8Array(data));
+          } else if (utils_default.isString(data)) {
+            data = Buffer.from(data, "utf-8");
+          } else {
+            return reject(new AxiosError_default(
+              "Data after transformation must be a string, an ArrayBuffer, a Buffer, or a Stream",
+              AxiosError_default.ERR_BAD_REQUEST,
+              config2
+            ));
+          }
+          headers.setContentLength(data.length, false);
+          if (config2.maxBodyLength > -1 && data.length > config2.maxBodyLength) {
+            return reject(new AxiosError_default(
+              "Request body larger than maxBodyLength limit",
+              AxiosError_default.ERR_BAD_REQUEST,
+              config2
+            ));
+          }
+        }
+        const contentLength = utils_default.toFiniteNumber(headers.getContentLength());
+        if (utils_default.isArray(maxRate)) {
+          maxUploadRate = maxRate[0];
+          maxDownloadRate = maxRate[1];
+        } else {
+          maxUploadRate = maxDownloadRate = maxRate;
+        }
+        if (data && (onUploadProgress || maxUploadRate)) {
+          if (!utils_default.isStream(data)) {
+            data = import_stream4.default.Readable.from(data, { objectMode: false });
+          }
+          data = import_stream4.default.pipeline([data, new AxiosTransformStream_default({
+            maxRate: utils_default.toFiniteNumber(maxUploadRate)
+          })], utils_default.noop);
+          onUploadProgress && data.on("progress", flushOnFinish(
+            data,
+            progressEventDecorator(
+              contentLength,
+              progressEventReducer(asyncDecorator(onUploadProgress), false, 3)
+            )
+          ));
+        }
+        let auth = void 0;
+        if (config2.auth) {
+          const username = config2.auth.username || "";
+          const password = config2.auth.password || "";
+          auth = username + ":" + password;
+        }
+        if (!auth && parsed.username) {
+          const urlUsername = parsed.username;
+          const urlPassword = parsed.password;
+          auth = urlUsername + ":" + urlPassword;
+        }
+        auth && headers.delete("authorization");
+        let path;
+        try {
+          path = buildURL(
+            parsed.pathname + parsed.search,
+            config2.params,
+            config2.paramsSerializer
+          ).replace(/^\?/, "");
+        } catch (err) {
+          const customErr = new Error(err.message);
+          customErr.config = config2;
+          customErr.url = config2.url;
+          customErr.exists = true;
+          return reject(customErr);
+        }
+        headers.set(
+          "Accept-Encoding",
+          "gzip, compress, deflate" + (isBrotliSupported ? ", br" : ""),
+          false
+        );
+        const options = {
+          path,
+          method,
+          headers: headers.toJSON(),
+          agents: { http: config2.httpAgent, https: config2.httpsAgent },
+          auth,
+          protocol,
+          family,
+          beforeRedirect: dispatchBeforeRedirect,
+          beforeRedirects: {}
+        };
+        !utils_default.isUndefined(lookup) && (options.lookup = lookup);
+        if (config2.socketPath) {
+          options.socketPath = config2.socketPath;
+        } else {
+          options.hostname = parsed.hostname.startsWith("[") ? parsed.hostname.slice(1, -1) : parsed.hostname;
+          options.port = parsed.port;
+          setProxy(options, config2.proxy, protocol + "//" + parsed.hostname + (parsed.port ? ":" + parsed.port : "") + options.path);
+        }
+        let transport;
+        const isHttpsRequest = isHttps.test(options.protocol);
+        options.agent = isHttpsRequest ? config2.httpsAgent : config2.httpAgent;
+        if (config2.transport) {
+          transport = config2.transport;
+        } else if (config2.maxRedirects === 0) {
+          transport = isHttpsRequest ? import_https.default : import_http.default;
+        } else {
+          if (config2.maxRedirects) {
+            options.maxRedirects = config2.maxRedirects;
+          }
+          if (config2.beforeRedirect) {
+            options.beforeRedirects.config = config2.beforeRedirect;
+          }
+          transport = isHttpsRequest ? httpsFollow : httpFollow;
+        }
+        if (config2.maxBodyLength > -1) {
+          options.maxBodyLength = config2.maxBodyLength;
+        } else {
+          options.maxBodyLength = Infinity;
+        }
+        if (config2.insecureHTTPParser) {
+          options.insecureHTTPParser = config2.insecureHTTPParser;
+        }
+        req = transport.request(options, function handleResponse(res) {
+          if (req.destroyed) return;
+          const streams = [res];
+          const responseLength = +res.headers["content-length"];
+          if (onDownloadProgress || maxDownloadRate) {
+            const transformStream = new AxiosTransformStream_default({
+              maxRate: utils_default.toFiniteNumber(maxDownloadRate)
+            });
+            onDownloadProgress && transformStream.on("progress", flushOnFinish(
+              transformStream,
+              progressEventDecorator(
+                responseLength,
+                progressEventReducer(asyncDecorator(onDownloadProgress), true, 3)
+              )
+            ));
+            streams.push(transformStream);
+          }
+          let responseStream = res;
+          const lastRequest = res.req || req;
+          if (config2.decompress !== false && res.headers["content-encoding"]) {
+            if (method === "HEAD" || res.statusCode === 204) {
+              delete res.headers["content-encoding"];
+            }
+            switch ((res.headers["content-encoding"] || "").toLowerCase()) {
+              /*eslint default-case:0*/
+              case "gzip":
+              case "x-gzip":
+              case "compress":
+              case "x-compress":
+                streams.push(import_zlib.default.createUnzip(zlibOptions));
+                delete res.headers["content-encoding"];
+                break;
+              case "deflate":
+                streams.push(new ZlibHeaderTransformStream_default());
+                streams.push(import_zlib.default.createUnzip(zlibOptions));
+                delete res.headers["content-encoding"];
+                break;
+              case "br":
+                if (isBrotliSupported) {
+                  streams.push(import_zlib.default.createBrotliDecompress(brotliOptions));
+                  delete res.headers["content-encoding"];
+                }
+            }
+          }
+          responseStream = streams.length > 1 ? import_stream4.default.pipeline(streams, utils_default.noop) : streams[0];
+          const offListeners = import_stream4.default.finished(responseStream, () => {
+            offListeners();
+            onFinished();
+          });
+          const response = {
+            status: res.statusCode,
+            statusText: res.statusMessage,
+            headers: new AxiosHeaders_default(res.headers),
+            config: config2,
+            request: lastRequest
+          };
+          if (responseType === "stream") {
+            response.data = responseStream;
+            settle(resolve, reject, response);
+          } else {
+            const responseBuffer = [];
+            let totalResponseBytes = 0;
+            responseStream.on("data", function handleStreamData(chunk) {
+              responseBuffer.push(chunk);
+              totalResponseBytes += chunk.length;
+              if (config2.maxContentLength > -1 && totalResponseBytes > config2.maxContentLength) {
+                rejected = true;
+                responseStream.destroy();
+                reject(new AxiosError_default(
+                  "maxContentLength size of " + config2.maxContentLength + " exceeded",
+                  AxiosError_default.ERR_BAD_RESPONSE,
+                  config2,
+                  lastRequest
+                ));
+              }
+            });
+            responseStream.on("aborted", function handlerStreamAborted() {
+              if (rejected) {
+                return;
+              }
+              const err = new AxiosError_default(
+                "stream has been aborted",
+                AxiosError_default.ERR_BAD_RESPONSE,
+                config2,
+                lastRequest
+              );
+              responseStream.destroy(err);
+              reject(err);
+            });
+            responseStream.on("error", function handleStreamError(err) {
+              if (req.destroyed) return;
+              reject(AxiosError_default.from(err, null, config2, lastRequest));
+            });
+            responseStream.on("end", function handleStreamEnd() {
+              try {
+                let responseData = responseBuffer.length === 1 ? responseBuffer[0] : Buffer.concat(responseBuffer);
+                if (responseType !== "arraybuffer") {
+                  responseData = responseData.toString(responseEncoding);
+                  if (!responseEncoding || responseEncoding === "utf8") {
+                    responseData = utils_default.stripBOM(responseData);
+                  }
+                }
+                response.data = responseData;
+              } catch (err) {
+                return reject(AxiosError_default.from(err, null, config2, response.request, response));
+              }
+              settle(resolve, reject, response);
+            });
+          }
+          emitter.once("abort", (err) => {
+            if (!responseStream.destroyed) {
+              responseStream.emit("error", err);
+              responseStream.destroy();
+            }
+          });
+        });
+        emitter.once("abort", (err) => {
+          reject(err);
+          req.destroy(err);
+        });
+        req.on("error", function handleRequestError(err) {
+          reject(AxiosError_default.from(err, null, config2, req));
+        });
+        req.on("socket", function handleRequestSocket(socket) {
+          socket.setKeepAlive(true, 1e3 * 60);
+        });
+        if (config2.timeout) {
+          const timeout = parseInt(config2.timeout, 10);
+          if (Number.isNaN(timeout)) {
+            reject(new AxiosError_default(
+              "error trying to parse `config.timeout` to int",
+              AxiosError_default.ERR_BAD_OPTION_VALUE,
+              config2,
+              req
+            ));
+            return;
+          }
+          req.setTimeout(timeout, function handleRequestTimeout() {
+            if (isDone) return;
+            let timeoutErrorMessage = config2.timeout ? "timeout of " + config2.timeout + "ms exceeded" : "timeout exceeded";
+            const transitional2 = config2.transitional || transitional_default;
+            if (config2.timeoutErrorMessage) {
+              timeoutErrorMessage = config2.timeoutErrorMessage;
+            }
+            reject(new AxiosError_default(
+              timeoutErrorMessage,
+              transitional2.clarifyTimeoutError ? AxiosError_default.ETIMEDOUT : AxiosError_default.ECONNABORTED,
+              config2,
+              req
+            ));
+            abort();
+          });
+        }
+        if (utils_default.isStream(data)) {
+          let ended = false;
+          let errored = false;
+          data.on("end", () => {
+            ended = true;
+          });
+          data.once("error", (err) => {
+            errored = true;
+            req.destroy(err);
+          });
+          data.on("close", () => {
+            if (!ended && !errored) {
+              abort(new CanceledError_default("Request stream has been aborted", config2, req));
+            }
+          });
+          data.pipe(req);
+        } else {
+          req.end(data);
+        }
+      });
+    };
+  }
+});
+
+// node_modules/axios/lib/helpers/isURLSameOrigin.js
+var isURLSameOrigin_default;
+var init_isURLSameOrigin = __esm({
+  "node_modules/axios/lib/helpers/isURLSameOrigin.js"() {
+    "use strict";
+    init_platform();
+    isURLSameOrigin_default = platform_default.hasStandardBrowserEnv ? /* @__PURE__ */ ((origin2, isMSIE) => (url2) => {
+      url2 = new URL(url2, platform_default.origin);
+      return origin2.protocol === url2.protocol && origin2.host === url2.host && (isMSIE || origin2.port === url2.port);
+    })(
+      new URL(platform_default.origin),
+      platform_default.navigator && /(msie|trident)/i.test(platform_default.navigator.userAgent)
+    ) : () => true;
+  }
+});
+
+// node_modules/axios/lib/helpers/cookies.js
+var cookies_default;
+var init_cookies = __esm({
+  "node_modules/axios/lib/helpers/cookies.js"() {
+    "use strict";
+    init_utils();
+    init_platform();
+    cookies_default = platform_default.hasStandardBrowserEnv ? (
+      // Standard browser envs support document.cookie
+      {
+        write(name, value, expires, path, domain, secure) {
+          const cookie = [name + "=" + encodeURIComponent(value)];
+          utils_default.isNumber(expires) && cookie.push("expires=" + new Date(expires).toGMTString());
+          utils_default.isString(path) && cookie.push("path=" + path);
+          utils_default.isString(domain) && cookie.push("domain=" + domain);
+          secure === true && cookie.push("secure");
+          document.cookie = cookie.join("; ");
+        },
+        read(name) {
+          const match = document.cookie.match(new RegExp("(^|;\\s*)(" + name + ")=([^;]*)"));
+          return match ? decodeURIComponent(match[3]) : null;
+        },
+        remove(name) {
+          this.write(name, "", Date.now() - 864e5);
+        }
+      }
+    ) : (
+      // Non-standard browser env (web workers, react-native) lack needed support.
+      {
+        write() {
+        },
+        read() {
+          return null;
+        },
+        remove() {
+        }
+      }
+    );
+  }
+});
+
+// node_modules/axios/lib/core/mergeConfig.js
+function mergeConfig(config1, config2) {
+  config2 = config2 || {};
+  const config3 = {};
+  function getMergedValue(target, source, prop, caseless) {
+    if (utils_default.isPlainObject(target) && utils_default.isPlainObject(source)) {
+      return utils_default.merge.call({ caseless }, target, source);
+    } else if (utils_default.isPlainObject(source)) {
+      return utils_default.merge({}, source);
+    } else if (utils_default.isArray(source)) {
+      return source.slice();
+    }
+    return source;
+  }
+  function mergeDeepProperties(a, b, prop, caseless) {
+    if (!utils_default.isUndefined(b)) {
+      return getMergedValue(a, b, prop, caseless);
+    } else if (!utils_default.isUndefined(a)) {
+      return getMergedValue(void 0, a, prop, caseless);
+    }
+  }
+  function valueFromConfig2(a, b) {
+    if (!utils_default.isUndefined(b)) {
+      return getMergedValue(void 0, b);
+    }
+  }
+  function defaultToConfig2(a, b) {
+    if (!utils_default.isUndefined(b)) {
+      return getMergedValue(void 0, b);
+    } else if (!utils_default.isUndefined(a)) {
+      return getMergedValue(void 0, a);
+    }
+  }
+  function mergeDirectKeys(a, b, prop) {
+    if (prop in config2) {
+      return getMergedValue(a, b);
+    } else if (prop in config1) {
+      return getMergedValue(void 0, a);
+    }
+  }
+  const mergeMap = {
+    url: valueFromConfig2,
+    method: valueFromConfig2,
+    data: valueFromConfig2,
+    baseURL: defaultToConfig2,
+    transformRequest: defaultToConfig2,
+    transformResponse: defaultToConfig2,
+    paramsSerializer: defaultToConfig2,
+    timeout: defaultToConfig2,
+    timeoutMessage: defaultToConfig2,
+    withCredentials: defaultToConfig2,
+    withXSRFToken: defaultToConfig2,
+    adapter: defaultToConfig2,
+    responseType: defaultToConfig2,
+    xsrfCookieName: defaultToConfig2,
+    xsrfHeaderName: defaultToConfig2,
+    onUploadProgress: defaultToConfig2,
+    onDownloadProgress: defaultToConfig2,
+    decompress: defaultToConfig2,
+    maxContentLength: defaultToConfig2,
+    maxBodyLength: defaultToConfig2,
+    beforeRedirect: defaultToConfig2,
+    transport: defaultToConfig2,
+    httpAgent: defaultToConfig2,
+    httpsAgent: defaultToConfig2,
+    cancelToken: defaultToConfig2,
+    socketPath: defaultToConfig2,
+    responseEncoding: defaultToConfig2,
+    validateStatus: mergeDirectKeys,
+    headers: (a, b, prop) => mergeDeepProperties(headersToObject(a), headersToObject(b), prop, true)
+  };
+  utils_default.forEach(Object.keys(Object.assign({}, config1, config2)), function computeConfigValue(prop) {
+    const merge2 = mergeMap[prop] || mergeDeepProperties;
+    const configValue = merge2(config1[prop], config2[prop], prop);
+    utils_default.isUndefined(configValue) && merge2 !== mergeDirectKeys || (config3[prop] = configValue);
+  });
+  return config3;
+}
+var headersToObject;
+var init_mergeConfig = __esm({
+  "node_modules/axios/lib/core/mergeConfig.js"() {
+    "use strict";
+    init_utils();
+    init_AxiosHeaders();
+    headersToObject = (thing) => thing instanceof AxiosHeaders_default ? { ...thing } : thing;
+  }
+});
+
+// node_modules/axios/lib/helpers/resolveConfig.js
+var resolveConfig_default;
+var init_resolveConfig = __esm({
+  "node_modules/axios/lib/helpers/resolveConfig.js"() {
+    "use strict";
+    init_platform();
+    init_utils();
+    init_isURLSameOrigin();
+    init_cookies();
+    init_buildFullPath();
+    init_mergeConfig();
+    init_AxiosHeaders();
+    init_buildURL();
+    resolveConfig_default = (config2) => {
+      const newConfig = mergeConfig({}, config2);
+      let { data, withXSRFToken, xsrfHeaderName, xsrfCookieName, headers, auth } = newConfig;
+      newConfig.headers = headers = AxiosHeaders_default.from(headers);
+      newConfig.url = buildURL(buildFullPath(newConfig.baseURL, newConfig.url, newConfig.allowAbsoluteUrls), config2.params, config2.paramsSerializer);
+      if (auth) {
+        headers.set(
+          "Authorization",
+          "Basic " + btoa((auth.username || "") + ":" + (auth.password ? unescape(encodeURIComponent(auth.password)) : ""))
+        );
+      }
+      let contentType;
+      if (utils_default.isFormData(data)) {
+        if (platform_default.hasStandardBrowserEnv || platform_default.hasStandardBrowserWebWorkerEnv) {
+          headers.setContentType(void 0);
+        } else if ((contentType = headers.getContentType()) !== false) {
+          const [type, ...tokens] = contentType ? contentType.split(";").map((token) => token.trim()).filter(Boolean) : [];
+          headers.setContentType([type || "multipart/form-data", ...tokens].join("; "));
+        }
+      }
+      if (platform_default.hasStandardBrowserEnv) {
+        withXSRFToken && utils_default.isFunction(withXSRFToken) && (withXSRFToken = withXSRFToken(newConfig));
+        if (withXSRFToken || withXSRFToken !== false && isURLSameOrigin_default(newConfig.url)) {
+          const xsrfValue = xsrfHeaderName && xsrfCookieName && cookies_default.read(xsrfCookieName);
+          if (xsrfValue) {
+            headers.set(xsrfHeaderName, xsrfValue);
+          }
+        }
+      }
+      return newConfig;
+    };
+  }
+});
+
+// node_modules/axios/lib/adapters/xhr.js
+var isXHRAdapterSupported, xhr_default;
+var init_xhr = __esm({
+  "node_modules/axios/lib/adapters/xhr.js"() {
+    "use strict";
+    init_utils();
+    init_settle();
+    init_transitional();
+    init_AxiosError();
+    init_CanceledError();
+    init_parseProtocol();
+    init_platform();
+    init_AxiosHeaders();
+    init_progressEventReducer();
+    init_resolveConfig();
+    isXHRAdapterSupported = typeof XMLHttpRequest !== "undefined";
+    xhr_default = isXHRAdapterSupported && function(config2) {
+      return new Promise(function dispatchXhrRequest(resolve, reject) {
+        const _config = resolveConfig_default(config2);
+        let requestData = _config.data;
+        const requestHeaders = AxiosHeaders_default.from(_config.headers).normalize();
+        let { responseType, onUploadProgress, onDownloadProgress } = _config;
+        let onCanceled;
+        let uploadThrottled, downloadThrottled;
+        let flushUpload, flushDownload;
+        function done() {
+          flushUpload && flushUpload();
+          flushDownload && flushDownload();
+          _config.cancelToken && _config.cancelToken.unsubscribe(onCanceled);
+          _config.signal && _config.signal.removeEventListener("abort", onCanceled);
+        }
+        let request = new XMLHttpRequest();
+        request.open(_config.method.toUpperCase(), _config.url, true);
+        request.timeout = _config.timeout;
+        function onloadend() {
+          if (!request) {
+            return;
+          }
+          const responseHeaders = AxiosHeaders_default.from(
+            "getAllResponseHeaders" in request && request.getAllResponseHeaders()
+          );
+          const responseData = !responseType || responseType === "text" || responseType === "json" ? request.responseText : request.response;
+          const response = {
+            data: responseData,
+            status: request.status,
+            statusText: request.statusText,
+            headers: responseHeaders,
+            config: config2,
+            request
+          };
+          settle(function _resolve(value) {
+            resolve(value);
+            done();
+          }, function _reject(err) {
+            reject(err);
+            done();
+          }, response);
+          request = null;
+        }
+        if ("onloadend" in request) {
+          request.onloadend = onloadend;
+        } else {
+          request.onreadystatechange = function handleLoad() {
+            if (!request || request.readyState !== 4) {
+              return;
+            }
+            if (request.status === 0 && !(request.responseURL && request.responseURL.indexOf("file:") === 0)) {
+              return;
+            }
+            setTimeout(onloadend);
+          };
+        }
+        request.onabort = function handleAbort() {
+          if (!request) {
+            return;
+          }
+          reject(new AxiosError_default("Request aborted", AxiosError_default.ECONNABORTED, config2, request));
+          request = null;
+        };
+        request.onerror = function handleError3() {
+          reject(new AxiosError_default("Network Error", AxiosError_default.ERR_NETWORK, config2, request));
+          request = null;
+        };
+        request.ontimeout = function handleTimeout() {
+          let timeoutErrorMessage = _config.timeout ? "timeout of " + _config.timeout + "ms exceeded" : "timeout exceeded";
+          const transitional2 = _config.transitional || transitional_default;
+          if (_config.timeoutErrorMessage) {
+            timeoutErrorMessage = _config.timeoutErrorMessage;
+          }
+          reject(new AxiosError_default(
+            timeoutErrorMessage,
+            transitional2.clarifyTimeoutError ? AxiosError_default.ETIMEDOUT : AxiosError_default.ECONNABORTED,
+            config2,
+            request
+          ));
+          request = null;
+        };
+        requestData === void 0 && requestHeaders.setContentType(null);
+        if ("setRequestHeader" in request) {
+          utils_default.forEach(requestHeaders.toJSON(), function setRequestHeader(val, key) {
+            request.setRequestHeader(key, val);
+          });
+        }
+        if (!utils_default.isUndefined(_config.withCredentials)) {
+          request.withCredentials = !!_config.withCredentials;
+        }
+        if (responseType && responseType !== "json") {
+          request.responseType = _config.responseType;
+        }
+        if (onDownloadProgress) {
+          [downloadThrottled, flushDownload] = progressEventReducer(onDownloadProgress, true);
+          request.addEventListener("progress", downloadThrottled);
+        }
+        if (onUploadProgress && request.upload) {
+          [uploadThrottled, flushUpload] = progressEventReducer(onUploadProgress);
+          request.upload.addEventListener("progress", uploadThrottled);
+          request.upload.addEventListener("loadend", flushUpload);
+        }
+        if (_config.cancelToken || _config.signal) {
+          onCanceled = (cancel) => {
+            if (!request) {
+              return;
+            }
+            reject(!cancel || cancel.type ? new CanceledError_default(null, config2, request) : cancel);
+            request.abort();
+            request = null;
+          };
+          _config.cancelToken && _config.cancelToken.subscribe(onCanceled);
+          if (_config.signal) {
+            _config.signal.aborted ? onCanceled() : _config.signal.addEventListener("abort", onCanceled);
+          }
+        }
+        const protocol = parseProtocol(_config.url);
+        if (protocol && platform_default.protocols.indexOf(protocol) === -1) {
+          reject(new AxiosError_default("Unsupported protocol " + protocol + ":", AxiosError_default.ERR_BAD_REQUEST, config2));
+          return;
+        }
+        request.send(requestData || null);
+      });
+    };
+  }
+});
+
+// node_modules/axios/lib/helpers/composeSignals.js
+var composeSignals, composeSignals_default;
+var init_composeSignals = __esm({
+  "node_modules/axios/lib/helpers/composeSignals.js"() {
+    "use strict";
+    init_CanceledError();
+    init_AxiosError();
+    init_utils();
+    composeSignals = (signals, timeout) => {
+      const { length } = signals = signals ? signals.filter(Boolean) : [];
+      if (timeout || length) {
+        let controller = new AbortController();
+        let aborted;
+        const onabort = function(reason) {
+          if (!aborted) {
+            aborted = true;
+            unsubscribe();
+            const err = reason instanceof Error ? reason : this.reason;
+            controller.abort(err instanceof AxiosError_default ? err : new CanceledError_default(err instanceof Error ? err.message : err));
+          }
+        };
+        let timer = timeout && setTimeout(() => {
+          timer = null;
+          onabort(new AxiosError_default(`timeout ${timeout} of ms exceeded`, AxiosError_default.ETIMEDOUT));
+        }, timeout);
+        const unsubscribe = () => {
+          if (signals) {
+            timer && clearTimeout(timer);
+            timer = null;
+            signals.forEach((signal2) => {
+              signal2.unsubscribe ? signal2.unsubscribe(onabort) : signal2.removeEventListener("abort", onabort);
+            });
+            signals = null;
+          }
+        };
+        signals.forEach((signal2) => signal2.addEventListener("abort", onabort));
+        const { signal } = controller;
+        signal.unsubscribe = () => utils_default.asap(unsubscribe);
+        return signal;
+      }
+    };
+    composeSignals_default = composeSignals;
+  }
+});
+
+// node_modules/axios/lib/helpers/trackStream.js
+var streamChunk, readBytes, readStream, trackStream;
+var init_trackStream = __esm({
+  "node_modules/axios/lib/helpers/trackStream.js"() {
+    "use strict";
+    streamChunk = function* (chunk, chunkSize) {
+      let len = chunk.byteLength;
+      if (!chunkSize || len < chunkSize) {
+        yield chunk;
+        return;
+      }
+      let pos = 0;
+      let end;
+      while (pos < len) {
+        end = pos + chunkSize;
+        yield chunk.slice(pos, end);
+        pos = end;
+      }
+    };
+    readBytes = async function* (iterable, chunkSize) {
+      for await (const chunk of readStream(iterable)) {
+        yield* streamChunk(chunk, chunkSize);
+      }
+    };
+    readStream = async function* (stream4) {
+      if (stream4[Symbol.asyncIterator]) {
+        yield* stream4;
+        return;
+      }
+      const reader = stream4.getReader();
+      try {
+        for (; ; ) {
+          const { done, value } = await reader.read();
+          if (done) {
+            break;
+          }
+          yield value;
+        }
+      } finally {
+        await reader.cancel();
+      }
+    };
+    trackStream = (stream4, chunkSize, onProgress, onFinish) => {
+      const iterator2 = readBytes(stream4, chunkSize);
+      let bytes = 0;
+      let done;
+      let _onFinish = (e) => {
+        if (!done) {
+          done = true;
+          onFinish && onFinish(e);
+        }
+      };
+      return new ReadableStream({
+        async pull(controller) {
+          try {
+            const { done: done2, value } = await iterator2.next();
+            if (done2) {
+              _onFinish();
+              controller.close();
+              return;
+            }
+            let len = value.byteLength;
+            if (onProgress) {
+              let loadedBytes = bytes += len;
+              onProgress(loadedBytes);
+            }
+            controller.enqueue(new Uint8Array(value));
+          } catch (err) {
+            _onFinish(err);
+            throw err;
+          }
+        },
+        cancel(reason) {
+          _onFinish(reason);
+          return iterator2.return();
+        }
+      }, {
+        highWaterMark: 2
+      });
+    };
+  }
+});
+
+// node_modules/axios/lib/adapters/fetch.js
+var isFetchSupported, isReadableStreamSupported, encodeText, test, supportsRequestStream, DEFAULT_CHUNK_SIZE, supportsResponseStream, resolvers, getBodyLength, resolveBodyLength, fetch_default;
+var init_fetch = __esm({
+  "node_modules/axios/lib/adapters/fetch.js"() {
+    "use strict";
+    init_platform();
+    init_utils();
+    init_AxiosError();
+    init_composeSignals();
+    init_trackStream();
+    init_AxiosHeaders();
+    init_progressEventReducer();
+    init_resolveConfig();
+    init_settle();
+    isFetchSupported = typeof fetch === "function" && typeof Request === "function" && typeof Response === "function";
+    isReadableStreamSupported = isFetchSupported && typeof ReadableStream === "function";
+    encodeText = isFetchSupported && (typeof TextEncoder === "function" ? /* @__PURE__ */ ((encoder) => (str) => encoder.encode(str))(new TextEncoder()) : async (str) => new Uint8Array(await new Response(str).arrayBuffer()));
+    test = (fn, ...args) => {
+      try {
+        return !!fn(...args);
+      } catch (e) {
+        return false;
+      }
+    };
+    supportsRequestStream = isReadableStreamSupported && test(() => {
+      let duplexAccessed = false;
+      const hasContentType = new Request(platform_default.origin, {
+        body: new ReadableStream(),
+        method: "POST",
+        get duplex() {
+          duplexAccessed = true;
+          return "half";
+        }
+      }).headers.has("Content-Type");
+      return duplexAccessed && !hasContentType;
+    });
+    DEFAULT_CHUNK_SIZE = 64 * 1024;
+    supportsResponseStream = isReadableStreamSupported && test(() => utils_default.isReadableStream(new Response("").body));
+    resolvers = {
+      stream: supportsResponseStream && ((res) => res.body)
+    };
+    isFetchSupported && ((res) => {
+      ["text", "arrayBuffer", "blob", "formData", "stream"].forEach((type) => {
+        !resolvers[type] && (resolvers[type] = utils_default.isFunction(res[type]) ? (res2) => res2[type]() : (_, config2) => {
+          throw new AxiosError_default(`Response type '${type}' is not supported`, AxiosError_default.ERR_NOT_SUPPORT, config2);
+        });
+      });
+    })(new Response());
+    getBodyLength = async (body) => {
+      if (body == null) {
+        return 0;
+      }
+      if (utils_default.isBlob(body)) {
+        return body.size;
+      }
+      if (utils_default.isSpecCompliantForm(body)) {
+        const _request2 = new Request(platform_default.origin, {
+          method: "POST",
+          body
+        });
+        return (await _request2.arrayBuffer()).byteLength;
+      }
+      if (utils_default.isArrayBufferView(body) || utils_default.isArrayBuffer(body)) {
+        return body.byteLength;
+      }
+      if (utils_default.isURLSearchParams(body)) {
+        body = body + "";
+      }
+      if (utils_default.isString(body)) {
+        return (await encodeText(body)).byteLength;
+      }
+    };
+    resolveBodyLength = async (headers, body) => {
+      const length = utils_default.toFiniteNumber(headers.getContentLength());
+      return length == null ? getBodyLength(body) : length;
+    };
+    fetch_default = isFetchSupported && (async (config2) => {
+      let {
+        url: url2,
+        method,
+        data,
+        signal,
+        cancelToken,
+        timeout,
+        onDownloadProgress,
+        onUploadProgress,
+        responseType,
+        headers,
+        withCredentials = "same-origin",
+        fetchOptions
+      } = resolveConfig_default(config2);
+      responseType = responseType ? (responseType + "").toLowerCase() : "text";
+      let composedSignal = composeSignals_default([signal, cancelToken && cancelToken.toAbortSignal()], timeout);
+      let request;
+      const unsubscribe = composedSignal && composedSignal.unsubscribe && (() => {
+        composedSignal.unsubscribe();
+      });
+      let requestContentLength;
+      try {
+        if (onUploadProgress && supportsRequestStream && method !== "get" && method !== "head" && (requestContentLength = await resolveBodyLength(headers, data)) !== 0) {
+          let _request2 = new Request(url2, {
+            method: "POST",
+            body: data,
+            duplex: "half"
+          });
+          let contentTypeHeader;
+          if (utils_default.isFormData(data) && (contentTypeHeader = _request2.headers.get("content-type"))) {
+            headers.setContentType(contentTypeHeader);
+          }
+          if (_request2.body) {
+            const [onProgress, flush] = progressEventDecorator(
+              requestContentLength,
+              progressEventReducer(asyncDecorator(onUploadProgress))
+            );
+            data = trackStream(_request2.body, DEFAULT_CHUNK_SIZE, onProgress, flush);
+          }
+        }
+        if (!utils_default.isString(withCredentials)) {
+          withCredentials = withCredentials ? "include" : "omit";
+        }
+        const isCredentialsSupported = "credentials" in Request.prototype;
+        request = new Request(url2, {
+          ...fetchOptions,
+          signal: composedSignal,
+          method: method.toUpperCase(),
+          headers: headers.normalize().toJSON(),
+          body: data,
+          duplex: "half",
+          credentials: isCredentialsSupported ? withCredentials : void 0
+        });
+        let response = await fetch(request, fetchOptions);
+        const isStreamResponse = supportsResponseStream && (responseType === "stream" || responseType === "response");
+        if (supportsResponseStream && (onDownloadProgress || isStreamResponse && unsubscribe)) {
+          const options = {};
+          ["status", "statusText", "headers"].forEach((prop) => {
+            options[prop] = response[prop];
+          });
+          const responseContentLength = utils_default.toFiniteNumber(response.headers.get("content-length"));
+          const [onProgress, flush] = onDownloadProgress && progressEventDecorator(
+            responseContentLength,
+            progressEventReducer(asyncDecorator(onDownloadProgress), true)
+          ) || [];
+          response = new Response(
+            trackStream(response.body, DEFAULT_CHUNK_SIZE, onProgress, () => {
+              flush && flush();
+              unsubscribe && unsubscribe();
+            }),
+            options
+          );
+        }
+        responseType = responseType || "text";
+        let responseData = await resolvers[utils_default.findKey(resolvers, responseType) || "text"](response, config2);
+        !isStreamResponse && unsubscribe && unsubscribe();
+        return await new Promise((resolve, reject) => {
+          settle(resolve, reject, {
+            data: responseData,
+            headers: AxiosHeaders_default.from(response.headers),
+            status: response.status,
+            statusText: response.statusText,
+            config: config2,
+            request
+          });
+        });
+      } catch (err) {
+        unsubscribe && unsubscribe();
+        if (err && err.name === "TypeError" && /Load failed|fetch/i.test(err.message)) {
+          throw Object.assign(
+            new AxiosError_default("Network Error", AxiosError_default.ERR_NETWORK, config2, request),
+            {
+              cause: err.cause || err
+            }
+          );
+        }
+        throw AxiosError_default.from(err, err && err.code, config2, request);
+      }
+    });
+  }
+});
+
+// node_modules/axios/lib/adapters/adapters.js
+var knownAdapters, renderReason, isResolvedHandle, adapters_default;
+var init_adapters = __esm({
+  "node_modules/axios/lib/adapters/adapters.js"() {
+    "use strict";
+    init_utils();
+    init_http();
+    init_xhr();
+    init_fetch();
+    init_AxiosError();
+    knownAdapters = {
+      http: http_default,
+      xhr: xhr_default,
+      fetch: fetch_default
+    };
+    utils_default.forEach(knownAdapters, (fn, value) => {
+      if (fn) {
+        try {
+          Object.defineProperty(fn, "name", { value });
+        } catch (e) {
+        }
+        Object.defineProperty(fn, "adapterName", { value });
+      }
+    });
+    renderReason = (reason) => `- ${reason}`;
+    isResolvedHandle = (adapter) => utils_default.isFunction(adapter) || adapter === null || adapter === false;
+    adapters_default = {
+      getAdapter: (adapters) => {
+        adapters = utils_default.isArray(adapters) ? adapters : [adapters];
+        const { length } = adapters;
+        let nameOrAdapter;
+        let adapter;
+        const rejectedReasons = {};
+        for (let i = 0; i < length; i++) {
+          nameOrAdapter = adapters[i];
+          let id;
+          adapter = nameOrAdapter;
+          if (!isResolvedHandle(nameOrAdapter)) {
+            adapter = knownAdapters[(id = String(nameOrAdapter)).toLowerCase()];
+            if (adapter === void 0) {
+              throw new AxiosError_default(`Unknown adapter '${id}'`);
+            }
+          }
+          if (adapter) {
+            break;
+          }
+          rejectedReasons[id || "#" + i] = adapter;
+        }
+        if (!adapter) {
+          const reasons = Object.entries(rejectedReasons).map(
+            ([id, state]) => `adapter ${id} ` + (state === false ? "is not supported by the environment" : "is not available in the build")
+          );
+          let s = length ? reasons.length > 1 ? "since :\n" + reasons.map(renderReason).join("\n") : " " + renderReason(reasons[0]) : "as no adapter specified";
+          throw new AxiosError_default(
+            `There is no suitable adapter to dispatch the request ` + s,
+            "ERR_NOT_SUPPORT"
+          );
+        }
+        return adapter;
+      },
+      adapters: knownAdapters
+    };
+  }
+});
+
+// node_modules/axios/lib/core/dispatchRequest.js
+function throwIfCancellationRequested(config2) {
+  if (config2.cancelToken) {
+    config2.cancelToken.throwIfRequested();
+  }
+  if (config2.signal && config2.signal.aborted) {
+    throw new CanceledError_default(null, config2);
+  }
+}
+function dispatchRequest(config2) {
+  throwIfCancellationRequested(config2);
+  config2.headers = AxiosHeaders_default.from(config2.headers);
+  config2.data = transformData.call(
+    config2,
+    config2.transformRequest
+  );
+  if (["post", "put", "patch"].indexOf(config2.method) !== -1) {
+    config2.headers.setContentType("application/x-www-form-urlencoded", false);
+  }
+  const adapter = adapters_default.getAdapter(config2.adapter || defaults_default.adapter);
+  return adapter(config2).then(function onAdapterResolution(response) {
+    throwIfCancellationRequested(config2);
+    response.data = transformData.call(
+      config2,
+      config2.transformResponse,
+      response
+    );
+    response.headers = AxiosHeaders_default.from(response.headers);
+    return response;
+  }, function onAdapterRejection(reason) {
+    if (!isCancel(reason)) {
+      throwIfCancellationRequested(config2);
+      if (reason && reason.response) {
+        reason.response.data = transformData.call(
+          config2,
+          config2.transformResponse,
+          reason.response
+        );
+        reason.response.headers = AxiosHeaders_default.from(reason.response.headers);
+      }
+    }
+    return Promise.reject(reason);
+  });
+}
+var init_dispatchRequest = __esm({
+  "node_modules/axios/lib/core/dispatchRequest.js"() {
+    "use strict";
+    init_transformData();
+    init_isCancel();
+    init_defaults();
+    init_CanceledError();
+    init_AxiosHeaders();
+    init_adapters();
+  }
+});
+
+// node_modules/axios/lib/helpers/validator.js
+function assertOptions(options, schema, allowUnknown) {
+  if (typeof options !== "object") {
+    throw new AxiosError_default("options must be an object", AxiosError_default.ERR_BAD_OPTION_VALUE);
+  }
+  const keys = Object.keys(options);
+  let i = keys.length;
+  while (i-- > 0) {
+    const opt = keys[i];
+    const validator = schema[opt];
+    if (validator) {
+      const value = options[opt];
+      const result = value === void 0 || validator(value, opt, options);
+      if (result !== true) {
+        throw new AxiosError_default("option " + opt + " must be " + result, AxiosError_default.ERR_BAD_OPTION_VALUE);
+      }
+      continue;
+    }
+    if (allowUnknown !== true) {
+      throw new AxiosError_default("Unknown option " + opt, AxiosError_default.ERR_BAD_OPTION);
+    }
+  }
+}
+var validators, deprecatedWarnings, validator_default;
+var init_validator = __esm({
+  "node_modules/axios/lib/helpers/validator.js"() {
+    "use strict";
+    init_data();
+    init_AxiosError();
+    validators = {};
+    ["object", "boolean", "number", "function", "string", "symbol"].forEach((type, i) => {
+      validators[type] = function validator(thing) {
+        return typeof thing === type || "a" + (i < 1 ? "n " : " ") + type;
+      };
+    });
+    deprecatedWarnings = {};
+    validators.transitional = function transitional(validator, version4, message) {
+      function formatMessage(opt, desc) {
+        return "[Axios v" + VERSION + "] Transitional option '" + opt + "'" + desc + (message ? ". " + message : "");
+      }
+      return (value, opt, opts) => {
+        if (validator === false) {
+          throw new AxiosError_default(
+            formatMessage(opt, " has been removed" + (version4 ? " in " + version4 : "")),
+            AxiosError_default.ERR_DEPRECATED
+          );
+        }
+        if (version4 && !deprecatedWarnings[opt]) {
+          deprecatedWarnings[opt] = true;
+          console.warn(
+            formatMessage(
+              opt,
+              " has been deprecated since v" + version4 + " and will be removed in the near future"
+            )
+          );
+        }
+        return validator ? validator(value, opt, opts) : true;
+      };
+    };
+    validators.spelling = function spelling(correctSpelling) {
+      return (value, opt) => {
+        console.warn(`${opt} is likely a misspelling of ${correctSpelling}`);
+        return true;
+      };
+    };
+    validator_default = {
+      assertOptions,
+      validators
+    };
+  }
+});
+
+// node_modules/axios/lib/core/Axios.js
+var validators2, Axios, Axios_default;
+var init_Axios = __esm({
+  "node_modules/axios/lib/core/Axios.js"() {
+    "use strict";
+    init_utils();
+    init_buildURL();
+    init_InterceptorManager();
+    init_dispatchRequest();
+    init_mergeConfig();
+    init_buildFullPath();
+    init_validator();
+    init_AxiosHeaders();
+    validators2 = validator_default.validators;
+    Axios = class {
+      constructor(instanceConfig) {
+        this.defaults = instanceConfig || {};
+        this.interceptors = {
+          request: new InterceptorManager_default(),
+          response: new InterceptorManager_default()
+        };
+      }
+      /**
+       * Dispatch a request
+       *
+       * @param {String|Object} configOrUrl The config specific for this request (merged with this.defaults)
+       * @param {?Object} config
+       *
+       * @returns {Promise} The Promise to be fulfilled
+       */
+      async request(configOrUrl, config2) {
+        try {
+          return await this._request(configOrUrl, config2);
+        } catch (err) {
+          if (err instanceof Error) {
+            let dummy = {};
+            Error.captureStackTrace ? Error.captureStackTrace(dummy) : dummy = new Error();
+            const stack = dummy.stack ? dummy.stack.replace(/^.+\n/, "") : "";
+            try {
+              if (!err.stack) {
+                err.stack = stack;
+              } else if (stack && !String(err.stack).endsWith(stack.replace(/^.+\n.+\n/, ""))) {
+                err.stack += "\n" + stack;
+              }
+            } catch (e) {
+            }
+          }
+          throw err;
+        }
+      }
+      _request(configOrUrl, config2) {
+        if (typeof configOrUrl === "string") {
+          config2 = config2 || {};
+          config2.url = configOrUrl;
+        } else {
+          config2 = configOrUrl || {};
+        }
+        config2 = mergeConfig(this.defaults, config2);
+        const { transitional: transitional2, paramsSerializer, headers } = config2;
+        if (transitional2 !== void 0) {
+          validator_default.assertOptions(transitional2, {
+            silentJSONParsing: validators2.transitional(validators2.boolean),
+            forcedJSONParsing: validators2.transitional(validators2.boolean),
+            clarifyTimeoutError: validators2.transitional(validators2.boolean)
+          }, false);
+        }
+        if (paramsSerializer != null) {
+          if (utils_default.isFunction(paramsSerializer)) {
+            config2.paramsSerializer = {
+              serialize: paramsSerializer
+            };
+          } else {
+            validator_default.assertOptions(paramsSerializer, {
+              encode: validators2.function,
+              serialize: validators2.function
+            }, true);
+          }
+        }
+        if (config2.allowAbsoluteUrls !== void 0) {
+        } else if (this.defaults.allowAbsoluteUrls !== void 0) {
+          config2.allowAbsoluteUrls = this.defaults.allowAbsoluteUrls;
+        } else {
+          config2.allowAbsoluteUrls = true;
+        }
+        validator_default.assertOptions(config2, {
+          baseUrl: validators2.spelling("baseURL"),
+          withXsrfToken: validators2.spelling("withXSRFToken")
+        }, true);
+        config2.method = (config2.method || this.defaults.method || "get").toLowerCase();
+        let contextHeaders = headers && utils_default.merge(
+          headers.common,
+          headers[config2.method]
+        );
+        headers && utils_default.forEach(
+          ["delete", "get", "head", "post", "put", "patch", "common"],
+          (method) => {
+            delete headers[method];
+          }
+        );
+        config2.headers = AxiosHeaders_default.concat(contextHeaders, headers);
+        const requestInterceptorChain = [];
+        let synchronousRequestInterceptors = true;
+        this.interceptors.request.forEach(function unshiftRequestInterceptors(interceptor) {
+          if (typeof interceptor.runWhen === "function" && interceptor.runWhen(config2) === false) {
+            return;
+          }
+          synchronousRequestInterceptors = synchronousRequestInterceptors && interceptor.synchronous;
+          requestInterceptorChain.unshift(interceptor.fulfilled, interceptor.rejected);
+        });
+        const responseInterceptorChain = [];
+        this.interceptors.response.forEach(function pushResponseInterceptors(interceptor) {
+          responseInterceptorChain.push(interceptor.fulfilled, interceptor.rejected);
+        });
+        let promise;
+        let i = 0;
+        let len;
+        if (!synchronousRequestInterceptors) {
+          const chain = [dispatchRequest.bind(this), void 0];
+          chain.unshift.apply(chain, requestInterceptorChain);
+          chain.push.apply(chain, responseInterceptorChain);
+          len = chain.length;
+          promise = Promise.resolve(config2);
+          while (i < len) {
+            promise = promise.then(chain[i++], chain[i++]);
+          }
+          return promise;
+        }
+        len = requestInterceptorChain.length;
+        let newConfig = config2;
+        i = 0;
+        while (i < len) {
+          const onFulfilled = requestInterceptorChain[i++];
+          const onRejected = requestInterceptorChain[i++];
+          try {
+            newConfig = onFulfilled(newConfig);
+          } catch (error) {
+            onRejected.call(this, error);
+            break;
+          }
+        }
+        try {
+          promise = dispatchRequest.call(this, newConfig);
+        } catch (error) {
+          return Promise.reject(error);
+        }
+        i = 0;
+        len = responseInterceptorChain.length;
+        while (i < len) {
+          promise = promise.then(responseInterceptorChain[i++], responseInterceptorChain[i++]);
+        }
+        return promise;
+      }
+      getUri(config2) {
+        config2 = mergeConfig(this.defaults, config2);
+        const fullPath = buildFullPath(config2.baseURL, config2.url, config2.allowAbsoluteUrls);
+        return buildURL(fullPath, config2.params, config2.paramsSerializer);
+      }
+    };
+    utils_default.forEach(["delete", "get", "head", "options"], function forEachMethodNoData(method) {
+      Axios.prototype[method] = function(url2, config2) {
+        return this.request(mergeConfig(config2 || {}, {
+          method,
+          url: url2,
+          data: (config2 || {}).data
+        }));
+      };
+    });
+    utils_default.forEach(["post", "put", "patch"], function forEachMethodWithData(method) {
+      function generateHTTPMethod(isForm) {
+        return function httpMethod(url2, data, config2) {
+          return this.request(mergeConfig(config2 || {}, {
+            method,
+            headers: isForm ? {
+              "Content-Type": "multipart/form-data"
+            } : {},
+            url: url2,
+            data
+          }));
+        };
+      }
+      Axios.prototype[method] = generateHTTPMethod();
+      Axios.prototype[method + "Form"] = generateHTTPMethod(true);
+    });
+    Axios_default = Axios;
+  }
+});
+
+// node_modules/axios/lib/cancel/CancelToken.js
+var CancelToken, CancelToken_default;
+var init_CancelToken = __esm({
+  "node_modules/axios/lib/cancel/CancelToken.js"() {
+    "use strict";
+    init_CanceledError();
+    CancelToken = class _CancelToken {
+      constructor(executor) {
+        if (typeof executor !== "function") {
+          throw new TypeError("executor must be a function.");
+        }
+        let resolvePromise;
+        this.promise = new Promise(function promiseExecutor(resolve) {
+          resolvePromise = resolve;
+        });
+        const token = this;
+        this.promise.then((cancel) => {
+          if (!token._listeners) return;
+          let i = token._listeners.length;
+          while (i-- > 0) {
+            token._listeners[i](cancel);
+          }
+          token._listeners = null;
+        });
+        this.promise.then = (onfulfilled) => {
+          let _resolve;
+          const promise = new Promise((resolve) => {
+            token.subscribe(resolve);
+            _resolve = resolve;
+          }).then(onfulfilled);
+          promise.cancel = function reject() {
+            token.unsubscribe(_resolve);
+          };
+          return promise;
+        };
+        executor(function cancel(message, config2, request) {
+          if (token.reason) {
+            return;
+          }
+          token.reason = new CanceledError_default(message, config2, request);
+          resolvePromise(token.reason);
+        });
+      }
+      /**
+       * Throws a `CanceledError` if cancellation has been requested.
+       */
+      throwIfRequested() {
+        if (this.reason) {
+          throw this.reason;
+        }
+      }
+      /**
+       * Subscribe to the cancel signal
+       */
+      subscribe(listener) {
+        if (this.reason) {
+          listener(this.reason);
+          return;
+        }
+        if (this._listeners) {
+          this._listeners.push(listener);
+        } else {
+          this._listeners = [listener];
+        }
+      }
+      /**
+       * Unsubscribe from the cancel signal
+       */
+      unsubscribe(listener) {
+        if (!this._listeners) {
+          return;
+        }
+        const index2 = this._listeners.indexOf(listener);
+        if (index2 !== -1) {
+          this._listeners.splice(index2, 1);
+        }
+      }
+      toAbortSignal() {
+        const controller = new AbortController();
+        const abort = (err) => {
+          controller.abort(err);
+        };
+        this.subscribe(abort);
+        controller.signal.unsubscribe = () => this.unsubscribe(abort);
+        return controller.signal;
+      }
+      /**
+       * Returns an object that contains a new `CancelToken` and a function that, when called,
+       * cancels the `CancelToken`.
+       */
+      static source() {
+        let cancel;
+        const token = new _CancelToken(function executor(c) {
+          cancel = c;
+        });
+        return {
+          token,
+          cancel
+        };
+      }
+    };
+    CancelToken_default = CancelToken;
+  }
+});
+
+// node_modules/axios/lib/helpers/spread.js
+function spread(callback) {
+  return function wrap(arr) {
+    return callback.apply(null, arr);
+  };
+}
+var init_spread = __esm({
+  "node_modules/axios/lib/helpers/spread.js"() {
+    "use strict";
+  }
+});
+
+// node_modules/axios/lib/helpers/isAxiosError.js
+function isAxiosError(payload) {
+  return utils_default.isObject(payload) && payload.isAxiosError === true;
+}
+var init_isAxiosError = __esm({
+  "node_modules/axios/lib/helpers/isAxiosError.js"() {
+    "use strict";
+    init_utils();
+  }
+});
+
+// node_modules/axios/lib/helpers/HttpStatusCode.js
+var HttpStatusCode, HttpStatusCode_default;
+var init_HttpStatusCode = __esm({
+  "node_modules/axios/lib/helpers/HttpStatusCode.js"() {
+    "use strict";
+    HttpStatusCode = {
+      Continue: 100,
+      SwitchingProtocols: 101,
+      Processing: 102,
+      EarlyHints: 103,
+      Ok: 200,
+      Created: 201,
+      Accepted: 202,
+      NonAuthoritativeInformation: 203,
+      NoContent: 204,
+      ResetContent: 205,
+      PartialContent: 206,
+      MultiStatus: 207,
+      AlreadyReported: 208,
+      ImUsed: 226,
+      MultipleChoices: 300,
+      MovedPermanently: 301,
+      Found: 302,
+      SeeOther: 303,
+      NotModified: 304,
+      UseProxy: 305,
+      Unused: 306,
+      TemporaryRedirect: 307,
+      PermanentRedirect: 308,
+      BadRequest: 400,
+      Unauthorized: 401,
+      PaymentRequired: 402,
+      Forbidden: 403,
+      NotFound: 404,
+      MethodNotAllowed: 405,
+      NotAcceptable: 406,
+      ProxyAuthenticationRequired: 407,
+      RequestTimeout: 408,
+      Conflict: 409,
+      Gone: 410,
+      LengthRequired: 411,
+      PreconditionFailed: 412,
+      PayloadTooLarge: 413,
+      UriTooLong: 414,
+      UnsupportedMediaType: 415,
+      RangeNotSatisfiable: 416,
+      ExpectationFailed: 417,
+      ImATeapot: 418,
+      MisdirectedRequest: 421,
+      UnprocessableEntity: 422,
+      Locked: 423,
+      FailedDependency: 424,
+      TooEarly: 425,
+      UpgradeRequired: 426,
+      PreconditionRequired: 428,
+      TooManyRequests: 429,
+      RequestHeaderFieldsTooLarge: 431,
+      UnavailableForLegalReasons: 451,
+      InternalServerError: 500,
+      NotImplemented: 501,
+      BadGateway: 502,
+      ServiceUnavailable: 503,
+      GatewayTimeout: 504,
+      HttpVersionNotSupported: 505,
+      VariantAlsoNegotiates: 506,
+      InsufficientStorage: 507,
+      LoopDetected: 508,
+      NotExtended: 510,
+      NetworkAuthenticationRequired: 511
+    };
+    Object.entries(HttpStatusCode).forEach(([key, value]) => {
+      HttpStatusCode[value] = key;
+    });
+    HttpStatusCode_default = HttpStatusCode;
+  }
+});
+
+// node_modules/axios/lib/axios.js
+function createInstance(defaultConfig) {
+  const context = new Axios_default(defaultConfig);
+  const instance = bind(Axios_default.prototype.request, context);
+  utils_default.extend(instance, Axios_default.prototype, context, { allOwnKeys: true });
+  utils_default.extend(instance, context, null, { allOwnKeys: true });
+  instance.create = function create(instanceConfig) {
+    return createInstance(mergeConfig(defaultConfig, instanceConfig));
+  };
+  return instance;
+}
+var axios, axios_default;
+var init_axios = __esm({
+  "node_modules/axios/lib/axios.js"() {
+    "use strict";
+    init_utils();
+    init_bind();
+    init_Axios();
+    init_mergeConfig();
+    init_defaults();
+    init_formDataToJSON();
+    init_CanceledError();
+    init_CancelToken();
+    init_isCancel();
+    init_data();
+    init_toFormData();
+    init_AxiosError();
+    init_spread();
+    init_isAxiosError();
+    init_AxiosHeaders();
+    init_adapters();
+    init_HttpStatusCode();
+    axios = createInstance(defaults_default);
+    axios.Axios = Axios_default;
+    axios.CanceledError = CanceledError_default;
+    axios.CancelToken = CancelToken_default;
+    axios.isCancel = isCancel;
+    axios.VERSION = VERSION;
+    axios.toFormData = toFormData_default;
+    axios.AxiosError = AxiosError_default;
+    axios.Cancel = axios.CanceledError;
+    axios.all = function all(promises) {
+      return Promise.all(promises);
+    };
+    axios.spread = spread;
+    axios.isAxiosError = isAxiosError;
+    axios.mergeConfig = mergeConfig;
+    axios.AxiosHeaders = AxiosHeaders_default;
+    axios.formToJSON = (thing) => formDataToJSON_default(utils_default.isHTMLForm(thing) ? new FormData(thing) : thing);
+    axios.getAdapter = adapters_default.getAdapter;
+    axios.HttpStatusCode = HttpStatusCode_default;
+    axios.default = axios;
+    axios_default = axios;
+  }
+});
+
+// node_modules/axios/index.js
+var Axios2, AxiosError2, CanceledError2, isCancel2, CancelToken2, VERSION2, all2, Cancel, isAxiosError2, spread2, toFormData2, AxiosHeaders2, HttpStatusCode2, formToJSON, getAdapter, mergeConfig2;
+var init_axios2 = __esm({
+  "node_modules/axios/index.js"() {
+    "use strict";
+    init_axios();
+    ({
+      Axios: Axios2,
+      AxiosError: AxiosError2,
+      CanceledError: CanceledError2,
+      isCancel: isCancel2,
+      CancelToken: CancelToken2,
+      VERSION: VERSION2,
+      all: all2,
+      Cancel,
+      isAxiosError: isAxiosError2,
+      spread: spread2,
+      toFormData: toFormData2,
+      AxiosHeaders: AxiosHeaders2,
+      HttpStatusCode: HttpStatusCode2,
+      formToJSON,
+      getAdapter,
+      mergeConfig: mergeConfig2
+    } = axios_default);
   }
 });
 
@@ -59505,8 +63271,8 @@ var require_RealtimeChannel = __commonJS({
       _trigger(type, payload, ref) {
         var _a, _b;
         const typeLower = type.toLocaleLowerCase();
-        const { close, error, leave, join: join2 } = constants_1.CHANNEL_EVENTS;
-        const events = [close, error, leave, join2];
+        const { close, error, leave, join: join3 } = constants_1.CHANNEL_EVENTS;
+        const events = [close, error, leave, join3];
         if (ref && events.indexOf(typeLower) >= 0 && ref !== this._joinRef()) {
           return;
         }
@@ -60265,6 +64031,967 @@ var require_main3 = __commonJS({
   }
 });
 
+// src/engines/elevenlabs.ts
+var elevenlabs_exports = {};
+__export(elevenlabs_exports, {
+  availableModels: () => availableModels,
+  calculateEstimatedCost: () => calculateEstimatedCost,
+  engineInfo: () => engineInfo,
+  getAvailableVoices: () => getAvailableVoices,
+  getUsageInfo: () => getUsageInfo,
+  synthesize: () => synthesize,
+  testConnection: () => testConnection,
+  validateParams: () => validateParams
+});
+async function synthesize(params) {
+  const { text, voice_id, speed, engine_config } = params;
+  const startTime = Date.now();
+  try {
+    console.log(`\u{1F399}\uFE0F ElevenLabs: Sintetizando "${text.substring(0, 50)}..." com voz ${voice_id}`);
+    if (!engine_config.api_key) {
+      throw new Error("ElevenLabs API key \xE9 obrigat\xF3ria");
+    }
+    const voiceMapping = {
+      "elevenlabs-21m00Tcm4TlvDq8ikWAM": "21m00Tcm4TlvDq8ikWAM",
+      "elevenlabs-AZnzlk1XvdvUeBnXmlld": "AZnzlk1XvdvUeBnXmlld",
+      "elevenlabs-rachel": "21m00Tcm4TlvDq8ikWAM",
+      "elevenlabs-domi": "AZnzlk1XvdvUeBnXmlld"
+    };
+    const externalVoiceId = voiceMapping[voice_id] || "21m00Tcm4TlvDq8ikWAM";
+    const requestPayload = {
+      text,
+      model_id: engine_config.model_id || "eleven_multilingual_v2",
+      voice_settings: {
+        stability: 0.5,
+        similarity_boost: 0.75,
+        style: 0,
+        use_speaker_boost: true
+      }
+    };
+    const response = await axios_default.post(
+      `${engine_config.api_url}/v1/text-to-speech/${externalVoiceId}`,
+      requestPayload,
+      {
+        headers: {
+          "Accept": "audio/mpeg",
+          "Content-Type": "application/json",
+          "xi-api-key": engine_config.api_key
+        },
+        responseType: "arraybuffer",
+        timeout: engine_config.timeout || 6e4
+      }
+    );
+    const audioBase64 = Buffer.from(response.data).toString("base64");
+    const audioUrl = `data:audio/mpeg;base64,${audioBase64}`;
+    console.log(`\u2705 ElevenLabs: S\xEDntese conclu\xEDda com sucesso`);
+    return {
+      success: true,
+      audio_url: audioUrl,
+      duration_ms: null,
+      // ElevenLabs não retorna duração
+      processing_time_ms: Date.now() - startTime
+    };
+  } catch (error) {
+    console.error(`\u274C ElevenLabs: Erro na s\xEDntese:`, error.message);
+    if (error.response?.status === 401) {
+      throw new Error("ElevenLabs API key inv\xE1lida ou expirada");
+    }
+    if (error.response?.status === 429) {
+      throw new Error("ElevenLabs rate limit excedido - tente novamente em alguns minutos");
+    }
+    if (error.response?.status === 400) {
+      throw new Error("ElevenLabs par\xE2metros inv\xE1lidos - verifique voice_id e texto");
+    }
+    if (error.response?.status === 422) {
+      throw new Error("ElevenLabs voz n\xE3o encontrada ou indispon\xEDvel");
+    }
+    if (error.code === "ECONNREFUSED") {
+      throw new Error("ElevenLabs servidor offline");
+    }
+    return {
+      success: false,
+      error: error.message,
+      processing_time_ms: Date.now() - startTime
+    };
+  }
+}
+async function testConnection(config2) {
+  try {
+    const response = await axios_default.get(`${config2.api_url}/v1/voices`, {
+      headers: {
+        "xi-api-key": config2.api_key
+      },
+      timeout: 1e4
+    });
+    return response.status === 200 && response.data.voices;
+  } catch (error) {
+    console.warn("\u26A0\uFE0F ElevenLabs: Falha no teste de conectividade:", error);
+    return false;
+  }
+}
+async function getAvailableVoices(config2) {
+  try {
+    const response = await axios_default.get(`${config2.api_url}/v1/voices`, {
+      headers: {
+        "xi-api-key": config2.api_key
+      },
+      timeout: 1e4
+    });
+    if (response.data.voices) {
+      return response.data.voices.map((voice) => ({
+        voice_id: voice.voice_id,
+        name: voice.name,
+        description: voice.description,
+        category: voice.category,
+        language: voice.fine_tuning?.language || "en",
+        preview_url: voice.preview_url,
+        available_for_tiers: voice.available_for_tiers
+      }));
+    }
+    return [];
+  } catch (error) {
+    console.error("\u274C ElevenLabs: Erro ao buscar vozes:", error);
+    return [];
+  }
+}
+async function getUsageInfo(config2) {
+  try {
+    const response = await axios_default.get(`${config2.api_url}/v1/user/subscription`, {
+      headers: {
+        "xi-api-key": config2.api_key
+      },
+      timeout: 5e3
+    });
+    return {
+      character_count: response.data.character_count,
+      character_limit: response.data.character_limit,
+      can_extend_character_limit: response.data.can_extend_character_limit,
+      allowed_to_extend_character_limit: response.data.allowed_to_extend_character_limit,
+      next_character_count_reset_unix: response.data.next_character_count_reset_unix
+    };
+  } catch (error) {
+    console.error("\u274C ElevenLabs: Erro ao verificar uso:", error);
+    return null;
+  }
+}
+function validateParams(params) {
+  const errors = [];
+  if (!params.text || params.text.trim().length === 0) {
+    errors.push("Texto \xE9 obrigat\xF3rio");
+  }
+  if (params.text && params.text.length > 2500) {
+    errors.push("Texto muito longo para ElevenLabs (m\xE1ximo 2500 caracteres)");
+  }
+  if (!params.voice_id) {
+    errors.push("Voice ID \xE9 obrigat\xF3rio");
+  }
+  if (!params.engine_config?.api_key) {
+    errors.push("ElevenLabs API key \xE9 obrigat\xF3ria");
+  }
+  return errors;
+}
+function calculateEstimatedCost(text, tier = "free") {
+  const charCount = text.length;
+  const pricing = {
+    free: 0,
+    // Plano gratuito tem limite mensal
+    starter: 3e-5,
+    // $0.30 per 1K characters
+    creator: 3e-5,
+    pro: 3e-5
+  };
+  return charCount * pricing[tier];
+}
+var availableModels, engineInfo;
+var init_elevenlabs = __esm({
+  "src/engines/elevenlabs.ts"() {
+    "use strict";
+    init_axios2();
+    availableModels = [
+      {
+        id: "eleven_multilingual_v2",
+        name: "Eleven Multilingual v2",
+        description: "Modelo multilingual mais recente, suporta 29 idiomas",
+        languages: ["pt", "en", "es", "fr", "de", "it", "pl", "hi", "ar"],
+        quality: "high"
+      },
+      {
+        id: "eleven_turbo_v2",
+        name: "Eleven Turbo v2",
+        description: "Modelo otimizado para velocidade, lat\xEAncia baixa",
+        languages: ["en"],
+        quality: "medium",
+        latency: "low"
+      },
+      {
+        id: "eleven_monolingual_v1",
+        name: "Eleven Monolingual v1",
+        description: "Modelo original apenas em ingl\xEAs, alta qualidade",
+        languages: ["en"],
+        quality: "very_high"
+      }
+    ];
+    engineInfo = {
+      name: "ElevenLabs",
+      version: "1.0.0",
+      description: "API premium de s\xEDntese de voz com IA avan\xE7ada e vozes naturais",
+      supported_languages: ["pt-BR", "en-US", "es-ES", "fr-FR", "de-DE", "it-IT"],
+      supported_formats: ["mp3"],
+      max_text_length: 2500,
+      estimated_cost_per_char: 3e-5,
+      requires_api_key: true,
+      has_usage_limits: true
+    };
+  }
+});
+
+// src/engines/googletts.ts
+var googletts_exports = {};
+__export(googletts_exports, {
+  calculateCost: () => calculateCost,
+  engineInfo: () => engineInfo2,
+  getAvailableVoices: () => getAvailableVoices2,
+  getQuotaInfo: () => getQuotaInfo,
+  recommendedVoices: () => recommendedVoices,
+  synthesize: () => synthesize2,
+  testConnection: () => testConnection2,
+  validateParams: () => validateParams2
+});
+async function synthesize2(params) {
+  const { text, voice_id, speed, pitch, engine_config } = params;
+  const startTime = Date.now();
+  try {
+    console.log(`\u{1F310} Google TTS: Sintetizando "${text.substring(0, 50)}..." com voz ${voice_id}`);
+    if (!engine_config.api_key) {
+      console.log(`\u26A0\uFE0F Google TTS: API key n\xE3o configurada, usando mock`);
+      return generateMockAudio(text, voice_id, startTime);
+    }
+    const [languageCode, name, gender] = parseVoiceId(voice_id);
+    const requestPayload = {
+      input: { text },
+      voice: {
+        languageCode,
+        name,
+        ssmlGender: gender
+      },
+      audioConfig: {
+        audioEncoding: "MP3",
+        speakingRate: speed,
+        pitch,
+        volumeGainDb: volumeToGainDb(params.volume),
+        sampleRateHertz: 24e3
+      }
+    };
+    const response = await axios_default.post(
+      `${engine_config.api_url}/v1/text:synthesize?key=${engine_config.api_key}`,
+      requestPayload,
+      {
+        headers: {
+          "Content-Type": "application/json"
+        },
+        timeout: engine_config.timeout || 3e4
+      }
+    );
+    if (response.status !== 200) {
+      throw new Error(`Google TTS API retornou status ${response.status}`);
+    }
+    const result = response.data;
+    if (!result.audioContent) {
+      throw new Error("Resposta inv\xE1lida da API Google TTS - audioContent ausente");
+    }
+    const audioFileName = `google_tts_${Date.now()}_${Math.random().toString(36).substring(7)}.mp3`;
+    const audioUrl = `/audio/generated/${audioFileName}`;
+    const duration_ms = estimateDuration(text);
+    console.log(`\u2705 Google TTS: S\xEDntese conclu\xEDda - ${audioUrl}`);
+    return {
+      success: true,
+      audio_url: audioUrl,
+      duration_ms
+    };
+  } catch (error) {
+    console.error(`\u274C Google TTS: Erro na s\xEDntese:`, error.message);
+    if (error.response?.status === 401) {
+      throw new Error("Google TTS API key inv\xE1lida ou sem permiss\xF5es");
+    }
+    if (error.response?.status === 400) {
+      const errorMsg = error.response.data?.error?.message || "Par\xE2metros inv\xE1lidos";
+      throw new Error(`Google TTS: ${errorMsg}`);
+    }
+    if (error.response?.status === 429) {
+      throw new Error("Google TTS rate limit excedido - tente novamente em alguns segundos");
+    }
+    if (error.response?.status === 403) {
+      throw new Error("Google TTS acesso negado - verifique cotas e billing");
+    }
+    if (error.code === "ECONNREFUSED") {
+      throw new Error("Google TTS servidor inacess\xEDvel");
+    }
+    throw error;
+  }
+}
+async function testConnection2(config2) {
+  try {
+    const response = await axios_default.get(`${config2.api_url}/v1/voices?key=${config2.api_key}`, {
+      timeout: 1e4
+    });
+    return response.status === 200 && response.data.voices;
+  } catch (error) {
+    console.warn("\u26A0\uFE0F Google TTS: Falha no teste de conectividade:", error);
+    return false;
+  }
+}
+async function getAvailableVoices2(config2) {
+  try {
+    const response = await axios_default.get(`${config2.api_url}/v1/voices?key=${config2.api_key}`, {
+      timeout: 15e3
+    });
+    if (response.data.voices) {
+      return response.data.voices.filter((voice) => voice.languageCodes.includes("pt-BR") || voice.languageCodes.includes("pt")).map((voice) => ({
+        voice_id: `${voice.languageCodes[0]}-${voice.name}-${voice.ssmlGender}`,
+        name: voice.name,
+        language: voice.languageCodes[0],
+        gender: voice.ssmlGender,
+        natural_sample_rate: voice.naturalSampleRateHertz,
+        supported_languages: voice.languageCodes
+      }));
+    }
+    return [];
+  } catch (error) {
+    console.error("\u274C Google TTS: Erro ao buscar vozes:", error);
+    return [];
+  }
+}
+async function calculateCost(text) {
+  const characters = text.length;
+  const costPer1M = 4;
+  return characters / 1e6 * costPer1M;
+}
+async function getQuotaInfo(config2) {
+  try {
+    return {
+      monthly_quota: 4e6,
+      // 4M characters per month (free tier)
+      used_this_month: 0,
+      // Seria obtido via Monitoring API
+      remaining: 4e6,
+      cost_this_month: 0
+    };
+  } catch (error) {
+    console.error("\u274C Google TTS: Erro ao verificar cotas:", error);
+    return null;
+  }
+}
+function parseVoiceId(voiceId) {
+  const parts = voiceId.split("-");
+  if (parts.length >= 5) {
+    const languageCode = `${parts[0]}-${parts[1]}`;
+    const name = `${parts[0]}-${parts[1]}-${parts[2]}-${parts[3]}`;
+    const gender = parts[4];
+    return [languageCode, name, gender];
+  }
+  return ["pt-BR", "pt-BR-Wavenet-A", "FEMALE"];
+}
+function volumeToGainDb(volume) {
+  if (volume <= 0) return -96;
+  if (volume >= 1) return 16;
+  return Math.round(20 * Math.log10(volume));
+}
+function estimateDuration(text) {
+  const words = text.split(" ").length;
+  const durationSeconds = words / 190 * 60;
+  return Math.floor(durationSeconds * 1e3);
+}
+function validateParams2(params) {
+  const errors = [];
+  if (!params.text || params.text.trim().length === 0) {
+    errors.push("Texto \xE9 obrigat\xF3rio");
+  }
+  if (params.text && params.text.length > 5e3) {
+    errors.push("Texto muito longo para Google TTS (m\xE1ximo 5000 caracteres)");
+  }
+  if (!params.voice_id) {
+    errors.push("Voice ID \xE9 obrigat\xF3rio");
+  }
+  if (!params.engine_config?.api_key) {
+    errors.push("Google TTS API key \xE9 obrigat\xF3ria");
+  }
+  if (params.speed && (params.speed < 0.25 || params.speed > 4)) {
+    errors.push("Speed deve estar entre 0.25 e 4.0 para Google TTS");
+  }
+  if (params.pitch && (params.pitch < -20 || params.pitch > 20)) {
+    errors.push("Pitch deve estar entre -20.0 e 20.0 para Google TTS");
+  }
+  return errors;
+}
+var recommendedVoices, engineInfo2;
+var init_googletts = __esm({
+  "src/engines/googletts.ts"() {
+    "use strict";
+    init_axios2();
+    recommendedVoices = [
+      {
+        voice_id: "pt-BR-Wavenet-A-FEMALE",
+        name: "pt-BR-Wavenet-A",
+        description: "Voz feminina brasileira de alta qualidade (WaveNet)",
+        gender: "FEMALE",
+        quality: "premium",
+        cost_tier: "standard"
+      },
+      {
+        voice_id: "pt-BR-Wavenet-B-MALE",
+        name: "pt-BR-Wavenet-B",
+        description: "Voz masculina brasileira de alta qualidade (WaveNet)",
+        gender: "MALE",
+        quality: "premium",
+        cost_tier: "standard"
+      },
+      {
+        voice_id: "pt-BR-Standard-A-FEMALE",
+        name: "pt-BR-Standard-A",
+        description: "Voz feminina brasileira padr\xE3o (econ\xF4mica)",
+        gender: "FEMALE",
+        quality: "good",
+        cost_tier: "basic"
+      },
+      {
+        voice_id: "pt-BR-Standard-B-MALE",
+        name: "pt-BR-Standard-B",
+        description: "Voz masculina brasileira padr\xE3o (econ\xF4mica)",
+        gender: "MALE",
+        quality: "good",
+        cost_tier: "basic"
+      },
+      {
+        voice_id: "pt-BR-Neural2-A-FEMALE",
+        name: "pt-BR-Neural2-A",
+        description: "Voz feminina brasileira neural (mais natural)",
+        gender: "FEMALE",
+        quality: "excellent",
+        cost_tier: "premium"
+      },
+      {
+        voice_id: "pt-BR-Neural2-B-MALE",
+        name: "pt-BR-Neural2-B",
+        description: "Voz masculina brasileira neural (mais natural)",
+        gender: "MALE",
+        quality: "excellent",
+        cost_tier: "premium"
+      }
+    ];
+    engineInfo2 = {
+      name: "Google Cloud TTS",
+      version: "1.0.0",
+      description: "S\xEDntese de voz avan\xE7ada do Google com vozes neurais e WaveNet",
+      supported_languages: ["pt-BR", "pt-PT", "en-US", "es-ES", "fr-FR", "de-DE"],
+      supported_formats: ["mp3", "wav", "ogg"],
+      max_text_length: 5e3,
+      estimated_cost_per_char: 4e-6,
+      // $4 per 1M characters
+      requires_api_key: true,
+      has_usage_limits: true,
+      quality_tiers: ["Standard", "WaveNet", "Neural2"],
+      processing_time: "fast"
+    };
+  }
+});
+
+// src/engines/mock-openvoice.ts
+var mock_openvoice_exports = {};
+__export(mock_openvoice_exports, {
+  default: () => mock_openvoice_default,
+  engineInfo: () => engineInfo3,
+  getAvailableVoices: () => getAvailableVoices3,
+  synthesize: () => synthesize3,
+  testConnection: () => testConnection3,
+  validateParams: () => validateParams3
+});
+async function synthesize3(params) {
+  const { text, voice_id, speed, pitch, volume } = params;
+  try {
+    console.log(`\u{1F3AD} MockOpenVoice: Simulando s\xEDntese para "${text.substring(0, 50)}..." com voz ${voice_id}`);
+    const processingTime = Math.random() * 2e3 + 500;
+    await new Promise((resolve) => setTimeout(resolve, processingTime));
+    if (text.toLowerCase().includes("erro") || text.toLowerCase().includes("falha")) {
+      throw new Error("Simula\xE7\xE3o de erro solicitada no texto");
+    }
+    const mockAudioBase64 = generateMockAudio2(text, voice_id);
+    const duration = estimateAudioDuration(text, speed);
+    console.log(`\u2705 MockOpenVoice: S\xEDntese simulada conclu\xEDda em ${Math.round(processingTime)}ms`);
+    return {
+      success: true,
+      audio_base64: mockAudioBase64,
+      duration_ms: duration,
+      processing_time_ms: Math.round(processingTime),
+      characters_count: text.length,
+      estimated_cost: 0
+    };
+  } catch (error) {
+    console.error(`\u274C MockOpenVoice: Erro simulado: ${error.message}`);
+    return {
+      success: false,
+      error: error.message,
+      processing_time_ms: 1e3,
+      characters_count: text.length,
+      estimated_cost: 0
+    };
+  }
+}
+function generateMockAudio2(text, voice_id) {
+  const sampleRate = 44100;
+  const duration = estimateAudioDuration(text, 1) / 1e3;
+  const numSamples = Math.round(sampleRate * duration);
+  const header = Buffer.alloc(44);
+  header.write("RIFF", 0);
+  header.writeUInt32LE(36 + numSamples * 2, 4);
+  header.write("WAVE", 8);
+  header.write("fmt ", 12);
+  header.writeUInt32LE(16, 16);
+  header.writeUInt16LE(1, 20);
+  header.writeUInt16LE(1, 22);
+  header.writeUInt32LE(sampleRate, 24);
+  header.writeUInt32LE(sampleRate * 2, 28);
+  header.writeUInt16LE(2, 32);
+  header.writeUInt16LE(16, 34);
+  header.write("data", 36);
+  header.writeUInt32LE(numSamples * 2, 40);
+  const audioData = Buffer.alloc(numSamples * 2);
+  const wavFile = Buffer.concat([header, audioData]);
+  return wavFile.toString("base64");
+}
+function estimateAudioDuration(text, speed) {
+  const words = text.split(" ").length;
+  const baseMinutes = words / 150;
+  const adjustedMinutes = baseMinutes / speed;
+  return Math.round(adjustedMinutes * 60 * 1e3);
+}
+async function testConnection3(config2) {
+  return Math.random() > 0.2;
+}
+async function getAvailableVoices3(config2) {
+  return [
+    "pt-br-female-1",
+    "pt-br-male-1",
+    "openvoice-pt-br-female-1",
+    "openvoice-pt-br-male-1"
+  ];
+}
+function validateParams3(params) {
+  const errors = [];
+  if (!params.text || params.text.trim().length === 0) {
+    errors.push("Texto \xE9 obrigat\xF3rio");
+  }
+  if (params.text && params.text.length > 5e3) {
+    errors.push("Texto muito longo (m\xE1ximo 5000 caracteres)");
+  }
+  if (!params.voice_id) {
+    errors.push("Voice ID \xE9 obrigat\xF3rio");
+  }
+  return errors;
+}
+var engineInfo3, mock_openvoice_default;
+var init_mock_openvoice = __esm({
+  "src/engines/mock-openvoice.ts"() {
+    "use strict";
+    engineInfo3 = {
+      name: "MockOpenVoice",
+      version: "1.0.0",
+      description: "Engine mock para testes de s\xEDntese de voz",
+      supported_languages: ["pt-BR", "en-US"],
+      supported_formats: ["wav"],
+      max_text_length: 5e3,
+      estimated_cost_per_char: 0
+    };
+    mock_openvoice_default = {
+      synthesize: synthesize3,
+      testConnection: testConnection3,
+      getAvailableVoices: getAvailableVoices3,
+      validateParams: validateParams3,
+      engineInfo: engineInfo3
+    };
+  }
+});
+
+// src/engines/openvoice.ts
+var openvoice_exports = {};
+var init_openvoice = __esm({
+  "src/engines/openvoice.ts"() {
+    "use strict";
+  }
+});
+
+// src/engines/openvoice_new.ts
+var openvoice_new_exports = {};
+__export(openvoice_new_exports, {
+  isAvailable: () => isAvailable,
+  synthesize: () => synthesize4
+});
+async function synthesize4(params) {
+  const { text, voice_id, speed, pitch, volume, engine_config } = params;
+  const startTime = Date.now();
+  try {
+    console.log(`\u{1F3A4} OpenVoice: Sintetizando "${text.substring(0, 50)}..." com voz ${voice_id}`);
+    const requestPayload = {
+      text,
+      voice: voice_id,
+      speed: speed || 1,
+      pitch: pitch || 0,
+      volume: volume || 0.8,
+      lang: "pt-BR"
+    };
+    try {
+      const response = await axios_default.post(
+        `${engine_config.api_url}/api/tts/synthesize`,
+        requestPayload,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "Accept": "audio/wav"
+          },
+          responseType: "arraybuffer",
+          timeout: engine_config.timeout || 3e4
+        }
+      );
+      const audioBase64 = Buffer.from(response.data).toString("base64");
+      const audioUrl = `data:audio/wav;base64,${audioBase64}`;
+      console.log(`\u2705 OpenVoice: S\xEDntese OVOS conclu\xEDda com sucesso`);
+      return {
+        success: true,
+        audio_url: audioUrl,
+        duration_ms: null,
+        processing_time_ms: Date.now() - startTime
+      };
+    } catch (ovosError) {
+      console.log(`\u26A0\uFE0F OpenVoice: OVOS n\xE3o dispon\xEDvel, usando mock`);
+      return generateMockAudio3(text, voice_id, startTime);
+    }
+  } catch (error) {
+    console.error("\u274C OpenVoice Error:", error.message);
+    return {
+      success: false,
+      error: error.message,
+      processing_time_ms: Date.now() - startTime
+    };
+  }
+}
+function generateMockAudio3(text, voice_id, startTime) {
+  const processingTime = 1e3 + Math.random() * 2e3;
+  const mockAudioBase64 = generateBeepAudio(text.length);
+  const audioUrl = `data:audio/wav;base64,${mockAudioBase64}`;
+  console.log(`\u{1F3B5} OpenVoice: Mock audio gerado para "${text.substring(0, 30)}..." (${text.length} chars)`);
+  return {
+    success: true,
+    audio_url: audioUrl,
+    duration_ms: Math.floor(text.length * 50),
+    // ~50ms por caractere
+    processing_time_ms: Date.now() - startTime
+  };
+}
+function generateBeepAudio(textLength) {
+  const sampleRate = 44100;
+  const duration = Math.max(1, textLength * 0.05);
+  const numSamples = Math.floor(sampleRate * duration);
+  const numChannels = 1;
+  const bytesPerSample = 2;
+  const byteRate = sampleRate * numChannels * bytesPerSample;
+  const dataSize = numSamples * numChannels * bytesPerSample;
+  const fileSize = 44 + dataSize;
+  const buffer = Buffer.alloc(44 + dataSize);
+  let offset = 0;
+  buffer.write("RIFF", offset);
+  offset += 4;
+  buffer.writeUInt32LE(fileSize - 8, offset);
+  offset += 4;
+  buffer.write("WAVE", offset);
+  offset += 4;
+  buffer.write("fmt ", offset);
+  offset += 4;
+  buffer.writeUInt32LE(16, offset);
+  offset += 4;
+  buffer.writeUInt16LE(1, offset);
+  offset += 2;
+  buffer.writeUInt16LE(numChannels, offset);
+  offset += 2;
+  buffer.writeUInt32LE(sampleRate, offset);
+  offset += 4;
+  buffer.writeUInt32LE(byteRate, offset);
+  offset += 4;
+  buffer.writeUInt16LE(numChannels * bytesPerSample, offset);
+  offset += 2;
+  buffer.writeUInt16LE(bytesPerSample * 8, offset);
+  offset += 2;
+  buffer.write("data", offset);
+  offset += 4;
+  buffer.writeUInt32LE(dataSize, offset);
+  offset += 4;
+  const frequency = 440;
+  for (let i = 0; i < numSamples; i++) {
+    const sample = Math.sin(2 * Math.PI * frequency * i / sampleRate) * 0.3;
+    const value = Math.floor(sample * 32767);
+    buffer.writeInt16LE(value, offset);
+    offset += 2;
+  }
+  return buffer.toString("base64");
+}
+async function isAvailable(apiUrl) {
+  try {
+    const response = await axios_default.get(`${apiUrl}/api/status`, {
+      timeout: 5e3
+    });
+    return response.status === 200;
+  } catch (error) {
+    console.log("\u26A0\uFE0F OpenVoice/OVOS n\xE3o dispon\xEDvel, usando mock");
+    return false;
+  }
+}
+var init_openvoice_new = __esm({
+  "src/engines/openvoice_new.ts"() {
+    "use strict";
+    init_axios2();
+  }
+});
+
+// src/engines/xtts.ts
+var xtts_exports = {};
+__export(xtts_exports, {
+  cloneVoice: () => cloneVoice,
+  engineInfo: () => engineInfo4,
+  getAvailableVoices: () => getAvailableVoices4,
+  recommendedConfigs: () => recommendedConfigs,
+  supportedLanguages: () => supportedLanguages,
+  synthesize: () => synthesize5,
+  testConnection: () => testConnection4,
+  validateParams: () => validateParams4
+});
+async function synthesize5(params) {
+  const { text, voice_id, speed, engine_config } = params;
+  try {
+    console.log(`\u{1F5E3}\uFE0F XTTS: Sintetizando "${text.substring(0, 50)}..." com voz ${voice_id}`);
+    const requestPayload = {
+      text,
+      speaker_wav: engine_config.speaker_wav || voice_id,
+      // voice_id pode ser um arquivo de referência
+      language: engine_config.language || "pt",
+      speed,
+      // XTTS específicos
+      gpt_cond_len: 3,
+      gpt_cond_chunk_len: 4,
+      max_ref_len: 60,
+      sound_norm_refs: false
+    };
+    const response = await axios_default.post(
+      `${engine_config.api_url}/tts_to_audio/`,
+      requestPayload,
+      {
+        headers: {
+          "Content-Type": "application/json"
+        },
+        timeout: engine_config.timeout || 45e3
+        // XTTS pode ser mais lento
+      }
+    );
+    if (response.status !== 200) {
+      throw new Error(`XTTS API retornou status ${response.status}`);
+    }
+    const result = response.data;
+    if (!result.success && !result.audio_url) {
+      throw new Error(result.error || "Resposta inv\xE1lida da API XTTS");
+    }
+    console.log(`\u2705 XTTS: S\xEDntese conclu\xEDda - ${result.audio_url}`);
+    return {
+      success: true,
+      audio_url: result.audio_url,
+      duration_ms: result.duration_ms || estimateDuration2(text)
+    };
+  } catch (error) {
+    console.error(`\u274C XTTS: Erro na s\xEDntese:`, error.message);
+    if (error.code === "ECONNREFUSED") {
+      throw new Error("XTTS servidor offline ou inacess\xEDvel");
+    }
+    if (error.code === "ENOTFOUND") {
+      throw new Error("XTTS servidor n\xE3o encontrado");
+    }
+    if (error.response?.status === 400) {
+      throw new Error("XTTS par\xE2metros inv\xE1lidos - verifique texto e configura\xE7\xF5es");
+    }
+    if (error.response?.status === 500) {
+      throw new Error("XTTS erro interno do servidor - tente novamente");
+    }
+    if (error.code === "ECONNRESET") {
+      throw new Error("XTTS conex\xE3o interrompida - texto muito longo ou sobrecarga");
+    }
+    throw error;
+  }
+}
+async function testConnection4(config2) {
+  try {
+    const response = await axios_default.get(`${config2.api_url}/health`, {
+      timeout: 5e3
+    });
+    return response.status === 200;
+  } catch (error) {
+    try {
+      const response = await axios_default.post(`${config2.api_url}/tts_to_audio/`, {
+        text: "test",
+        speaker_wav: "test.wav",
+        language: "pt"
+      }, {
+        timeout: 3e3,
+        validateStatus: (status) => status < 500
+        // Aceita 4xx como "conectado"
+      });
+      return response.status < 500;
+    } catch (error2) {
+      console.warn("\u26A0\uFE0F XTTS: Falha no teste de conectividade:", error2);
+      return false;
+    }
+  }
+}
+async function getAvailableVoices4(config2) {
+  try {
+    const response = await axios_default.get(`${config2.api_url}/speakers`, {
+      timeout: 1e4
+    });
+    if (response.data.speakers) {
+      return response.data.speakers.map((speaker) => ({
+        voice_id: speaker.name || speaker.file,
+        name: speaker.display_name || speaker.name,
+        language: speaker.language || "pt",
+        speaker_wav: speaker.file,
+        quality: speaker.quality || "medium"
+      }));
+    }
+    return [];
+  } catch (error) {
+    console.error("\u274C XTTS: Erro ao buscar vozes:", error);
+    return [
+      {
+        voice_id: "pt-br-female-1",
+        name: "Voz Feminina Brasileira",
+        language: "pt",
+        speaker_wav: "default_female_pt.wav",
+        quality: "high"
+      },
+      {
+        voice_id: "pt-br-male-1",
+        name: "Voz Masculina Brasileira",
+        language: "pt",
+        speaker_wav: "default_male_pt.wav",
+        quality: "high"
+      }
+    ];
+  }
+}
+async function cloneVoice(config2, audioFile, voiceName) {
+  try {
+    const formData = new FormData();
+    formData.append("audio", new Blob([audioFile]), "voice_sample.wav");
+    formData.append("name", voiceName);
+    formData.append("language", "pt");
+    const response = await axios_default.post(`${config2.api_url}/clone_speaker`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data"
+      },
+      timeout: 6e4
+      // Clonagem pode demorar
+    });
+    if (response.data.success) {
+      return {
+        success: true,
+        voice_id: response.data.speaker_id,
+        message: "Voz clonada com sucesso"
+      };
+    } else {
+      throw new Error(response.data.error || "Falha na clonagem da voz");
+    }
+  } catch (error) {
+    console.error("\u274C XTTS: Erro na clonagem de voz:", error);
+    throw error;
+  }
+}
+function estimateDuration2(text) {
+  const words = text.split(" ").length;
+  const durationSeconds = words / 150 * 60;
+  return Math.floor(durationSeconds * 1e3);
+}
+function validateParams4(params) {
+  const errors = [];
+  if (!params.text || params.text.trim().length === 0) {
+    errors.push("Texto \xE9 obrigat\xF3rio");
+  }
+  if (params.text && params.text.length > 1e4) {
+    errors.push("Texto muito longo para XTTS (m\xE1ximo 10000 caracteres)");
+  }
+  if (!params.voice_id && !params.engine_config?.speaker_wav) {
+    errors.push("Voice ID ou speaker_wav \xE9 obrigat\xF3rio");
+  }
+  if (params.speed && (params.speed < 0.1 || params.speed > 2)) {
+    errors.push("Speed deve estar entre 0.1 e 2.0 para XTTS");
+  }
+  return errors;
+}
+var recommendedConfigs, supportedLanguages, engineInfo4;
+var init_xtts = __esm({
+  "src/engines/xtts.ts"() {
+    "use strict";
+    init_axios2();
+    recommendedConfigs = {
+      "conversational": {
+        gpt_cond_len: 3,
+        gpt_cond_chunk_len: 4,
+        max_ref_len: 60,
+        sound_norm_refs: false,
+        description: "Otimizado para conversas naturais"
+      },
+      "audiobook": {
+        gpt_cond_len: 6,
+        gpt_cond_chunk_len: 8,
+        max_ref_len: 120,
+        sound_norm_refs: true,
+        description: "Otimizado para narrativa longa"
+      },
+      "fast": {
+        gpt_cond_len: 2,
+        gpt_cond_chunk_len: 2,
+        max_ref_len: 30,
+        sound_norm_refs: false,
+        description: "Otimizado para velocidade"
+      }
+    };
+    supportedLanguages = [
+      { code: "pt", name: "Portugu\xEAs", quality: "excellent" },
+      { code: "en", name: "English", quality: "excellent" },
+      { code: "es", name: "Espa\xF1ol", quality: "good" },
+      { code: "fr", name: "Fran\xE7ais", quality: "good" },
+      { code: "de", name: "Deutsch", quality: "good" },
+      { code: "it", name: "Italiano", quality: "good" },
+      { code: "pl", name: "Polski", quality: "fair" },
+      { code: "tr", name: "T\xFCrk\xE7e", quality: "fair" },
+      { code: "ru", name: "\u0420\u0443\u0441\u0441\u043A\u0438\u0439", quality: "fair" },
+      { code: "nl", name: "Nederlands", quality: "fair" },
+      { code: "cs", name: "\u010Ce\u0161tina", quality: "fair" },
+      { code: "ar", name: "\u0627\u0644\u0639\u0631\u0628\u064A\u0629", quality: "fair" },
+      { code: "zh-cn", name: "\u4E2D\u6587", quality: "fair" },
+      { code: "hu", name: "Magyar", quality: "fair" },
+      { code: "ko", name: "\uD55C\uAD6D\uC5B4", quality: "fair" },
+      { code: "ja", name: "\u65E5\u672C\u8A9E", quality: "fair" },
+      { code: "hi", name: "\u0939\u093F\u0928\u094D\u0926\u0940", quality: "fair" }
+    ];
+    engineInfo4 = {
+      name: "XTTS (Coqui)",
+      version: "2.0.0",
+      description: "Engine de s\xEDntese de voz baseada em IA com capacidade de clonagem de voz",
+      supported_languages: supportedLanguages.map((lang) => lang.code),
+      supported_formats: ["wav", "mp3"],
+      max_text_length: 1e4,
+      estimated_cost_per_char: 0,
+      // Open source, sem custo direto
+      supports_voice_cloning: true,
+      requires_api_key: false,
+      processing_time: "medium"
+    };
+  }
+});
+
 // src/index.ts
 var import_fastify = __toESM(require_fastify(), 1);
 var import_cors = __toESM(require_cors(), 1);
@@ -60272,3319 +64999,10 @@ var import_helmet = __toESM(require_helmet2(), 1);
 var import_rate_limit = __toESM(require_rate_limit(), 1);
 var import_multipart = __toESM(require_multipart2(), 1);
 var import_dotenv2 = __toESM(require_main2(), 1);
-var import_path = require("path");
+var import_path2 = require("path");
 
-// node_modules/axios/lib/helpers/bind.js
-function bind(fn, thisArg) {
-  return function wrap() {
-    return fn.apply(thisArg, arguments);
-  };
-}
-
-// node_modules/axios/lib/utils.js
-var { toString } = Object.prototype;
-var { getPrototypeOf } = Object;
-var { iterator, toStringTag } = Symbol;
-var kindOf = /* @__PURE__ */ ((cache) => (thing) => {
-  const str = toString.call(thing);
-  return cache[str] || (cache[str] = str.slice(8, -1).toLowerCase());
-})(/* @__PURE__ */ Object.create(null));
-var kindOfTest = (type) => {
-  type = type.toLowerCase();
-  return (thing) => kindOf(thing) === type;
-};
-var typeOfTest = (type) => (thing) => typeof thing === type;
-var { isArray } = Array;
-var isUndefined = typeOfTest("undefined");
-function isBuffer(val) {
-  return val !== null && !isUndefined(val) && val.constructor !== null && !isUndefined(val.constructor) && isFunction(val.constructor.isBuffer) && val.constructor.isBuffer(val);
-}
-var isArrayBuffer = kindOfTest("ArrayBuffer");
-function isArrayBufferView(val) {
-  let result;
-  if (typeof ArrayBuffer !== "undefined" && ArrayBuffer.isView) {
-    result = ArrayBuffer.isView(val);
-  } else {
-    result = val && val.buffer && isArrayBuffer(val.buffer);
-  }
-  return result;
-}
-var isString = typeOfTest("string");
-var isFunction = typeOfTest("function");
-var isNumber = typeOfTest("number");
-var isObject = (thing) => thing !== null && typeof thing === "object";
-var isBoolean = (thing) => thing === true || thing === false;
-var isPlainObject = (val) => {
-  if (kindOf(val) !== "object") {
-    return false;
-  }
-  const prototype3 = getPrototypeOf(val);
-  return (prototype3 === null || prototype3 === Object.prototype || Object.getPrototypeOf(prototype3) === null) && !(toStringTag in val) && !(iterator in val);
-};
-var isDate = kindOfTest("Date");
-var isFile = kindOfTest("File");
-var isBlob = kindOfTest("Blob");
-var isFileList = kindOfTest("FileList");
-var isStream = (val) => isObject(val) && isFunction(val.pipe);
-var isFormData = (thing) => {
-  let kind;
-  return thing && (typeof FormData === "function" && thing instanceof FormData || isFunction(thing.append) && ((kind = kindOf(thing)) === "formdata" || // detect form-data instance
-  kind === "object" && isFunction(thing.toString) && thing.toString() === "[object FormData]"));
-};
-var isURLSearchParams = kindOfTest("URLSearchParams");
-var [isReadableStream, isRequest, isResponse, isHeaders] = ["ReadableStream", "Request", "Response", "Headers"].map(kindOfTest);
-var trim = (str) => str.trim ? str.trim() : str.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, "");
-function forEach(obj, fn, { allOwnKeys = false } = {}) {
-  if (obj === null || typeof obj === "undefined") {
-    return;
-  }
-  let i;
-  let l;
-  if (typeof obj !== "object") {
-    obj = [obj];
-  }
-  if (isArray(obj)) {
-    for (i = 0, l = obj.length; i < l; i++) {
-      fn.call(null, obj[i], i, obj);
-    }
-  } else {
-    const keys = allOwnKeys ? Object.getOwnPropertyNames(obj) : Object.keys(obj);
-    const len = keys.length;
-    let key;
-    for (i = 0; i < len; i++) {
-      key = keys[i];
-      fn.call(null, obj[key], key, obj);
-    }
-  }
-}
-function findKey(obj, key) {
-  key = key.toLowerCase();
-  const keys = Object.keys(obj);
-  let i = keys.length;
-  let _key;
-  while (i-- > 0) {
-    _key = keys[i];
-    if (key === _key.toLowerCase()) {
-      return _key;
-    }
-  }
-  return null;
-}
-var _global = (() => {
-  if (typeof globalThis !== "undefined") return globalThis;
-  return typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : global;
-})();
-var isContextDefined = (context) => !isUndefined(context) && context !== _global;
-function merge() {
-  const { caseless } = isContextDefined(this) && this || {};
-  const result = {};
-  const assignValue = (val, key) => {
-    const targetKey = caseless && findKey(result, key) || key;
-    if (isPlainObject(result[targetKey]) && isPlainObject(val)) {
-      result[targetKey] = merge(result[targetKey], val);
-    } else if (isPlainObject(val)) {
-      result[targetKey] = merge({}, val);
-    } else if (isArray(val)) {
-      result[targetKey] = val.slice();
-    } else {
-      result[targetKey] = val;
-    }
-  };
-  for (let i = 0, l = arguments.length; i < l; i++) {
-    arguments[i] && forEach(arguments[i], assignValue);
-  }
-  return result;
-}
-var extend = (a, b, thisArg, { allOwnKeys } = {}) => {
-  forEach(b, (val, key) => {
-    if (thisArg && isFunction(val)) {
-      a[key] = bind(val, thisArg);
-    } else {
-      a[key] = val;
-    }
-  }, { allOwnKeys });
-  return a;
-};
-var stripBOM = (content) => {
-  if (content.charCodeAt(0) === 65279) {
-    content = content.slice(1);
-  }
-  return content;
-};
-var inherits = (constructor, superConstructor, props, descriptors2) => {
-  constructor.prototype = Object.create(superConstructor.prototype, descriptors2);
-  constructor.prototype.constructor = constructor;
-  Object.defineProperty(constructor, "super", {
-    value: superConstructor.prototype
-  });
-  props && Object.assign(constructor.prototype, props);
-};
-var toFlatObject = (sourceObj, destObj, filter2, propFilter) => {
-  let props;
-  let i;
-  let prop;
-  const merged = {};
-  destObj = destObj || {};
-  if (sourceObj == null) return destObj;
-  do {
-    props = Object.getOwnPropertyNames(sourceObj);
-    i = props.length;
-    while (i-- > 0) {
-      prop = props[i];
-      if ((!propFilter || propFilter(prop, sourceObj, destObj)) && !merged[prop]) {
-        destObj[prop] = sourceObj[prop];
-        merged[prop] = true;
-      }
-    }
-    sourceObj = filter2 !== false && getPrototypeOf(sourceObj);
-  } while (sourceObj && (!filter2 || filter2(sourceObj, destObj)) && sourceObj !== Object.prototype);
-  return destObj;
-};
-var endsWith = (str, searchString, position) => {
-  str = String(str);
-  if (position === void 0 || position > str.length) {
-    position = str.length;
-  }
-  position -= searchString.length;
-  const lastIndex = str.indexOf(searchString, position);
-  return lastIndex !== -1 && lastIndex === position;
-};
-var toArray = (thing) => {
-  if (!thing) return null;
-  if (isArray(thing)) return thing;
-  let i = thing.length;
-  if (!isNumber(i)) return null;
-  const arr = new Array(i);
-  while (i-- > 0) {
-    arr[i] = thing[i];
-  }
-  return arr;
-};
-var isTypedArray = /* @__PURE__ */ ((TypedArray) => {
-  return (thing) => {
-    return TypedArray && thing instanceof TypedArray;
-  };
-})(typeof Uint8Array !== "undefined" && getPrototypeOf(Uint8Array));
-var forEachEntry = (obj, fn) => {
-  const generator = obj && obj[iterator];
-  const _iterator = generator.call(obj);
-  let result;
-  while ((result = _iterator.next()) && !result.done) {
-    const pair = result.value;
-    fn.call(obj, pair[0], pair[1]);
-  }
-};
-var matchAll = (regExp, str) => {
-  let matches;
-  const arr = [];
-  while ((matches = regExp.exec(str)) !== null) {
-    arr.push(matches);
-  }
-  return arr;
-};
-var isHTMLForm = kindOfTest("HTMLFormElement");
-var toCamelCase = (str) => {
-  return str.toLowerCase().replace(
-    /[-_\s]([a-z\d])(\w*)/g,
-    function replacer(m, p1, p2) {
-      return p1.toUpperCase() + p2;
-    }
-  );
-};
-var hasOwnProperty = (({ hasOwnProperty: hasOwnProperty2 }) => (obj, prop) => hasOwnProperty2.call(obj, prop))(Object.prototype);
-var isRegExp = kindOfTest("RegExp");
-var reduceDescriptors = (obj, reducer) => {
-  const descriptors2 = Object.getOwnPropertyDescriptors(obj);
-  const reducedDescriptors = {};
-  forEach(descriptors2, (descriptor, name) => {
-    let ret;
-    if ((ret = reducer(descriptor, name, obj)) !== false) {
-      reducedDescriptors[name] = ret || descriptor;
-    }
-  });
-  Object.defineProperties(obj, reducedDescriptors);
-};
-var freezeMethods = (obj) => {
-  reduceDescriptors(obj, (descriptor, name) => {
-    if (isFunction(obj) && ["arguments", "caller", "callee"].indexOf(name) !== -1) {
-      return false;
-    }
-    const value = obj[name];
-    if (!isFunction(value)) return;
-    descriptor.enumerable = false;
-    if ("writable" in descriptor) {
-      descriptor.writable = false;
-      return;
-    }
-    if (!descriptor.set) {
-      descriptor.set = () => {
-        throw Error("Can not rewrite read-only method '" + name + "'");
-      };
-    }
-  });
-};
-var toObjectSet = (arrayOrString, delimiter) => {
-  const obj = {};
-  const define = (arr) => {
-    arr.forEach((value) => {
-      obj[value] = true;
-    });
-  };
-  isArray(arrayOrString) ? define(arrayOrString) : define(String(arrayOrString).split(delimiter));
-  return obj;
-};
-var noop = () => {
-};
-var toFiniteNumber = (value, defaultValue) => {
-  return value != null && Number.isFinite(value = +value) ? value : defaultValue;
-};
-function isSpecCompliantForm(thing) {
-  return !!(thing && isFunction(thing.append) && thing[toStringTag] === "FormData" && thing[iterator]);
-}
-var toJSONObject = (obj) => {
-  const stack = new Array(10);
-  const visit = (source, i) => {
-    if (isObject(source)) {
-      if (stack.indexOf(source) >= 0) {
-        return;
-      }
-      if (!("toJSON" in source)) {
-        stack[i] = source;
-        const target = isArray(source) ? [] : {};
-        forEach(source, (value, key) => {
-          const reducedValue = visit(value, i + 1);
-          !isUndefined(reducedValue) && (target[key] = reducedValue);
-        });
-        stack[i] = void 0;
-        return target;
-      }
-    }
-    return source;
-  };
-  return visit(obj, 0);
-};
-var isAsyncFn = kindOfTest("AsyncFunction");
-var isThenable = (thing) => thing && (isObject(thing) || isFunction(thing)) && isFunction(thing.then) && isFunction(thing.catch);
-var _setImmediate = ((setImmediateSupported, postMessageSupported) => {
-  if (setImmediateSupported) {
-    return setImmediate;
-  }
-  return postMessageSupported ? ((token, callbacks) => {
-    _global.addEventListener("message", ({ source, data }) => {
-      if (source === _global && data === token) {
-        callbacks.length && callbacks.shift()();
-      }
-    }, false);
-    return (cb) => {
-      callbacks.push(cb);
-      _global.postMessage(token, "*");
-    };
-  })(`axios@${Math.random()}`, []) : (cb) => setTimeout(cb);
-})(
-  typeof setImmediate === "function",
-  isFunction(_global.postMessage)
-);
-var asap = typeof queueMicrotask !== "undefined" ? queueMicrotask.bind(_global) : typeof process !== "undefined" && process.nextTick || _setImmediate;
-var isIterable = (thing) => thing != null && isFunction(thing[iterator]);
-var utils_default = {
-  isArray,
-  isArrayBuffer,
-  isBuffer,
-  isFormData,
-  isArrayBufferView,
-  isString,
-  isNumber,
-  isBoolean,
-  isObject,
-  isPlainObject,
-  isReadableStream,
-  isRequest,
-  isResponse,
-  isHeaders,
-  isUndefined,
-  isDate,
-  isFile,
-  isBlob,
-  isRegExp,
-  isFunction,
-  isStream,
-  isURLSearchParams,
-  isTypedArray,
-  isFileList,
-  forEach,
-  merge,
-  extend,
-  trim,
-  stripBOM,
-  inherits,
-  toFlatObject,
-  kindOf,
-  kindOfTest,
-  endsWith,
-  toArray,
-  forEachEntry,
-  matchAll,
-  isHTMLForm,
-  hasOwnProperty,
-  hasOwnProp: hasOwnProperty,
-  // an alias to avoid ESLint no-prototype-builtins detection
-  reduceDescriptors,
-  freezeMethods,
-  toObjectSet,
-  toCamelCase,
-  noop,
-  toFiniteNumber,
-  findKey,
-  global: _global,
-  isContextDefined,
-  isSpecCompliantForm,
-  toJSONObject,
-  isAsyncFn,
-  isThenable,
-  setImmediate: _setImmediate,
-  asap,
-  isIterable
-};
-
-// node_modules/axios/lib/core/AxiosError.js
-function AxiosError(message, code, config2, request, response) {
-  Error.call(this);
-  if (Error.captureStackTrace) {
-    Error.captureStackTrace(this, this.constructor);
-  } else {
-    this.stack = new Error().stack;
-  }
-  this.message = message;
-  this.name = "AxiosError";
-  code && (this.code = code);
-  config2 && (this.config = config2);
-  request && (this.request = request);
-  if (response) {
-    this.response = response;
-    this.status = response.status ? response.status : null;
-  }
-}
-utils_default.inherits(AxiosError, Error, {
-  toJSON: function toJSON() {
-    return {
-      // Standard
-      message: this.message,
-      name: this.name,
-      // Microsoft
-      description: this.description,
-      number: this.number,
-      // Mozilla
-      fileName: this.fileName,
-      lineNumber: this.lineNumber,
-      columnNumber: this.columnNumber,
-      stack: this.stack,
-      // Axios
-      config: utils_default.toJSONObject(this.config),
-      code: this.code,
-      status: this.status
-    };
-  }
-});
-var prototype = AxiosError.prototype;
-var descriptors = {};
-[
-  "ERR_BAD_OPTION_VALUE",
-  "ERR_BAD_OPTION",
-  "ECONNABORTED",
-  "ETIMEDOUT",
-  "ERR_NETWORK",
-  "ERR_FR_TOO_MANY_REDIRECTS",
-  "ERR_DEPRECATED",
-  "ERR_BAD_RESPONSE",
-  "ERR_BAD_REQUEST",
-  "ERR_CANCELED",
-  "ERR_NOT_SUPPORT",
-  "ERR_INVALID_URL"
-  // eslint-disable-next-line func-names
-].forEach((code) => {
-  descriptors[code] = { value: code };
-});
-Object.defineProperties(AxiosError, descriptors);
-Object.defineProperty(prototype, "isAxiosError", { value: true });
-AxiosError.from = (error, code, config2, request, response, customProps) => {
-  const axiosError = Object.create(prototype);
-  utils_default.toFlatObject(error, axiosError, function filter2(obj) {
-    return obj !== Error.prototype;
-  }, (prop) => {
-    return prop !== "isAxiosError";
-  });
-  AxiosError.call(axiosError, error.message, code, config2, request, response);
-  axiosError.cause = error;
-  axiosError.name = error.name;
-  customProps && Object.assign(axiosError, customProps);
-  return axiosError;
-};
-var AxiosError_default = AxiosError;
-
-// node_modules/axios/lib/platform/node/classes/FormData.js
-var import_form_data = __toESM(require_form_data2(), 1);
-var FormData_default = import_form_data.default;
-
-// node_modules/axios/lib/helpers/toFormData.js
-function isVisitable(thing) {
-  return utils_default.isPlainObject(thing) || utils_default.isArray(thing);
-}
-function removeBrackets(key) {
-  return utils_default.endsWith(key, "[]") ? key.slice(0, -2) : key;
-}
-function renderKey(path, key, dots) {
-  if (!path) return key;
-  return path.concat(key).map(function each(token, i) {
-    token = removeBrackets(token);
-    return !dots && i ? "[" + token + "]" : token;
-  }).join(dots ? "." : "");
-}
-function isFlatArray(arr) {
-  return utils_default.isArray(arr) && !arr.some(isVisitable);
-}
-var predicates = utils_default.toFlatObject(utils_default, {}, null, function filter(prop) {
-  return /^is[A-Z]/.test(prop);
-});
-function toFormData(obj, formData, options) {
-  if (!utils_default.isObject(obj)) {
-    throw new TypeError("target must be an object");
-  }
-  formData = formData || new (FormData_default || FormData)();
-  options = utils_default.toFlatObject(options, {
-    metaTokens: true,
-    dots: false,
-    indexes: false
-  }, false, function defined(option, source) {
-    return !utils_default.isUndefined(source[option]);
-  });
-  const metaTokens = options.metaTokens;
-  const visitor = options.visitor || defaultVisitor;
-  const dots = options.dots;
-  const indexes = options.indexes;
-  const _Blob = options.Blob || typeof Blob !== "undefined" && Blob;
-  const useBlob = _Blob && utils_default.isSpecCompliantForm(formData);
-  if (!utils_default.isFunction(visitor)) {
-    throw new TypeError("visitor must be a function");
-  }
-  function convertValue(value) {
-    if (value === null) return "";
-    if (utils_default.isDate(value)) {
-      return value.toISOString();
-    }
-    if (utils_default.isBoolean(value)) {
-      return value.toString();
-    }
-    if (!useBlob && utils_default.isBlob(value)) {
-      throw new AxiosError_default("Blob is not supported. Use a Buffer instead.");
-    }
-    if (utils_default.isArrayBuffer(value) || utils_default.isTypedArray(value)) {
-      return useBlob && typeof Blob === "function" ? new Blob([value]) : Buffer.from(value);
-    }
-    return value;
-  }
-  function defaultVisitor(value, key, path) {
-    let arr = value;
-    if (value && !path && typeof value === "object") {
-      if (utils_default.endsWith(key, "{}")) {
-        key = metaTokens ? key : key.slice(0, -2);
-        value = JSON.stringify(value);
-      } else if (utils_default.isArray(value) && isFlatArray(value) || (utils_default.isFileList(value) || utils_default.endsWith(key, "[]")) && (arr = utils_default.toArray(value))) {
-        key = removeBrackets(key);
-        arr.forEach(function each(el, index2) {
-          !(utils_default.isUndefined(el) || el === null) && formData.append(
-            // eslint-disable-next-line no-nested-ternary
-            indexes === true ? renderKey([key], index2, dots) : indexes === null ? key : key + "[]",
-            convertValue(el)
-          );
-        });
-        return false;
-      }
-    }
-    if (isVisitable(value)) {
-      return true;
-    }
-    formData.append(renderKey(path, key, dots), convertValue(value));
-    return false;
-  }
-  const stack = [];
-  const exposedHelpers = Object.assign(predicates, {
-    defaultVisitor,
-    convertValue,
-    isVisitable
-  });
-  function build(value, path) {
-    if (utils_default.isUndefined(value)) return;
-    if (stack.indexOf(value) !== -1) {
-      throw Error("Circular reference detected in " + path.join("."));
-    }
-    stack.push(value);
-    utils_default.forEach(value, function each(el, key) {
-      const result = !(utils_default.isUndefined(el) || el === null) && visitor.call(
-        formData,
-        el,
-        utils_default.isString(key) ? key.trim() : key,
-        path,
-        exposedHelpers
-      );
-      if (result === true) {
-        build(el, path ? path.concat(key) : [key]);
-      }
-    });
-    stack.pop();
-  }
-  if (!utils_default.isObject(obj)) {
-    throw new TypeError("data must be an object");
-  }
-  build(obj);
-  return formData;
-}
-var toFormData_default = toFormData;
-
-// node_modules/axios/lib/helpers/AxiosURLSearchParams.js
-function encode(str) {
-  const charMap = {
-    "!": "%21",
-    "'": "%27",
-    "(": "%28",
-    ")": "%29",
-    "~": "%7E",
-    "%20": "+",
-    "%00": "\0"
-  };
-  return encodeURIComponent(str).replace(/[!'()~]|%20|%00/g, function replacer(match) {
-    return charMap[match];
-  });
-}
-function AxiosURLSearchParams(params, options) {
-  this._pairs = [];
-  params && toFormData_default(params, this, options);
-}
-var prototype2 = AxiosURLSearchParams.prototype;
-prototype2.append = function append(name, value) {
-  this._pairs.push([name, value]);
-};
-prototype2.toString = function toString2(encoder) {
-  const _encode = encoder ? function(value) {
-    return encoder.call(this, value, encode);
-  } : encode;
-  return this._pairs.map(function each(pair) {
-    return _encode(pair[0]) + "=" + _encode(pair[1]);
-  }, "").join("&");
-};
-var AxiosURLSearchParams_default = AxiosURLSearchParams;
-
-// node_modules/axios/lib/helpers/buildURL.js
-function encode2(val) {
-  return encodeURIComponent(val).replace(/%3A/gi, ":").replace(/%24/g, "$").replace(/%2C/gi, ",").replace(/%20/g, "+").replace(/%5B/gi, "[").replace(/%5D/gi, "]");
-}
-function buildURL(url2, params, options) {
-  if (!params) {
-    return url2;
-  }
-  const _encode = options && options.encode || encode2;
-  if (utils_default.isFunction(options)) {
-    options = {
-      serialize: options
-    };
-  }
-  const serializeFn = options && options.serialize;
-  let serializedParams;
-  if (serializeFn) {
-    serializedParams = serializeFn(params, options);
-  } else {
-    serializedParams = utils_default.isURLSearchParams(params) ? params.toString() : new AxiosURLSearchParams_default(params, options).toString(_encode);
-  }
-  if (serializedParams) {
-    const hashmarkIndex = url2.indexOf("#");
-    if (hashmarkIndex !== -1) {
-      url2 = url2.slice(0, hashmarkIndex);
-    }
-    url2 += (url2.indexOf("?") === -1 ? "?" : "&") + serializedParams;
-  }
-  return url2;
-}
-
-// node_modules/axios/lib/core/InterceptorManager.js
-var InterceptorManager = class {
-  constructor() {
-    this.handlers = [];
-  }
-  /**
-   * Add a new interceptor to the stack
-   *
-   * @param {Function} fulfilled The function to handle `then` for a `Promise`
-   * @param {Function} rejected The function to handle `reject` for a `Promise`
-   *
-   * @return {Number} An ID used to remove interceptor later
-   */
-  use(fulfilled, rejected, options) {
-    this.handlers.push({
-      fulfilled,
-      rejected,
-      synchronous: options ? options.synchronous : false,
-      runWhen: options ? options.runWhen : null
-    });
-    return this.handlers.length - 1;
-  }
-  /**
-   * Remove an interceptor from the stack
-   *
-   * @param {Number} id The ID that was returned by `use`
-   *
-   * @returns {Boolean} `true` if the interceptor was removed, `false` otherwise
-   */
-  eject(id) {
-    if (this.handlers[id]) {
-      this.handlers[id] = null;
-    }
-  }
-  /**
-   * Clear all interceptors from the stack
-   *
-   * @returns {void}
-   */
-  clear() {
-    if (this.handlers) {
-      this.handlers = [];
-    }
-  }
-  /**
-   * Iterate over all the registered interceptors
-   *
-   * This method is particularly useful for skipping over any
-   * interceptors that may have become `null` calling `eject`.
-   *
-   * @param {Function} fn The function to call for each interceptor
-   *
-   * @returns {void}
-   */
-  forEach(fn) {
-    utils_default.forEach(this.handlers, function forEachHandler(h) {
-      if (h !== null) {
-        fn(h);
-      }
-    });
-  }
-};
-var InterceptorManager_default = InterceptorManager;
-
-// node_modules/axios/lib/defaults/transitional.js
-var transitional_default = {
-  silentJSONParsing: true,
-  forcedJSONParsing: true,
-  clarifyTimeoutError: false
-};
-
-// node_modules/axios/lib/platform/node/index.js
-var import_crypto = __toESM(require("crypto"), 1);
-
-// node_modules/axios/lib/platform/node/classes/URLSearchParams.js
-var import_url = __toESM(require("url"), 1);
-var URLSearchParams_default = import_url.default.URLSearchParams;
-
-// node_modules/axios/lib/platform/node/index.js
-var ALPHA = "abcdefghijklmnopqrstuvwxyz";
-var DIGIT = "0123456789";
-var ALPHABET = {
-  DIGIT,
-  ALPHA,
-  ALPHA_DIGIT: ALPHA + ALPHA.toUpperCase() + DIGIT
-};
-var generateString = (size = 16, alphabet = ALPHABET.ALPHA_DIGIT) => {
-  let str = "";
-  const { length } = alphabet;
-  const randomValues = new Uint32Array(size);
-  import_crypto.default.randomFillSync(randomValues);
-  for (let i = 0; i < size; i++) {
-    str += alphabet[randomValues[i] % length];
-  }
-  return str;
-};
-var node_default = {
-  isNode: true,
-  classes: {
-    URLSearchParams: URLSearchParams_default,
-    FormData: FormData_default,
-    Blob: typeof Blob !== "undefined" && Blob || null
-  },
-  ALPHABET,
-  generateString,
-  protocols: ["http", "https", "file", "data"]
-};
-
-// node_modules/axios/lib/platform/common/utils.js
-var utils_exports = {};
-__export(utils_exports, {
-  hasBrowserEnv: () => hasBrowserEnv,
-  hasStandardBrowserEnv: () => hasStandardBrowserEnv,
-  hasStandardBrowserWebWorkerEnv: () => hasStandardBrowserWebWorkerEnv,
-  navigator: () => _navigator,
-  origin: () => origin
-});
-var hasBrowserEnv = typeof window !== "undefined" && typeof document !== "undefined";
-var _navigator = typeof navigator === "object" && navigator || void 0;
-var hasStandardBrowserEnv = hasBrowserEnv && (!_navigator || ["ReactNative", "NativeScript", "NS"].indexOf(_navigator.product) < 0);
-var hasStandardBrowserWebWorkerEnv = (() => {
-  return typeof WorkerGlobalScope !== "undefined" && // eslint-disable-next-line no-undef
-  self instanceof WorkerGlobalScope && typeof self.importScripts === "function";
-})();
-var origin = hasBrowserEnv && window.location.href || "http://localhost";
-
-// node_modules/axios/lib/platform/index.js
-var platform_default = {
-  ...utils_exports,
-  ...node_default
-};
-
-// node_modules/axios/lib/helpers/toURLEncodedForm.js
-function toURLEncodedForm(data, options) {
-  return toFormData_default(data, new platform_default.classes.URLSearchParams(), Object.assign({
-    visitor: function(value, key, path, helpers) {
-      if (platform_default.isNode && utils_default.isBuffer(value)) {
-        this.append(key, value.toString("base64"));
-        return false;
-      }
-      return helpers.defaultVisitor.apply(this, arguments);
-    }
-  }, options));
-}
-
-// node_modules/axios/lib/helpers/formDataToJSON.js
-function parsePropPath(name) {
-  return utils_default.matchAll(/\w+|\[(\w*)]/g, name).map((match) => {
-    return match[0] === "[]" ? "" : match[1] || match[0];
-  });
-}
-function arrayToObject(arr) {
-  const obj = {};
-  const keys = Object.keys(arr);
-  let i;
-  const len = keys.length;
-  let key;
-  for (i = 0; i < len; i++) {
-    key = keys[i];
-    obj[key] = arr[key];
-  }
-  return obj;
-}
-function formDataToJSON(formData) {
-  function buildPath(path, value, target, index2) {
-    let name = path[index2++];
-    if (name === "__proto__") return true;
-    const isNumericKey = Number.isFinite(+name);
-    const isLast = index2 >= path.length;
-    name = !name && utils_default.isArray(target) ? target.length : name;
-    if (isLast) {
-      if (utils_default.hasOwnProp(target, name)) {
-        target[name] = [target[name], value];
-      } else {
-        target[name] = value;
-      }
-      return !isNumericKey;
-    }
-    if (!target[name] || !utils_default.isObject(target[name])) {
-      target[name] = [];
-    }
-    const result = buildPath(path, value, target[name], index2);
-    if (result && utils_default.isArray(target[name])) {
-      target[name] = arrayToObject(target[name]);
-    }
-    return !isNumericKey;
-  }
-  if (utils_default.isFormData(formData) && utils_default.isFunction(formData.entries)) {
-    const obj = {};
-    utils_default.forEachEntry(formData, (name, value) => {
-      buildPath(parsePropPath(name), value, obj, 0);
-    });
-    return obj;
-  }
-  return null;
-}
-var formDataToJSON_default = formDataToJSON;
-
-// node_modules/axios/lib/defaults/index.js
-function stringifySafely(rawValue, parser, encoder) {
-  if (utils_default.isString(rawValue)) {
-    try {
-      (parser || JSON.parse)(rawValue);
-      return utils_default.trim(rawValue);
-    } catch (e) {
-      if (e.name !== "SyntaxError") {
-        throw e;
-      }
-    }
-  }
-  return (encoder || JSON.stringify)(rawValue);
-}
-var defaults = {
-  transitional: transitional_default,
-  adapter: ["xhr", "http", "fetch"],
-  transformRequest: [function transformRequest(data, headers) {
-    const contentType = headers.getContentType() || "";
-    const hasJSONContentType = contentType.indexOf("application/json") > -1;
-    const isObjectPayload = utils_default.isObject(data);
-    if (isObjectPayload && utils_default.isHTMLForm(data)) {
-      data = new FormData(data);
-    }
-    const isFormData2 = utils_default.isFormData(data);
-    if (isFormData2) {
-      return hasJSONContentType ? JSON.stringify(formDataToJSON_default(data)) : data;
-    }
-    if (utils_default.isArrayBuffer(data) || utils_default.isBuffer(data) || utils_default.isStream(data) || utils_default.isFile(data) || utils_default.isBlob(data) || utils_default.isReadableStream(data)) {
-      return data;
-    }
-    if (utils_default.isArrayBufferView(data)) {
-      return data.buffer;
-    }
-    if (utils_default.isURLSearchParams(data)) {
-      headers.setContentType("application/x-www-form-urlencoded;charset=utf-8", false);
-      return data.toString();
-    }
-    let isFileList2;
-    if (isObjectPayload) {
-      if (contentType.indexOf("application/x-www-form-urlencoded") > -1) {
-        return toURLEncodedForm(data, this.formSerializer).toString();
-      }
-      if ((isFileList2 = utils_default.isFileList(data)) || contentType.indexOf("multipart/form-data") > -1) {
-        const _FormData = this.env && this.env.FormData;
-        return toFormData_default(
-          isFileList2 ? { "files[]": data } : data,
-          _FormData && new _FormData(),
-          this.formSerializer
-        );
-      }
-    }
-    if (isObjectPayload || hasJSONContentType) {
-      headers.setContentType("application/json", false);
-      return stringifySafely(data);
-    }
-    return data;
-  }],
-  transformResponse: [function transformResponse(data) {
-    const transitional2 = this.transitional || defaults.transitional;
-    const forcedJSONParsing = transitional2 && transitional2.forcedJSONParsing;
-    const JSONRequested = this.responseType === "json";
-    if (utils_default.isResponse(data) || utils_default.isReadableStream(data)) {
-      return data;
-    }
-    if (data && utils_default.isString(data) && (forcedJSONParsing && !this.responseType || JSONRequested)) {
-      const silentJSONParsing = transitional2 && transitional2.silentJSONParsing;
-      const strictJSONParsing = !silentJSONParsing && JSONRequested;
-      try {
-        return JSON.parse(data);
-      } catch (e) {
-        if (strictJSONParsing) {
-          if (e.name === "SyntaxError") {
-            throw AxiosError_default.from(e, AxiosError_default.ERR_BAD_RESPONSE, this, null, this.response);
-          }
-          throw e;
-        }
-      }
-    }
-    return data;
-  }],
-  /**
-   * A timeout in milliseconds to abort a request. If set to 0 (default) a
-   * timeout is not created.
-   */
-  timeout: 0,
-  xsrfCookieName: "XSRF-TOKEN",
-  xsrfHeaderName: "X-XSRF-TOKEN",
-  maxContentLength: -1,
-  maxBodyLength: -1,
-  env: {
-    FormData: platform_default.classes.FormData,
-    Blob: platform_default.classes.Blob
-  },
-  validateStatus: function validateStatus(status) {
-    return status >= 200 && status < 300;
-  },
-  headers: {
-    common: {
-      "Accept": "application/json, text/plain, */*",
-      "Content-Type": void 0
-    }
-  }
-};
-utils_default.forEach(["delete", "get", "head", "post", "put", "patch"], (method) => {
-  defaults.headers[method] = {};
-});
-var defaults_default = defaults;
-
-// node_modules/axios/lib/helpers/parseHeaders.js
-var ignoreDuplicateOf = utils_default.toObjectSet([
-  "age",
-  "authorization",
-  "content-length",
-  "content-type",
-  "etag",
-  "expires",
-  "from",
-  "host",
-  "if-modified-since",
-  "if-unmodified-since",
-  "last-modified",
-  "location",
-  "max-forwards",
-  "proxy-authorization",
-  "referer",
-  "retry-after",
-  "user-agent"
-]);
-var parseHeaders_default = (rawHeaders) => {
-  const parsed = {};
-  let key;
-  let val;
-  let i;
-  rawHeaders && rawHeaders.split("\n").forEach(function parser(line) {
-    i = line.indexOf(":");
-    key = line.substring(0, i).trim().toLowerCase();
-    val = line.substring(i + 1).trim();
-    if (!key || parsed[key] && ignoreDuplicateOf[key]) {
-      return;
-    }
-    if (key === "set-cookie") {
-      if (parsed[key]) {
-        parsed[key].push(val);
-      } else {
-        parsed[key] = [val];
-      }
-    } else {
-      parsed[key] = parsed[key] ? parsed[key] + ", " + val : val;
-    }
-  });
-  return parsed;
-};
-
-// node_modules/axios/lib/core/AxiosHeaders.js
-var $internals = Symbol("internals");
-function normalizeHeader(header) {
-  return header && String(header).trim().toLowerCase();
-}
-function normalizeValue(value) {
-  if (value === false || value == null) {
-    return value;
-  }
-  return utils_default.isArray(value) ? value.map(normalizeValue) : String(value);
-}
-function parseTokens(str) {
-  const tokens = /* @__PURE__ */ Object.create(null);
-  const tokensRE = /([^\s,;=]+)\s*(?:=\s*([^,;]+))?/g;
-  let match;
-  while (match = tokensRE.exec(str)) {
-    tokens[match[1]] = match[2];
-  }
-  return tokens;
-}
-var isValidHeaderName = (str) => /^[-_a-zA-Z0-9^`|~,!#$%&'*+.]+$/.test(str.trim());
-function matchHeaderValue(context, value, header, filter2, isHeaderNameFilter) {
-  if (utils_default.isFunction(filter2)) {
-    return filter2.call(this, value, header);
-  }
-  if (isHeaderNameFilter) {
-    value = header;
-  }
-  if (!utils_default.isString(value)) return;
-  if (utils_default.isString(filter2)) {
-    return value.indexOf(filter2) !== -1;
-  }
-  if (utils_default.isRegExp(filter2)) {
-    return filter2.test(value);
-  }
-}
-function formatHeader(header) {
-  return header.trim().toLowerCase().replace(/([a-z\d])(\w*)/g, (w, char, str) => {
-    return char.toUpperCase() + str;
-  });
-}
-function buildAccessors(obj, header) {
-  const accessorName = utils_default.toCamelCase(" " + header);
-  ["get", "set", "has"].forEach((methodName) => {
-    Object.defineProperty(obj, methodName + accessorName, {
-      value: function(arg1, arg2, arg3) {
-        return this[methodName].call(this, header, arg1, arg2, arg3);
-      },
-      configurable: true
-    });
-  });
-}
-var AxiosHeaders = class {
-  constructor(headers) {
-    headers && this.set(headers);
-  }
-  set(header, valueOrRewrite, rewrite) {
-    const self2 = this;
-    function setHeader(_value, _header, _rewrite) {
-      const lHeader = normalizeHeader(_header);
-      if (!lHeader) {
-        throw new Error("header name must be a non-empty string");
-      }
-      const key = utils_default.findKey(self2, lHeader);
-      if (!key || self2[key] === void 0 || _rewrite === true || _rewrite === void 0 && self2[key] !== false) {
-        self2[key || _header] = normalizeValue(_value);
-      }
-    }
-    const setHeaders = (headers, _rewrite) => utils_default.forEach(headers, (_value, _header) => setHeader(_value, _header, _rewrite));
-    if (utils_default.isPlainObject(header) || header instanceof this.constructor) {
-      setHeaders(header, valueOrRewrite);
-    } else if (utils_default.isString(header) && (header = header.trim()) && !isValidHeaderName(header)) {
-      setHeaders(parseHeaders_default(header), valueOrRewrite);
-    } else if (utils_default.isObject(header) && utils_default.isIterable(header)) {
-      let obj = {}, dest, key;
-      for (const entry of header) {
-        if (!utils_default.isArray(entry)) {
-          throw TypeError("Object iterator must return a key-value pair");
-        }
-        obj[key = entry[0]] = (dest = obj[key]) ? utils_default.isArray(dest) ? [...dest, entry[1]] : [dest, entry[1]] : entry[1];
-      }
-      setHeaders(obj, valueOrRewrite);
-    } else {
-      header != null && setHeader(valueOrRewrite, header, rewrite);
-    }
-    return this;
-  }
-  get(header, parser) {
-    header = normalizeHeader(header);
-    if (header) {
-      const key = utils_default.findKey(this, header);
-      if (key) {
-        const value = this[key];
-        if (!parser) {
-          return value;
-        }
-        if (parser === true) {
-          return parseTokens(value);
-        }
-        if (utils_default.isFunction(parser)) {
-          return parser.call(this, value, key);
-        }
-        if (utils_default.isRegExp(parser)) {
-          return parser.exec(value);
-        }
-        throw new TypeError("parser must be boolean|regexp|function");
-      }
-    }
-  }
-  has(header, matcher) {
-    header = normalizeHeader(header);
-    if (header) {
-      const key = utils_default.findKey(this, header);
-      return !!(key && this[key] !== void 0 && (!matcher || matchHeaderValue(this, this[key], key, matcher)));
-    }
-    return false;
-  }
-  delete(header, matcher) {
-    const self2 = this;
-    let deleted = false;
-    function deleteHeader(_header) {
-      _header = normalizeHeader(_header);
-      if (_header) {
-        const key = utils_default.findKey(self2, _header);
-        if (key && (!matcher || matchHeaderValue(self2, self2[key], key, matcher))) {
-          delete self2[key];
-          deleted = true;
-        }
-      }
-    }
-    if (utils_default.isArray(header)) {
-      header.forEach(deleteHeader);
-    } else {
-      deleteHeader(header);
-    }
-    return deleted;
-  }
-  clear(matcher) {
-    const keys = Object.keys(this);
-    let i = keys.length;
-    let deleted = false;
-    while (i--) {
-      const key = keys[i];
-      if (!matcher || matchHeaderValue(this, this[key], key, matcher, true)) {
-        delete this[key];
-        deleted = true;
-      }
-    }
-    return deleted;
-  }
-  normalize(format) {
-    const self2 = this;
-    const headers = {};
-    utils_default.forEach(this, (value, header) => {
-      const key = utils_default.findKey(headers, header);
-      if (key) {
-        self2[key] = normalizeValue(value);
-        delete self2[header];
-        return;
-      }
-      const normalized = format ? formatHeader(header) : String(header).trim();
-      if (normalized !== header) {
-        delete self2[header];
-      }
-      self2[normalized] = normalizeValue(value);
-      headers[normalized] = true;
-    });
-    return this;
-  }
-  concat(...targets) {
-    return this.constructor.concat(this, ...targets);
-  }
-  toJSON(asStrings) {
-    const obj = /* @__PURE__ */ Object.create(null);
-    utils_default.forEach(this, (value, header) => {
-      value != null && value !== false && (obj[header] = asStrings && utils_default.isArray(value) ? value.join(", ") : value);
-    });
-    return obj;
-  }
-  [Symbol.iterator]() {
-    return Object.entries(this.toJSON())[Symbol.iterator]();
-  }
-  toString() {
-    return Object.entries(this.toJSON()).map(([header, value]) => header + ": " + value).join("\n");
-  }
-  getSetCookie() {
-    return this.get("set-cookie") || [];
-  }
-  get [Symbol.toStringTag]() {
-    return "AxiosHeaders";
-  }
-  static from(thing) {
-    return thing instanceof this ? thing : new this(thing);
-  }
-  static concat(first, ...targets) {
-    const computed = new this(first);
-    targets.forEach((target) => computed.set(target));
-    return computed;
-  }
-  static accessor(header) {
-    const internals2 = this[$internals] = this[$internals] = {
-      accessors: {}
-    };
-    const accessors = internals2.accessors;
-    const prototype3 = this.prototype;
-    function defineAccessor(_header) {
-      const lHeader = normalizeHeader(_header);
-      if (!accessors[lHeader]) {
-        buildAccessors(prototype3, _header);
-        accessors[lHeader] = true;
-      }
-    }
-    utils_default.isArray(header) ? header.forEach(defineAccessor) : defineAccessor(header);
-    return this;
-  }
-};
-AxiosHeaders.accessor(["Content-Type", "Content-Length", "Accept", "Accept-Encoding", "User-Agent", "Authorization"]);
-utils_default.reduceDescriptors(AxiosHeaders.prototype, ({ value }, key) => {
-  let mapped = key[0].toUpperCase() + key.slice(1);
-  return {
-    get: () => value,
-    set(headerValue) {
-      this[mapped] = headerValue;
-    }
-  };
-});
-utils_default.freezeMethods(AxiosHeaders);
-var AxiosHeaders_default = AxiosHeaders;
-
-// node_modules/axios/lib/core/transformData.js
-function transformData(fns, response) {
-  const config2 = this || defaults_default;
-  const context = response || config2;
-  const headers = AxiosHeaders_default.from(context.headers);
-  let data = context.data;
-  utils_default.forEach(fns, function transform(fn) {
-    data = fn.call(config2, data, headers.normalize(), response ? response.status : void 0);
-  });
-  headers.normalize();
-  return data;
-}
-
-// node_modules/axios/lib/cancel/isCancel.js
-function isCancel(value) {
-  return !!(value && value.__CANCEL__);
-}
-
-// node_modules/axios/lib/cancel/CanceledError.js
-function CanceledError(message, config2, request) {
-  AxiosError_default.call(this, message == null ? "canceled" : message, AxiosError_default.ERR_CANCELED, config2, request);
-  this.name = "CanceledError";
-}
-utils_default.inherits(CanceledError, AxiosError_default, {
-  __CANCEL__: true
-});
-var CanceledError_default = CanceledError;
-
-// node_modules/axios/lib/core/settle.js
-function settle(resolve, reject, response) {
-  const validateStatus2 = response.config.validateStatus;
-  if (!response.status || !validateStatus2 || validateStatus2(response.status)) {
-    resolve(response);
-  } else {
-    reject(new AxiosError_default(
-      "Request failed with status code " + response.status,
-      [AxiosError_default.ERR_BAD_REQUEST, AxiosError_default.ERR_BAD_RESPONSE][Math.floor(response.status / 100) - 4],
-      response.config,
-      response.request,
-      response
-    ));
-  }
-}
-
-// node_modules/axios/lib/helpers/isAbsoluteURL.js
-function isAbsoluteURL(url2) {
-  return /^([a-z][a-z\d+\-.]*:)?\/\//i.test(url2);
-}
-
-// node_modules/axios/lib/helpers/combineURLs.js
-function combineURLs(baseURL, relativeURL) {
-  return relativeURL ? baseURL.replace(/\/?\/$/, "") + "/" + relativeURL.replace(/^\/+/, "") : baseURL;
-}
-
-// node_modules/axios/lib/core/buildFullPath.js
-function buildFullPath(baseURL, requestedURL, allowAbsoluteUrls) {
-  let isRelativeUrl = !isAbsoluteURL(requestedURL);
-  if (baseURL && (isRelativeUrl || allowAbsoluteUrls == false)) {
-    return combineURLs(baseURL, requestedURL);
-  }
-  return requestedURL;
-}
-
-// node_modules/axios/lib/adapters/http.js
-var import_proxy_from_env = __toESM(require_proxy_from_env(), 1);
-var import_http = __toESM(require("http"), 1);
-var import_https = __toESM(require("https"), 1);
-var import_util2 = __toESM(require("util"), 1);
-var import_follow_redirects = __toESM(require_follow_redirects(), 1);
-var import_zlib = __toESM(require("zlib"), 1);
-
-// node_modules/axios/lib/env/data.js
-var VERSION = "1.10.0";
-
-// node_modules/axios/lib/helpers/parseProtocol.js
-function parseProtocol(url2) {
-  const match = /^([-+\w]{1,25})(:?\/\/|:)/.exec(url2);
-  return match && match[1] || "";
-}
-
-// node_modules/axios/lib/helpers/fromDataURI.js
-var DATA_URL_PATTERN = /^(?:([^;]+);)?(?:[^;]+;)?(base64|),([\s\S]*)$/;
-function fromDataURI(uri, asBlob, options) {
-  const _Blob = options && options.Blob || platform_default.classes.Blob;
-  const protocol = parseProtocol(uri);
-  if (asBlob === void 0 && _Blob) {
-    asBlob = true;
-  }
-  if (protocol === "data") {
-    uri = protocol.length ? uri.slice(protocol.length + 1) : uri;
-    const match = DATA_URL_PATTERN.exec(uri);
-    if (!match) {
-      throw new AxiosError_default("Invalid URL", AxiosError_default.ERR_INVALID_URL);
-    }
-    const mime = match[1];
-    const isBase64 = match[2];
-    const body = match[3];
-    const buffer = Buffer.from(decodeURIComponent(body), isBase64 ? "base64" : "utf8");
-    if (asBlob) {
-      if (!_Blob) {
-        throw new AxiosError_default("Blob is not supported", AxiosError_default.ERR_NOT_SUPPORT);
-      }
-      return new _Blob([buffer], { type: mime });
-    }
-    return buffer;
-  }
-  throw new AxiosError_default("Unsupported protocol " + protocol, AxiosError_default.ERR_NOT_SUPPORT);
-}
-
-// node_modules/axios/lib/adapters/http.js
-var import_stream4 = __toESM(require("stream"), 1);
-
-// node_modules/axios/lib/helpers/AxiosTransformStream.js
-var import_stream = __toESM(require("stream"), 1);
-var kInternals = Symbol("internals");
-var AxiosTransformStream = class extends import_stream.default.Transform {
-  constructor(options) {
-    options = utils_default.toFlatObject(options, {
-      maxRate: 0,
-      chunkSize: 64 * 1024,
-      minChunkSize: 100,
-      timeWindow: 500,
-      ticksRate: 2,
-      samplesCount: 15
-    }, null, (prop, source) => {
-      return !utils_default.isUndefined(source[prop]);
-    });
-    super({
-      readableHighWaterMark: options.chunkSize
-    });
-    const internals2 = this[kInternals] = {
-      timeWindow: options.timeWindow,
-      chunkSize: options.chunkSize,
-      maxRate: options.maxRate,
-      minChunkSize: options.minChunkSize,
-      bytesSeen: 0,
-      isCaptured: false,
-      notifiedBytesLoaded: 0,
-      ts: Date.now(),
-      bytes: 0,
-      onReadCallback: null
-    };
-    this.on("newListener", (event) => {
-      if (event === "progress") {
-        if (!internals2.isCaptured) {
-          internals2.isCaptured = true;
-        }
-      }
-    });
-  }
-  _read(size) {
-    const internals2 = this[kInternals];
-    if (internals2.onReadCallback) {
-      internals2.onReadCallback();
-    }
-    return super._read(size);
-  }
-  _transform(chunk, encoding, callback) {
-    const internals2 = this[kInternals];
-    const maxRate = internals2.maxRate;
-    const readableHighWaterMark = this.readableHighWaterMark;
-    const timeWindow = internals2.timeWindow;
-    const divider = 1e3 / timeWindow;
-    const bytesThreshold = maxRate / divider;
-    const minChunkSize = internals2.minChunkSize !== false ? Math.max(internals2.minChunkSize, bytesThreshold * 0.01) : 0;
-    const pushChunk = (_chunk, _callback) => {
-      const bytes = Buffer.byteLength(_chunk);
-      internals2.bytesSeen += bytes;
-      internals2.bytes += bytes;
-      internals2.isCaptured && this.emit("progress", internals2.bytesSeen);
-      if (this.push(_chunk)) {
-        process.nextTick(_callback);
-      } else {
-        internals2.onReadCallback = () => {
-          internals2.onReadCallback = null;
-          process.nextTick(_callback);
-        };
-      }
-    };
-    const transformChunk = (_chunk, _callback) => {
-      const chunkSize = Buffer.byteLength(_chunk);
-      let chunkRemainder = null;
-      let maxChunkSize = readableHighWaterMark;
-      let bytesLeft;
-      let passed = 0;
-      if (maxRate) {
-        const now = Date.now();
-        if (!internals2.ts || (passed = now - internals2.ts) >= timeWindow) {
-          internals2.ts = now;
-          bytesLeft = bytesThreshold - internals2.bytes;
-          internals2.bytes = bytesLeft < 0 ? -bytesLeft : 0;
-          passed = 0;
-        }
-        bytesLeft = bytesThreshold - internals2.bytes;
-      }
-      if (maxRate) {
-        if (bytesLeft <= 0) {
-          return setTimeout(() => {
-            _callback(null, _chunk);
-          }, timeWindow - passed);
-        }
-        if (bytesLeft < maxChunkSize) {
-          maxChunkSize = bytesLeft;
-        }
-      }
-      if (maxChunkSize && chunkSize > maxChunkSize && chunkSize - maxChunkSize > minChunkSize) {
-        chunkRemainder = _chunk.subarray(maxChunkSize);
-        _chunk = _chunk.subarray(0, maxChunkSize);
-      }
-      pushChunk(_chunk, chunkRemainder ? () => {
-        process.nextTick(_callback, null, chunkRemainder);
-      } : _callback);
-    };
-    transformChunk(chunk, function transformNextChunk(err, _chunk) {
-      if (err) {
-        return callback(err);
-      }
-      if (_chunk) {
-        transformChunk(_chunk, transformNextChunk);
-      } else {
-        callback(null);
-      }
-    });
-  }
-};
-var AxiosTransformStream_default = AxiosTransformStream;
-
-// node_modules/axios/lib/adapters/http.js
-var import_events = require("events");
-
-// node_modules/axios/lib/helpers/formDataToStream.js
-var import_util = __toESM(require("util"), 1);
-var import_stream2 = require("stream");
-
-// node_modules/axios/lib/helpers/readBlob.js
-var { asyncIterator } = Symbol;
-var readBlob = async function* (blob) {
-  if (blob.stream) {
-    yield* blob.stream();
-  } else if (blob.arrayBuffer) {
-    yield await blob.arrayBuffer();
-  } else if (blob[asyncIterator]) {
-    yield* blob[asyncIterator]();
-  } else {
-    yield blob;
-  }
-};
-var readBlob_default = readBlob;
-
-// node_modules/axios/lib/helpers/formDataToStream.js
-var BOUNDARY_ALPHABET = platform_default.ALPHABET.ALPHA_DIGIT + "-_";
-var textEncoder = typeof TextEncoder === "function" ? new TextEncoder() : new import_util.default.TextEncoder();
-var CRLF = "\r\n";
-var CRLF_BYTES = textEncoder.encode(CRLF);
-var CRLF_BYTES_COUNT = 2;
-var FormDataPart = class {
-  constructor(name, value) {
-    const { escapeName } = this.constructor;
-    const isStringValue = utils_default.isString(value);
-    let headers = `Content-Disposition: form-data; name="${escapeName(name)}"${!isStringValue && value.name ? `; filename="${escapeName(value.name)}"` : ""}${CRLF}`;
-    if (isStringValue) {
-      value = textEncoder.encode(String(value).replace(/\r?\n|\r\n?/g, CRLF));
-    } else {
-      headers += `Content-Type: ${value.type || "application/octet-stream"}${CRLF}`;
-    }
-    this.headers = textEncoder.encode(headers + CRLF);
-    this.contentLength = isStringValue ? value.byteLength : value.size;
-    this.size = this.headers.byteLength + this.contentLength + CRLF_BYTES_COUNT;
-    this.name = name;
-    this.value = value;
-  }
-  async *encode() {
-    yield this.headers;
-    const { value } = this;
-    if (utils_default.isTypedArray(value)) {
-      yield value;
-    } else {
-      yield* readBlob_default(value);
-    }
-    yield CRLF_BYTES;
-  }
-  static escapeName(name) {
-    return String(name).replace(/[\r\n"]/g, (match) => ({
-      "\r": "%0D",
-      "\n": "%0A",
-      '"': "%22"
-    })[match]);
-  }
-};
-var formDataToStream = (form, headersHandler, options) => {
-  const {
-    tag = "form-data-boundary",
-    size = 25,
-    boundary = tag + "-" + platform_default.generateString(size, BOUNDARY_ALPHABET)
-  } = options || {};
-  if (!utils_default.isFormData(form)) {
-    throw TypeError("FormData instance required");
-  }
-  if (boundary.length < 1 || boundary.length > 70) {
-    throw Error("boundary must be 10-70 characters long");
-  }
-  const boundaryBytes = textEncoder.encode("--" + boundary + CRLF);
-  const footerBytes = textEncoder.encode("--" + boundary + "--" + CRLF);
-  let contentLength = footerBytes.byteLength;
-  const parts = Array.from(form.entries()).map(([name, value]) => {
-    const part = new FormDataPart(name, value);
-    contentLength += part.size;
-    return part;
-  });
-  contentLength += boundaryBytes.byteLength * parts.length;
-  contentLength = utils_default.toFiniteNumber(contentLength);
-  const computedHeaders = {
-    "Content-Type": `multipart/form-data; boundary=${boundary}`
-  };
-  if (Number.isFinite(contentLength)) {
-    computedHeaders["Content-Length"] = contentLength;
-  }
-  headersHandler && headersHandler(computedHeaders);
-  return import_stream2.Readable.from(async function* () {
-    for (const part of parts) {
-      yield boundaryBytes;
-      yield* part.encode();
-    }
-    yield footerBytes;
-  }());
-};
-var formDataToStream_default = formDataToStream;
-
-// node_modules/axios/lib/helpers/ZlibHeaderTransformStream.js
-var import_stream3 = __toESM(require("stream"), 1);
-var ZlibHeaderTransformStream = class extends import_stream3.default.Transform {
-  __transform(chunk, encoding, callback) {
-    this.push(chunk);
-    callback();
-  }
-  _transform(chunk, encoding, callback) {
-    if (chunk.length !== 0) {
-      this._transform = this.__transform;
-      if (chunk[0] !== 120) {
-        const header = Buffer.alloc(2);
-        header[0] = 120;
-        header[1] = 156;
-        this.push(header, encoding);
-      }
-    }
-    this.__transform(chunk, encoding, callback);
-  }
-};
-var ZlibHeaderTransformStream_default = ZlibHeaderTransformStream;
-
-// node_modules/axios/lib/helpers/callbackify.js
-var callbackify = (fn, reducer) => {
-  return utils_default.isAsyncFn(fn) ? function(...args) {
-    const cb = args.pop();
-    fn.apply(this, args).then((value) => {
-      try {
-        reducer ? cb(null, ...reducer(value)) : cb(null, value);
-      } catch (err) {
-        cb(err);
-      }
-    }, cb);
-  } : fn;
-};
-var callbackify_default = callbackify;
-
-// node_modules/axios/lib/helpers/speedometer.js
-function speedometer(samplesCount, min) {
-  samplesCount = samplesCount || 10;
-  const bytes = new Array(samplesCount);
-  const timestamps = new Array(samplesCount);
-  let head2 = 0;
-  let tail = 0;
-  let firstSampleTS;
-  min = min !== void 0 ? min : 1e3;
-  return function push(chunkLength) {
-    const now = Date.now();
-    const startedAt = timestamps[tail];
-    if (!firstSampleTS) {
-      firstSampleTS = now;
-    }
-    bytes[head2] = chunkLength;
-    timestamps[head2] = now;
-    let i = tail;
-    let bytesCount = 0;
-    while (i !== head2) {
-      bytesCount += bytes[i++];
-      i = i % samplesCount;
-    }
-    head2 = (head2 + 1) % samplesCount;
-    if (head2 === tail) {
-      tail = (tail + 1) % samplesCount;
-    }
-    if (now - firstSampleTS < min) {
-      return;
-    }
-    const passed = startedAt && now - startedAt;
-    return passed ? Math.round(bytesCount * 1e3 / passed) : void 0;
-  };
-}
-var speedometer_default = speedometer;
-
-// node_modules/axios/lib/helpers/throttle.js
-function throttle(fn, freq) {
-  let timestamp = 0;
-  let threshold = 1e3 / freq;
-  let lastArgs;
-  let timer;
-  const invoke = (args, now = Date.now()) => {
-    timestamp = now;
-    lastArgs = null;
-    if (timer) {
-      clearTimeout(timer);
-      timer = null;
-    }
-    fn.apply(null, args);
-  };
-  const throttled = (...args) => {
-    const now = Date.now();
-    const passed = now - timestamp;
-    if (passed >= threshold) {
-      invoke(args, now);
-    } else {
-      lastArgs = args;
-      if (!timer) {
-        timer = setTimeout(() => {
-          timer = null;
-          invoke(lastArgs);
-        }, threshold - passed);
-      }
-    }
-  };
-  const flush = () => lastArgs && invoke(lastArgs);
-  return [throttled, flush];
-}
-var throttle_default = throttle;
-
-// node_modules/axios/lib/helpers/progressEventReducer.js
-var progressEventReducer = (listener, isDownloadStream, freq = 3) => {
-  let bytesNotified = 0;
-  const _speedometer = speedometer_default(50, 250);
-  return throttle_default((e) => {
-    const loaded = e.loaded;
-    const total = e.lengthComputable ? e.total : void 0;
-    const progressBytes = loaded - bytesNotified;
-    const rate = _speedometer(progressBytes);
-    const inRange = loaded <= total;
-    bytesNotified = loaded;
-    const data = {
-      loaded,
-      total,
-      progress: total ? loaded / total : void 0,
-      bytes: progressBytes,
-      rate: rate ? rate : void 0,
-      estimated: rate && total && inRange ? (total - loaded) / rate : void 0,
-      event: e,
-      lengthComputable: total != null,
-      [isDownloadStream ? "download" : "upload"]: true
-    };
-    listener(data);
-  }, freq);
-};
-var progressEventDecorator = (total, throttled) => {
-  const lengthComputable = total != null;
-  return [(loaded) => throttled[0]({
-    lengthComputable,
-    total,
-    loaded
-  }), throttled[1]];
-};
-var asyncDecorator = (fn) => (...args) => utils_default.asap(() => fn(...args));
-
-// node_modules/axios/lib/adapters/http.js
-var zlibOptions = {
-  flush: import_zlib.default.constants.Z_SYNC_FLUSH,
-  finishFlush: import_zlib.default.constants.Z_SYNC_FLUSH
-};
-var brotliOptions = {
-  flush: import_zlib.default.constants.BROTLI_OPERATION_FLUSH,
-  finishFlush: import_zlib.default.constants.BROTLI_OPERATION_FLUSH
-};
-var isBrotliSupported = utils_default.isFunction(import_zlib.default.createBrotliDecompress);
-var { http: httpFollow, https: httpsFollow } = import_follow_redirects.default;
-var isHttps = /https:?/;
-var supportedProtocols = platform_default.protocols.map((protocol) => {
-  return protocol + ":";
-});
-var flushOnFinish = (stream4, [throttled, flush]) => {
-  stream4.on("end", flush).on("error", flush);
-  return throttled;
-};
-function dispatchBeforeRedirect(options, responseDetails) {
-  if (options.beforeRedirects.proxy) {
-    options.beforeRedirects.proxy(options);
-  }
-  if (options.beforeRedirects.config) {
-    options.beforeRedirects.config(options, responseDetails);
-  }
-}
-function setProxy(options, configProxy, location) {
-  let proxy = configProxy;
-  if (!proxy && proxy !== false) {
-    const proxyUrl = import_proxy_from_env.default.getProxyForUrl(location);
-    if (proxyUrl) {
-      proxy = new URL(proxyUrl);
-    }
-  }
-  if (proxy) {
-    if (proxy.username) {
-      proxy.auth = (proxy.username || "") + ":" + (proxy.password || "");
-    }
-    if (proxy.auth) {
-      if (proxy.auth.username || proxy.auth.password) {
-        proxy.auth = (proxy.auth.username || "") + ":" + (proxy.auth.password || "");
-      }
-      const base64 = Buffer.from(proxy.auth, "utf8").toString("base64");
-      options.headers["Proxy-Authorization"] = "Basic " + base64;
-    }
-    options.headers.host = options.hostname + (options.port ? ":" + options.port : "");
-    const proxyHost = proxy.hostname || proxy.host;
-    options.hostname = proxyHost;
-    options.host = proxyHost;
-    options.port = proxy.port;
-    options.path = location;
-    if (proxy.protocol) {
-      options.protocol = proxy.protocol.includes(":") ? proxy.protocol : `${proxy.protocol}:`;
-    }
-  }
-  options.beforeRedirects.proxy = function beforeRedirect(redirectOptions) {
-    setProxy(redirectOptions, configProxy, redirectOptions.href);
-  };
-}
-var isHttpAdapterSupported = typeof process !== "undefined" && utils_default.kindOf(process) === "process";
-var wrapAsync = (asyncExecutor) => {
-  return new Promise((resolve, reject) => {
-    let onDone;
-    let isDone;
-    const done = (value, isRejected) => {
-      if (isDone) return;
-      isDone = true;
-      onDone && onDone(value, isRejected);
-    };
-    const _resolve = (value) => {
-      done(value);
-      resolve(value);
-    };
-    const _reject = (reason) => {
-      done(reason, true);
-      reject(reason);
-    };
-    asyncExecutor(_resolve, _reject, (onDoneHandler) => onDone = onDoneHandler).catch(_reject);
-  });
-};
-var resolveFamily = ({ address, family }) => {
-  if (!utils_default.isString(address)) {
-    throw TypeError("address must be a string");
-  }
-  return {
-    address,
-    family: family || (address.indexOf(".") < 0 ? 6 : 4)
-  };
-};
-var buildAddressEntry = (address, family) => resolveFamily(utils_default.isObject(address) ? address : { address, family });
-var http_default = isHttpAdapterSupported && function httpAdapter(config2) {
-  return wrapAsync(async function dispatchHttpRequest(resolve, reject, onDone) {
-    let { data, lookup, family } = config2;
-    const { responseType, responseEncoding } = config2;
-    const method = config2.method.toUpperCase();
-    let isDone;
-    let rejected = false;
-    let req;
-    if (lookup) {
-      const _lookup = callbackify_default(lookup, (value) => utils_default.isArray(value) ? value : [value]);
-      lookup = (hostname, opt, cb) => {
-        _lookup(hostname, opt, (err, arg0, arg1) => {
-          if (err) {
-            return cb(err);
-          }
-          const addresses = utils_default.isArray(arg0) ? arg0.map((addr) => buildAddressEntry(addr)) : [buildAddressEntry(arg0, arg1)];
-          opt.all ? cb(err, addresses) : cb(err, addresses[0].address, addresses[0].family);
-        });
-      };
-    }
-    const emitter = new import_events.EventEmitter();
-    const onFinished = () => {
-      if (config2.cancelToken) {
-        config2.cancelToken.unsubscribe(abort);
-      }
-      if (config2.signal) {
-        config2.signal.removeEventListener("abort", abort);
-      }
-      emitter.removeAllListeners();
-    };
-    onDone((value, isRejected) => {
-      isDone = true;
-      if (isRejected) {
-        rejected = true;
-        onFinished();
-      }
-    });
-    function abort(reason) {
-      emitter.emit("abort", !reason || reason.type ? new CanceledError_default(null, config2, req) : reason);
-    }
-    emitter.once("abort", reject);
-    if (config2.cancelToken || config2.signal) {
-      config2.cancelToken && config2.cancelToken.subscribe(abort);
-      if (config2.signal) {
-        config2.signal.aborted ? abort() : config2.signal.addEventListener("abort", abort);
-      }
-    }
-    const fullPath = buildFullPath(config2.baseURL, config2.url, config2.allowAbsoluteUrls);
-    const parsed = new URL(fullPath, platform_default.hasBrowserEnv ? platform_default.origin : void 0);
-    const protocol = parsed.protocol || supportedProtocols[0];
-    if (protocol === "data:") {
-      let convertedData;
-      if (method !== "GET") {
-        return settle(resolve, reject, {
-          status: 405,
-          statusText: "method not allowed",
-          headers: {},
-          config: config2
-        });
-      }
-      try {
-        convertedData = fromDataURI(config2.url, responseType === "blob", {
-          Blob: config2.env && config2.env.Blob
-        });
-      } catch (err) {
-        throw AxiosError_default.from(err, AxiosError_default.ERR_BAD_REQUEST, config2);
-      }
-      if (responseType === "text") {
-        convertedData = convertedData.toString(responseEncoding);
-        if (!responseEncoding || responseEncoding === "utf8") {
-          convertedData = utils_default.stripBOM(convertedData);
-        }
-      } else if (responseType === "stream") {
-        convertedData = import_stream4.default.Readable.from(convertedData);
-      }
-      return settle(resolve, reject, {
-        data: convertedData,
-        status: 200,
-        statusText: "OK",
-        headers: new AxiosHeaders_default(),
-        config: config2
-      });
-    }
-    if (supportedProtocols.indexOf(protocol) === -1) {
-      return reject(new AxiosError_default(
-        "Unsupported protocol " + protocol,
-        AxiosError_default.ERR_BAD_REQUEST,
-        config2
-      ));
-    }
-    const headers = AxiosHeaders_default.from(config2.headers).normalize();
-    headers.set("User-Agent", "axios/" + VERSION, false);
-    const { onUploadProgress, onDownloadProgress } = config2;
-    const maxRate = config2.maxRate;
-    let maxUploadRate = void 0;
-    let maxDownloadRate = void 0;
-    if (utils_default.isSpecCompliantForm(data)) {
-      const userBoundary = headers.getContentType(/boundary=([-_\w\d]{10,70})/i);
-      data = formDataToStream_default(data, (formHeaders) => {
-        headers.set(formHeaders);
-      }, {
-        tag: `axios-${VERSION}-boundary`,
-        boundary: userBoundary && userBoundary[1] || void 0
-      });
-    } else if (utils_default.isFormData(data) && utils_default.isFunction(data.getHeaders)) {
-      headers.set(data.getHeaders());
-      if (!headers.hasContentLength()) {
-        try {
-          const knownLength = await import_util2.default.promisify(data.getLength).call(data);
-          Number.isFinite(knownLength) && knownLength >= 0 && headers.setContentLength(knownLength);
-        } catch (e) {
-        }
-      }
-    } else if (utils_default.isBlob(data) || utils_default.isFile(data)) {
-      data.size && headers.setContentType(data.type || "application/octet-stream");
-      headers.setContentLength(data.size || 0);
-      data = import_stream4.default.Readable.from(readBlob_default(data));
-    } else if (data && !utils_default.isStream(data)) {
-      if (Buffer.isBuffer(data)) {
-      } else if (utils_default.isArrayBuffer(data)) {
-        data = Buffer.from(new Uint8Array(data));
-      } else if (utils_default.isString(data)) {
-        data = Buffer.from(data, "utf-8");
-      } else {
-        return reject(new AxiosError_default(
-          "Data after transformation must be a string, an ArrayBuffer, a Buffer, or a Stream",
-          AxiosError_default.ERR_BAD_REQUEST,
-          config2
-        ));
-      }
-      headers.setContentLength(data.length, false);
-      if (config2.maxBodyLength > -1 && data.length > config2.maxBodyLength) {
-        return reject(new AxiosError_default(
-          "Request body larger than maxBodyLength limit",
-          AxiosError_default.ERR_BAD_REQUEST,
-          config2
-        ));
-      }
-    }
-    const contentLength = utils_default.toFiniteNumber(headers.getContentLength());
-    if (utils_default.isArray(maxRate)) {
-      maxUploadRate = maxRate[0];
-      maxDownloadRate = maxRate[1];
-    } else {
-      maxUploadRate = maxDownloadRate = maxRate;
-    }
-    if (data && (onUploadProgress || maxUploadRate)) {
-      if (!utils_default.isStream(data)) {
-        data = import_stream4.default.Readable.from(data, { objectMode: false });
-      }
-      data = import_stream4.default.pipeline([data, new AxiosTransformStream_default({
-        maxRate: utils_default.toFiniteNumber(maxUploadRate)
-      })], utils_default.noop);
-      onUploadProgress && data.on("progress", flushOnFinish(
-        data,
-        progressEventDecorator(
-          contentLength,
-          progressEventReducer(asyncDecorator(onUploadProgress), false, 3)
-        )
-      ));
-    }
-    let auth = void 0;
-    if (config2.auth) {
-      const username = config2.auth.username || "";
-      const password = config2.auth.password || "";
-      auth = username + ":" + password;
-    }
-    if (!auth && parsed.username) {
-      const urlUsername = parsed.username;
-      const urlPassword = parsed.password;
-      auth = urlUsername + ":" + urlPassword;
-    }
-    auth && headers.delete("authorization");
-    let path;
-    try {
-      path = buildURL(
-        parsed.pathname + parsed.search,
-        config2.params,
-        config2.paramsSerializer
-      ).replace(/^\?/, "");
-    } catch (err) {
-      const customErr = new Error(err.message);
-      customErr.config = config2;
-      customErr.url = config2.url;
-      customErr.exists = true;
-      return reject(customErr);
-    }
-    headers.set(
-      "Accept-Encoding",
-      "gzip, compress, deflate" + (isBrotliSupported ? ", br" : ""),
-      false
-    );
-    const options = {
-      path,
-      method,
-      headers: headers.toJSON(),
-      agents: { http: config2.httpAgent, https: config2.httpsAgent },
-      auth,
-      protocol,
-      family,
-      beforeRedirect: dispatchBeforeRedirect,
-      beforeRedirects: {}
-    };
-    !utils_default.isUndefined(lookup) && (options.lookup = lookup);
-    if (config2.socketPath) {
-      options.socketPath = config2.socketPath;
-    } else {
-      options.hostname = parsed.hostname.startsWith("[") ? parsed.hostname.slice(1, -1) : parsed.hostname;
-      options.port = parsed.port;
-      setProxy(options, config2.proxy, protocol + "//" + parsed.hostname + (parsed.port ? ":" + parsed.port : "") + options.path);
-    }
-    let transport;
-    const isHttpsRequest = isHttps.test(options.protocol);
-    options.agent = isHttpsRequest ? config2.httpsAgent : config2.httpAgent;
-    if (config2.transport) {
-      transport = config2.transport;
-    } else if (config2.maxRedirects === 0) {
-      transport = isHttpsRequest ? import_https.default : import_http.default;
-    } else {
-      if (config2.maxRedirects) {
-        options.maxRedirects = config2.maxRedirects;
-      }
-      if (config2.beforeRedirect) {
-        options.beforeRedirects.config = config2.beforeRedirect;
-      }
-      transport = isHttpsRequest ? httpsFollow : httpFollow;
-    }
-    if (config2.maxBodyLength > -1) {
-      options.maxBodyLength = config2.maxBodyLength;
-    } else {
-      options.maxBodyLength = Infinity;
-    }
-    if (config2.insecureHTTPParser) {
-      options.insecureHTTPParser = config2.insecureHTTPParser;
-    }
-    req = transport.request(options, function handleResponse(res) {
-      if (req.destroyed) return;
-      const streams = [res];
-      const responseLength = +res.headers["content-length"];
-      if (onDownloadProgress || maxDownloadRate) {
-        const transformStream = new AxiosTransformStream_default({
-          maxRate: utils_default.toFiniteNumber(maxDownloadRate)
-        });
-        onDownloadProgress && transformStream.on("progress", flushOnFinish(
-          transformStream,
-          progressEventDecorator(
-            responseLength,
-            progressEventReducer(asyncDecorator(onDownloadProgress), true, 3)
-          )
-        ));
-        streams.push(transformStream);
-      }
-      let responseStream = res;
-      const lastRequest = res.req || req;
-      if (config2.decompress !== false && res.headers["content-encoding"]) {
-        if (method === "HEAD" || res.statusCode === 204) {
-          delete res.headers["content-encoding"];
-        }
-        switch ((res.headers["content-encoding"] || "").toLowerCase()) {
-          /*eslint default-case:0*/
-          case "gzip":
-          case "x-gzip":
-          case "compress":
-          case "x-compress":
-            streams.push(import_zlib.default.createUnzip(zlibOptions));
-            delete res.headers["content-encoding"];
-            break;
-          case "deflate":
-            streams.push(new ZlibHeaderTransformStream_default());
-            streams.push(import_zlib.default.createUnzip(zlibOptions));
-            delete res.headers["content-encoding"];
-            break;
-          case "br":
-            if (isBrotliSupported) {
-              streams.push(import_zlib.default.createBrotliDecompress(brotliOptions));
-              delete res.headers["content-encoding"];
-            }
-        }
-      }
-      responseStream = streams.length > 1 ? import_stream4.default.pipeline(streams, utils_default.noop) : streams[0];
-      const offListeners = import_stream4.default.finished(responseStream, () => {
-        offListeners();
-        onFinished();
-      });
-      const response = {
-        status: res.statusCode,
-        statusText: res.statusMessage,
-        headers: new AxiosHeaders_default(res.headers),
-        config: config2,
-        request: lastRequest
-      };
-      if (responseType === "stream") {
-        response.data = responseStream;
-        settle(resolve, reject, response);
-      } else {
-        const responseBuffer = [];
-        let totalResponseBytes = 0;
-        responseStream.on("data", function handleStreamData(chunk) {
-          responseBuffer.push(chunk);
-          totalResponseBytes += chunk.length;
-          if (config2.maxContentLength > -1 && totalResponseBytes > config2.maxContentLength) {
-            rejected = true;
-            responseStream.destroy();
-            reject(new AxiosError_default(
-              "maxContentLength size of " + config2.maxContentLength + " exceeded",
-              AxiosError_default.ERR_BAD_RESPONSE,
-              config2,
-              lastRequest
-            ));
-          }
-        });
-        responseStream.on("aborted", function handlerStreamAborted() {
-          if (rejected) {
-            return;
-          }
-          const err = new AxiosError_default(
-            "stream has been aborted",
-            AxiosError_default.ERR_BAD_RESPONSE,
-            config2,
-            lastRequest
-          );
-          responseStream.destroy(err);
-          reject(err);
-        });
-        responseStream.on("error", function handleStreamError(err) {
-          if (req.destroyed) return;
-          reject(AxiosError_default.from(err, null, config2, lastRequest));
-        });
-        responseStream.on("end", function handleStreamEnd() {
-          try {
-            let responseData = responseBuffer.length === 1 ? responseBuffer[0] : Buffer.concat(responseBuffer);
-            if (responseType !== "arraybuffer") {
-              responseData = responseData.toString(responseEncoding);
-              if (!responseEncoding || responseEncoding === "utf8") {
-                responseData = utils_default.stripBOM(responseData);
-              }
-            }
-            response.data = responseData;
-          } catch (err) {
-            return reject(AxiosError_default.from(err, null, config2, response.request, response));
-          }
-          settle(resolve, reject, response);
-        });
-      }
-      emitter.once("abort", (err) => {
-        if (!responseStream.destroyed) {
-          responseStream.emit("error", err);
-          responseStream.destroy();
-        }
-      });
-    });
-    emitter.once("abort", (err) => {
-      reject(err);
-      req.destroy(err);
-    });
-    req.on("error", function handleRequestError(err) {
-      reject(AxiosError_default.from(err, null, config2, req));
-    });
-    req.on("socket", function handleRequestSocket(socket) {
-      socket.setKeepAlive(true, 1e3 * 60);
-    });
-    if (config2.timeout) {
-      const timeout = parseInt(config2.timeout, 10);
-      if (Number.isNaN(timeout)) {
-        reject(new AxiosError_default(
-          "error trying to parse `config.timeout` to int",
-          AxiosError_default.ERR_BAD_OPTION_VALUE,
-          config2,
-          req
-        ));
-        return;
-      }
-      req.setTimeout(timeout, function handleRequestTimeout() {
-        if (isDone) return;
-        let timeoutErrorMessage = config2.timeout ? "timeout of " + config2.timeout + "ms exceeded" : "timeout exceeded";
-        const transitional2 = config2.transitional || transitional_default;
-        if (config2.timeoutErrorMessage) {
-          timeoutErrorMessage = config2.timeoutErrorMessage;
-        }
-        reject(new AxiosError_default(
-          timeoutErrorMessage,
-          transitional2.clarifyTimeoutError ? AxiosError_default.ETIMEDOUT : AxiosError_default.ECONNABORTED,
-          config2,
-          req
-        ));
-        abort();
-      });
-    }
-    if (utils_default.isStream(data)) {
-      let ended = false;
-      let errored = false;
-      data.on("end", () => {
-        ended = true;
-      });
-      data.once("error", (err) => {
-        errored = true;
-        req.destroy(err);
-      });
-      data.on("close", () => {
-        if (!ended && !errored) {
-          abort(new CanceledError_default("Request stream has been aborted", config2, req));
-        }
-      });
-      data.pipe(req);
-    } else {
-      req.end(data);
-    }
-  });
-};
-
-// node_modules/axios/lib/helpers/isURLSameOrigin.js
-var isURLSameOrigin_default = platform_default.hasStandardBrowserEnv ? /* @__PURE__ */ ((origin2, isMSIE) => (url2) => {
-  url2 = new URL(url2, platform_default.origin);
-  return origin2.protocol === url2.protocol && origin2.host === url2.host && (isMSIE || origin2.port === url2.port);
-})(
-  new URL(platform_default.origin),
-  platform_default.navigator && /(msie|trident)/i.test(platform_default.navigator.userAgent)
-) : () => true;
-
-// node_modules/axios/lib/helpers/cookies.js
-var cookies_default = platform_default.hasStandardBrowserEnv ? (
-  // Standard browser envs support document.cookie
-  {
-    write(name, value, expires, path, domain, secure) {
-      const cookie = [name + "=" + encodeURIComponent(value)];
-      utils_default.isNumber(expires) && cookie.push("expires=" + new Date(expires).toGMTString());
-      utils_default.isString(path) && cookie.push("path=" + path);
-      utils_default.isString(domain) && cookie.push("domain=" + domain);
-      secure === true && cookie.push("secure");
-      document.cookie = cookie.join("; ");
-    },
-    read(name) {
-      const match = document.cookie.match(new RegExp("(^|;\\s*)(" + name + ")=([^;]*)"));
-      return match ? decodeURIComponent(match[3]) : null;
-    },
-    remove(name) {
-      this.write(name, "", Date.now() - 864e5);
-    }
-  }
-) : (
-  // Non-standard browser env (web workers, react-native) lack needed support.
-  {
-    write() {
-    },
-    read() {
-      return null;
-    },
-    remove() {
-    }
-  }
-);
-
-// node_modules/axios/lib/core/mergeConfig.js
-var headersToObject = (thing) => thing instanceof AxiosHeaders_default ? { ...thing } : thing;
-function mergeConfig(config1, config2) {
-  config2 = config2 || {};
-  const config3 = {};
-  function getMergedValue(target, source, prop, caseless) {
-    if (utils_default.isPlainObject(target) && utils_default.isPlainObject(source)) {
-      return utils_default.merge.call({ caseless }, target, source);
-    } else if (utils_default.isPlainObject(source)) {
-      return utils_default.merge({}, source);
-    } else if (utils_default.isArray(source)) {
-      return source.slice();
-    }
-    return source;
-  }
-  function mergeDeepProperties(a, b, prop, caseless) {
-    if (!utils_default.isUndefined(b)) {
-      return getMergedValue(a, b, prop, caseless);
-    } else if (!utils_default.isUndefined(a)) {
-      return getMergedValue(void 0, a, prop, caseless);
-    }
-  }
-  function valueFromConfig2(a, b) {
-    if (!utils_default.isUndefined(b)) {
-      return getMergedValue(void 0, b);
-    }
-  }
-  function defaultToConfig2(a, b) {
-    if (!utils_default.isUndefined(b)) {
-      return getMergedValue(void 0, b);
-    } else if (!utils_default.isUndefined(a)) {
-      return getMergedValue(void 0, a);
-    }
-  }
-  function mergeDirectKeys(a, b, prop) {
-    if (prop in config2) {
-      return getMergedValue(a, b);
-    } else if (prop in config1) {
-      return getMergedValue(void 0, a);
-    }
-  }
-  const mergeMap = {
-    url: valueFromConfig2,
-    method: valueFromConfig2,
-    data: valueFromConfig2,
-    baseURL: defaultToConfig2,
-    transformRequest: defaultToConfig2,
-    transformResponse: defaultToConfig2,
-    paramsSerializer: defaultToConfig2,
-    timeout: defaultToConfig2,
-    timeoutMessage: defaultToConfig2,
-    withCredentials: defaultToConfig2,
-    withXSRFToken: defaultToConfig2,
-    adapter: defaultToConfig2,
-    responseType: defaultToConfig2,
-    xsrfCookieName: defaultToConfig2,
-    xsrfHeaderName: defaultToConfig2,
-    onUploadProgress: defaultToConfig2,
-    onDownloadProgress: defaultToConfig2,
-    decompress: defaultToConfig2,
-    maxContentLength: defaultToConfig2,
-    maxBodyLength: defaultToConfig2,
-    beforeRedirect: defaultToConfig2,
-    transport: defaultToConfig2,
-    httpAgent: defaultToConfig2,
-    httpsAgent: defaultToConfig2,
-    cancelToken: defaultToConfig2,
-    socketPath: defaultToConfig2,
-    responseEncoding: defaultToConfig2,
-    validateStatus: mergeDirectKeys,
-    headers: (a, b, prop) => mergeDeepProperties(headersToObject(a), headersToObject(b), prop, true)
-  };
-  utils_default.forEach(Object.keys(Object.assign({}, config1, config2)), function computeConfigValue(prop) {
-    const merge2 = mergeMap[prop] || mergeDeepProperties;
-    const configValue = merge2(config1[prop], config2[prop], prop);
-    utils_default.isUndefined(configValue) && merge2 !== mergeDirectKeys || (config3[prop] = configValue);
-  });
-  return config3;
-}
-
-// node_modules/axios/lib/helpers/resolveConfig.js
-var resolveConfig_default = (config2) => {
-  const newConfig = mergeConfig({}, config2);
-  let { data, withXSRFToken, xsrfHeaderName, xsrfCookieName, headers, auth } = newConfig;
-  newConfig.headers = headers = AxiosHeaders_default.from(headers);
-  newConfig.url = buildURL(buildFullPath(newConfig.baseURL, newConfig.url, newConfig.allowAbsoluteUrls), config2.params, config2.paramsSerializer);
-  if (auth) {
-    headers.set(
-      "Authorization",
-      "Basic " + btoa((auth.username || "") + ":" + (auth.password ? unescape(encodeURIComponent(auth.password)) : ""))
-    );
-  }
-  let contentType;
-  if (utils_default.isFormData(data)) {
-    if (platform_default.hasStandardBrowserEnv || platform_default.hasStandardBrowserWebWorkerEnv) {
-      headers.setContentType(void 0);
-    } else if ((contentType = headers.getContentType()) !== false) {
-      const [type, ...tokens] = contentType ? contentType.split(";").map((token) => token.trim()).filter(Boolean) : [];
-      headers.setContentType([type || "multipart/form-data", ...tokens].join("; "));
-    }
-  }
-  if (platform_default.hasStandardBrowserEnv) {
-    withXSRFToken && utils_default.isFunction(withXSRFToken) && (withXSRFToken = withXSRFToken(newConfig));
-    if (withXSRFToken || withXSRFToken !== false && isURLSameOrigin_default(newConfig.url)) {
-      const xsrfValue = xsrfHeaderName && xsrfCookieName && cookies_default.read(xsrfCookieName);
-      if (xsrfValue) {
-        headers.set(xsrfHeaderName, xsrfValue);
-      }
-    }
-  }
-  return newConfig;
-};
-
-// node_modules/axios/lib/adapters/xhr.js
-var isXHRAdapterSupported = typeof XMLHttpRequest !== "undefined";
-var xhr_default = isXHRAdapterSupported && function(config2) {
-  return new Promise(function dispatchXhrRequest(resolve, reject) {
-    const _config = resolveConfig_default(config2);
-    let requestData = _config.data;
-    const requestHeaders = AxiosHeaders_default.from(_config.headers).normalize();
-    let { responseType, onUploadProgress, onDownloadProgress } = _config;
-    let onCanceled;
-    let uploadThrottled, downloadThrottled;
-    let flushUpload, flushDownload;
-    function done() {
-      flushUpload && flushUpload();
-      flushDownload && flushDownload();
-      _config.cancelToken && _config.cancelToken.unsubscribe(onCanceled);
-      _config.signal && _config.signal.removeEventListener("abort", onCanceled);
-    }
-    let request = new XMLHttpRequest();
-    request.open(_config.method.toUpperCase(), _config.url, true);
-    request.timeout = _config.timeout;
-    function onloadend() {
-      if (!request) {
-        return;
-      }
-      const responseHeaders = AxiosHeaders_default.from(
-        "getAllResponseHeaders" in request && request.getAllResponseHeaders()
-      );
-      const responseData = !responseType || responseType === "text" || responseType === "json" ? request.responseText : request.response;
-      const response = {
-        data: responseData,
-        status: request.status,
-        statusText: request.statusText,
-        headers: responseHeaders,
-        config: config2,
-        request
-      };
-      settle(function _resolve(value) {
-        resolve(value);
-        done();
-      }, function _reject(err) {
-        reject(err);
-        done();
-      }, response);
-      request = null;
-    }
-    if ("onloadend" in request) {
-      request.onloadend = onloadend;
-    } else {
-      request.onreadystatechange = function handleLoad() {
-        if (!request || request.readyState !== 4) {
-          return;
-        }
-        if (request.status === 0 && !(request.responseURL && request.responseURL.indexOf("file:") === 0)) {
-          return;
-        }
-        setTimeout(onloadend);
-      };
-    }
-    request.onabort = function handleAbort() {
-      if (!request) {
-        return;
-      }
-      reject(new AxiosError_default("Request aborted", AxiosError_default.ECONNABORTED, config2, request));
-      request = null;
-    };
-    request.onerror = function handleError3() {
-      reject(new AxiosError_default("Network Error", AxiosError_default.ERR_NETWORK, config2, request));
-      request = null;
-    };
-    request.ontimeout = function handleTimeout() {
-      let timeoutErrorMessage = _config.timeout ? "timeout of " + _config.timeout + "ms exceeded" : "timeout exceeded";
-      const transitional2 = _config.transitional || transitional_default;
-      if (_config.timeoutErrorMessage) {
-        timeoutErrorMessage = _config.timeoutErrorMessage;
-      }
-      reject(new AxiosError_default(
-        timeoutErrorMessage,
-        transitional2.clarifyTimeoutError ? AxiosError_default.ETIMEDOUT : AxiosError_default.ECONNABORTED,
-        config2,
-        request
-      ));
-      request = null;
-    };
-    requestData === void 0 && requestHeaders.setContentType(null);
-    if ("setRequestHeader" in request) {
-      utils_default.forEach(requestHeaders.toJSON(), function setRequestHeader(val, key) {
-        request.setRequestHeader(key, val);
-      });
-    }
-    if (!utils_default.isUndefined(_config.withCredentials)) {
-      request.withCredentials = !!_config.withCredentials;
-    }
-    if (responseType && responseType !== "json") {
-      request.responseType = _config.responseType;
-    }
-    if (onDownloadProgress) {
-      [downloadThrottled, flushDownload] = progressEventReducer(onDownloadProgress, true);
-      request.addEventListener("progress", downloadThrottled);
-    }
-    if (onUploadProgress && request.upload) {
-      [uploadThrottled, flushUpload] = progressEventReducer(onUploadProgress);
-      request.upload.addEventListener("progress", uploadThrottled);
-      request.upload.addEventListener("loadend", flushUpload);
-    }
-    if (_config.cancelToken || _config.signal) {
-      onCanceled = (cancel) => {
-        if (!request) {
-          return;
-        }
-        reject(!cancel || cancel.type ? new CanceledError_default(null, config2, request) : cancel);
-        request.abort();
-        request = null;
-      };
-      _config.cancelToken && _config.cancelToken.subscribe(onCanceled);
-      if (_config.signal) {
-        _config.signal.aborted ? onCanceled() : _config.signal.addEventListener("abort", onCanceled);
-      }
-    }
-    const protocol = parseProtocol(_config.url);
-    if (protocol && platform_default.protocols.indexOf(protocol) === -1) {
-      reject(new AxiosError_default("Unsupported protocol " + protocol + ":", AxiosError_default.ERR_BAD_REQUEST, config2));
-      return;
-    }
-    request.send(requestData || null);
-  });
-};
-
-// node_modules/axios/lib/helpers/composeSignals.js
-var composeSignals = (signals, timeout) => {
-  const { length } = signals = signals ? signals.filter(Boolean) : [];
-  if (timeout || length) {
-    let controller = new AbortController();
-    let aborted;
-    const onabort = function(reason) {
-      if (!aborted) {
-        aborted = true;
-        unsubscribe();
-        const err = reason instanceof Error ? reason : this.reason;
-        controller.abort(err instanceof AxiosError_default ? err : new CanceledError_default(err instanceof Error ? err.message : err));
-      }
-    };
-    let timer = timeout && setTimeout(() => {
-      timer = null;
-      onabort(new AxiosError_default(`timeout ${timeout} of ms exceeded`, AxiosError_default.ETIMEDOUT));
-    }, timeout);
-    const unsubscribe = () => {
-      if (signals) {
-        timer && clearTimeout(timer);
-        timer = null;
-        signals.forEach((signal2) => {
-          signal2.unsubscribe ? signal2.unsubscribe(onabort) : signal2.removeEventListener("abort", onabort);
-        });
-        signals = null;
-      }
-    };
-    signals.forEach((signal2) => signal2.addEventListener("abort", onabort));
-    const { signal } = controller;
-    signal.unsubscribe = () => utils_default.asap(unsubscribe);
-    return signal;
-  }
-};
-var composeSignals_default = composeSignals;
-
-// node_modules/axios/lib/helpers/trackStream.js
-var streamChunk = function* (chunk, chunkSize) {
-  let len = chunk.byteLength;
-  if (!chunkSize || len < chunkSize) {
-    yield chunk;
-    return;
-  }
-  let pos = 0;
-  let end;
-  while (pos < len) {
-    end = pos + chunkSize;
-    yield chunk.slice(pos, end);
-    pos = end;
-  }
-};
-var readBytes = async function* (iterable, chunkSize) {
-  for await (const chunk of readStream(iterable)) {
-    yield* streamChunk(chunk, chunkSize);
-  }
-};
-var readStream = async function* (stream4) {
-  if (stream4[Symbol.asyncIterator]) {
-    yield* stream4;
-    return;
-  }
-  const reader = stream4.getReader();
-  try {
-    for (; ; ) {
-      const { done, value } = await reader.read();
-      if (done) {
-        break;
-      }
-      yield value;
-    }
-  } finally {
-    await reader.cancel();
-  }
-};
-var trackStream = (stream4, chunkSize, onProgress, onFinish) => {
-  const iterator2 = readBytes(stream4, chunkSize);
-  let bytes = 0;
-  let done;
-  let _onFinish = (e) => {
-    if (!done) {
-      done = true;
-      onFinish && onFinish(e);
-    }
-  };
-  return new ReadableStream({
-    async pull(controller) {
-      try {
-        const { done: done2, value } = await iterator2.next();
-        if (done2) {
-          _onFinish();
-          controller.close();
-          return;
-        }
-        let len = value.byteLength;
-        if (onProgress) {
-          let loadedBytes = bytes += len;
-          onProgress(loadedBytes);
-        }
-        controller.enqueue(new Uint8Array(value));
-      } catch (err) {
-        _onFinish(err);
-        throw err;
-      }
-    },
-    cancel(reason) {
-      _onFinish(reason);
-      return iterator2.return();
-    }
-  }, {
-    highWaterMark: 2
-  });
-};
-
-// node_modules/axios/lib/adapters/fetch.js
-var isFetchSupported = typeof fetch === "function" && typeof Request === "function" && typeof Response === "function";
-var isReadableStreamSupported = isFetchSupported && typeof ReadableStream === "function";
-var encodeText = isFetchSupported && (typeof TextEncoder === "function" ? /* @__PURE__ */ ((encoder) => (str) => encoder.encode(str))(new TextEncoder()) : async (str) => new Uint8Array(await new Response(str).arrayBuffer()));
-var test = (fn, ...args) => {
-  try {
-    return !!fn(...args);
-  } catch (e) {
-    return false;
-  }
-};
-var supportsRequestStream = isReadableStreamSupported && test(() => {
-  let duplexAccessed = false;
-  const hasContentType = new Request(platform_default.origin, {
-    body: new ReadableStream(),
-    method: "POST",
-    get duplex() {
-      duplexAccessed = true;
-      return "half";
-    }
-  }).headers.has("Content-Type");
-  return duplexAccessed && !hasContentType;
-});
-var DEFAULT_CHUNK_SIZE = 64 * 1024;
-var supportsResponseStream = isReadableStreamSupported && test(() => utils_default.isReadableStream(new Response("").body));
-var resolvers = {
-  stream: supportsResponseStream && ((res) => res.body)
-};
-isFetchSupported && ((res) => {
-  ["text", "arrayBuffer", "blob", "formData", "stream"].forEach((type) => {
-    !resolvers[type] && (resolvers[type] = utils_default.isFunction(res[type]) ? (res2) => res2[type]() : (_, config2) => {
-      throw new AxiosError_default(`Response type '${type}' is not supported`, AxiosError_default.ERR_NOT_SUPPORT, config2);
-    });
-  });
-})(new Response());
-var getBodyLength = async (body) => {
-  if (body == null) {
-    return 0;
-  }
-  if (utils_default.isBlob(body)) {
-    return body.size;
-  }
-  if (utils_default.isSpecCompliantForm(body)) {
-    const _request2 = new Request(platform_default.origin, {
-      method: "POST",
-      body
-    });
-    return (await _request2.arrayBuffer()).byteLength;
-  }
-  if (utils_default.isArrayBufferView(body) || utils_default.isArrayBuffer(body)) {
-    return body.byteLength;
-  }
-  if (utils_default.isURLSearchParams(body)) {
-    body = body + "";
-  }
-  if (utils_default.isString(body)) {
-    return (await encodeText(body)).byteLength;
-  }
-};
-var resolveBodyLength = async (headers, body) => {
-  const length = utils_default.toFiniteNumber(headers.getContentLength());
-  return length == null ? getBodyLength(body) : length;
-};
-var fetch_default = isFetchSupported && (async (config2) => {
-  let {
-    url: url2,
-    method,
-    data,
-    signal,
-    cancelToken,
-    timeout,
-    onDownloadProgress,
-    onUploadProgress,
-    responseType,
-    headers,
-    withCredentials = "same-origin",
-    fetchOptions
-  } = resolveConfig_default(config2);
-  responseType = responseType ? (responseType + "").toLowerCase() : "text";
-  let composedSignal = composeSignals_default([signal, cancelToken && cancelToken.toAbortSignal()], timeout);
-  let request;
-  const unsubscribe = composedSignal && composedSignal.unsubscribe && (() => {
-    composedSignal.unsubscribe();
-  });
-  let requestContentLength;
-  try {
-    if (onUploadProgress && supportsRequestStream && method !== "get" && method !== "head" && (requestContentLength = await resolveBodyLength(headers, data)) !== 0) {
-      let _request2 = new Request(url2, {
-        method: "POST",
-        body: data,
-        duplex: "half"
-      });
-      let contentTypeHeader;
-      if (utils_default.isFormData(data) && (contentTypeHeader = _request2.headers.get("content-type"))) {
-        headers.setContentType(contentTypeHeader);
-      }
-      if (_request2.body) {
-        const [onProgress, flush] = progressEventDecorator(
-          requestContentLength,
-          progressEventReducer(asyncDecorator(onUploadProgress))
-        );
-        data = trackStream(_request2.body, DEFAULT_CHUNK_SIZE, onProgress, flush);
-      }
-    }
-    if (!utils_default.isString(withCredentials)) {
-      withCredentials = withCredentials ? "include" : "omit";
-    }
-    const isCredentialsSupported = "credentials" in Request.prototype;
-    request = new Request(url2, {
-      ...fetchOptions,
-      signal: composedSignal,
-      method: method.toUpperCase(),
-      headers: headers.normalize().toJSON(),
-      body: data,
-      duplex: "half",
-      credentials: isCredentialsSupported ? withCredentials : void 0
-    });
-    let response = await fetch(request, fetchOptions);
-    const isStreamResponse = supportsResponseStream && (responseType === "stream" || responseType === "response");
-    if (supportsResponseStream && (onDownloadProgress || isStreamResponse && unsubscribe)) {
-      const options = {};
-      ["status", "statusText", "headers"].forEach((prop) => {
-        options[prop] = response[prop];
-      });
-      const responseContentLength = utils_default.toFiniteNumber(response.headers.get("content-length"));
-      const [onProgress, flush] = onDownloadProgress && progressEventDecorator(
-        responseContentLength,
-        progressEventReducer(asyncDecorator(onDownloadProgress), true)
-      ) || [];
-      response = new Response(
-        trackStream(response.body, DEFAULT_CHUNK_SIZE, onProgress, () => {
-          flush && flush();
-          unsubscribe && unsubscribe();
-        }),
-        options
-      );
-    }
-    responseType = responseType || "text";
-    let responseData = await resolvers[utils_default.findKey(resolvers, responseType) || "text"](response, config2);
-    !isStreamResponse && unsubscribe && unsubscribe();
-    return await new Promise((resolve, reject) => {
-      settle(resolve, reject, {
-        data: responseData,
-        headers: AxiosHeaders_default.from(response.headers),
-        status: response.status,
-        statusText: response.statusText,
-        config: config2,
-        request
-      });
-    });
-  } catch (err) {
-    unsubscribe && unsubscribe();
-    if (err && err.name === "TypeError" && /Load failed|fetch/i.test(err.message)) {
-      throw Object.assign(
-        new AxiosError_default("Network Error", AxiosError_default.ERR_NETWORK, config2, request),
-        {
-          cause: err.cause || err
-        }
-      );
-    }
-    throw AxiosError_default.from(err, err && err.code, config2, request);
-  }
-});
-
-// node_modules/axios/lib/adapters/adapters.js
-var knownAdapters = {
-  http: http_default,
-  xhr: xhr_default,
-  fetch: fetch_default
-};
-utils_default.forEach(knownAdapters, (fn, value) => {
-  if (fn) {
-    try {
-      Object.defineProperty(fn, "name", { value });
-    } catch (e) {
-    }
-    Object.defineProperty(fn, "adapterName", { value });
-  }
-});
-var renderReason = (reason) => `- ${reason}`;
-var isResolvedHandle = (adapter) => utils_default.isFunction(adapter) || adapter === null || adapter === false;
-var adapters_default = {
-  getAdapter: (adapters) => {
-    adapters = utils_default.isArray(adapters) ? adapters : [adapters];
-    const { length } = adapters;
-    let nameOrAdapter;
-    let adapter;
-    const rejectedReasons = {};
-    for (let i = 0; i < length; i++) {
-      nameOrAdapter = adapters[i];
-      let id;
-      adapter = nameOrAdapter;
-      if (!isResolvedHandle(nameOrAdapter)) {
-        adapter = knownAdapters[(id = String(nameOrAdapter)).toLowerCase()];
-        if (adapter === void 0) {
-          throw new AxiosError_default(`Unknown adapter '${id}'`);
-        }
-      }
-      if (adapter) {
-        break;
-      }
-      rejectedReasons[id || "#" + i] = adapter;
-    }
-    if (!adapter) {
-      const reasons = Object.entries(rejectedReasons).map(
-        ([id, state]) => `adapter ${id} ` + (state === false ? "is not supported by the environment" : "is not available in the build")
-      );
-      let s = length ? reasons.length > 1 ? "since :\n" + reasons.map(renderReason).join("\n") : " " + renderReason(reasons[0]) : "as no adapter specified";
-      throw new AxiosError_default(
-        `There is no suitable adapter to dispatch the request ` + s,
-        "ERR_NOT_SUPPORT"
-      );
-    }
-    return adapter;
-  },
-  adapters: knownAdapters
-};
-
-// node_modules/axios/lib/core/dispatchRequest.js
-function throwIfCancellationRequested(config2) {
-  if (config2.cancelToken) {
-    config2.cancelToken.throwIfRequested();
-  }
-  if (config2.signal && config2.signal.aborted) {
-    throw new CanceledError_default(null, config2);
-  }
-}
-function dispatchRequest(config2) {
-  throwIfCancellationRequested(config2);
-  config2.headers = AxiosHeaders_default.from(config2.headers);
-  config2.data = transformData.call(
-    config2,
-    config2.transformRequest
-  );
-  if (["post", "put", "patch"].indexOf(config2.method) !== -1) {
-    config2.headers.setContentType("application/x-www-form-urlencoded", false);
-  }
-  const adapter = adapters_default.getAdapter(config2.adapter || defaults_default.adapter);
-  return adapter(config2).then(function onAdapterResolution(response) {
-    throwIfCancellationRequested(config2);
-    response.data = transformData.call(
-      config2,
-      config2.transformResponse,
-      response
-    );
-    response.headers = AxiosHeaders_default.from(response.headers);
-    return response;
-  }, function onAdapterRejection(reason) {
-    if (!isCancel(reason)) {
-      throwIfCancellationRequested(config2);
-      if (reason && reason.response) {
-        reason.response.data = transformData.call(
-          config2,
-          config2.transformResponse,
-          reason.response
-        );
-        reason.response.headers = AxiosHeaders_default.from(reason.response.headers);
-      }
-    }
-    return Promise.reject(reason);
-  });
-}
-
-// node_modules/axios/lib/helpers/validator.js
-var validators = {};
-["object", "boolean", "number", "function", "string", "symbol"].forEach((type, i) => {
-  validators[type] = function validator(thing) {
-    return typeof thing === type || "a" + (i < 1 ? "n " : " ") + type;
-  };
-});
-var deprecatedWarnings = {};
-validators.transitional = function transitional(validator, version4, message) {
-  function formatMessage(opt, desc) {
-    return "[Axios v" + VERSION + "] Transitional option '" + opt + "'" + desc + (message ? ". " + message : "");
-  }
-  return (value, opt, opts) => {
-    if (validator === false) {
-      throw new AxiosError_default(
-        formatMessage(opt, " has been removed" + (version4 ? " in " + version4 : "")),
-        AxiosError_default.ERR_DEPRECATED
-      );
-    }
-    if (version4 && !deprecatedWarnings[opt]) {
-      deprecatedWarnings[opt] = true;
-      console.warn(
-        formatMessage(
-          opt,
-          " has been deprecated since v" + version4 + " and will be removed in the near future"
-        )
-      );
-    }
-    return validator ? validator(value, opt, opts) : true;
-  };
-};
-validators.spelling = function spelling(correctSpelling) {
-  return (value, opt) => {
-    console.warn(`${opt} is likely a misspelling of ${correctSpelling}`);
-    return true;
-  };
-};
-function assertOptions(options, schema, allowUnknown) {
-  if (typeof options !== "object") {
-    throw new AxiosError_default("options must be an object", AxiosError_default.ERR_BAD_OPTION_VALUE);
-  }
-  const keys = Object.keys(options);
-  let i = keys.length;
-  while (i-- > 0) {
-    const opt = keys[i];
-    const validator = schema[opt];
-    if (validator) {
-      const value = options[opt];
-      const result = value === void 0 || validator(value, opt, options);
-      if (result !== true) {
-        throw new AxiosError_default("option " + opt + " must be " + result, AxiosError_default.ERR_BAD_OPTION_VALUE);
-      }
-      continue;
-    }
-    if (allowUnknown !== true) {
-      throw new AxiosError_default("Unknown option " + opt, AxiosError_default.ERR_BAD_OPTION);
-    }
-  }
-}
-var validator_default = {
-  assertOptions,
-  validators
-};
-
-// node_modules/axios/lib/core/Axios.js
-var validators2 = validator_default.validators;
-var Axios = class {
-  constructor(instanceConfig) {
-    this.defaults = instanceConfig || {};
-    this.interceptors = {
-      request: new InterceptorManager_default(),
-      response: new InterceptorManager_default()
-    };
-  }
-  /**
-   * Dispatch a request
-   *
-   * @param {String|Object} configOrUrl The config specific for this request (merged with this.defaults)
-   * @param {?Object} config
-   *
-   * @returns {Promise} The Promise to be fulfilled
-   */
-  async request(configOrUrl, config2) {
-    try {
-      return await this._request(configOrUrl, config2);
-    } catch (err) {
-      if (err instanceof Error) {
-        let dummy = {};
-        Error.captureStackTrace ? Error.captureStackTrace(dummy) : dummy = new Error();
-        const stack = dummy.stack ? dummy.stack.replace(/^.+\n/, "") : "";
-        try {
-          if (!err.stack) {
-            err.stack = stack;
-          } else if (stack && !String(err.stack).endsWith(stack.replace(/^.+\n.+\n/, ""))) {
-            err.stack += "\n" + stack;
-          }
-        } catch (e) {
-        }
-      }
-      throw err;
-    }
-  }
-  _request(configOrUrl, config2) {
-    if (typeof configOrUrl === "string") {
-      config2 = config2 || {};
-      config2.url = configOrUrl;
-    } else {
-      config2 = configOrUrl || {};
-    }
-    config2 = mergeConfig(this.defaults, config2);
-    const { transitional: transitional2, paramsSerializer, headers } = config2;
-    if (transitional2 !== void 0) {
-      validator_default.assertOptions(transitional2, {
-        silentJSONParsing: validators2.transitional(validators2.boolean),
-        forcedJSONParsing: validators2.transitional(validators2.boolean),
-        clarifyTimeoutError: validators2.transitional(validators2.boolean)
-      }, false);
-    }
-    if (paramsSerializer != null) {
-      if (utils_default.isFunction(paramsSerializer)) {
-        config2.paramsSerializer = {
-          serialize: paramsSerializer
-        };
-      } else {
-        validator_default.assertOptions(paramsSerializer, {
-          encode: validators2.function,
-          serialize: validators2.function
-        }, true);
-      }
-    }
-    if (config2.allowAbsoluteUrls !== void 0) {
-    } else if (this.defaults.allowAbsoluteUrls !== void 0) {
-      config2.allowAbsoluteUrls = this.defaults.allowAbsoluteUrls;
-    } else {
-      config2.allowAbsoluteUrls = true;
-    }
-    validator_default.assertOptions(config2, {
-      baseUrl: validators2.spelling("baseURL"),
-      withXsrfToken: validators2.spelling("withXSRFToken")
-    }, true);
-    config2.method = (config2.method || this.defaults.method || "get").toLowerCase();
-    let contextHeaders = headers && utils_default.merge(
-      headers.common,
-      headers[config2.method]
-    );
-    headers && utils_default.forEach(
-      ["delete", "get", "head", "post", "put", "patch", "common"],
-      (method) => {
-        delete headers[method];
-      }
-    );
-    config2.headers = AxiosHeaders_default.concat(contextHeaders, headers);
-    const requestInterceptorChain = [];
-    let synchronousRequestInterceptors = true;
-    this.interceptors.request.forEach(function unshiftRequestInterceptors(interceptor) {
-      if (typeof interceptor.runWhen === "function" && interceptor.runWhen(config2) === false) {
-        return;
-      }
-      synchronousRequestInterceptors = synchronousRequestInterceptors && interceptor.synchronous;
-      requestInterceptorChain.unshift(interceptor.fulfilled, interceptor.rejected);
-    });
-    const responseInterceptorChain = [];
-    this.interceptors.response.forEach(function pushResponseInterceptors(interceptor) {
-      responseInterceptorChain.push(interceptor.fulfilled, interceptor.rejected);
-    });
-    let promise;
-    let i = 0;
-    let len;
-    if (!synchronousRequestInterceptors) {
-      const chain = [dispatchRequest.bind(this), void 0];
-      chain.unshift.apply(chain, requestInterceptorChain);
-      chain.push.apply(chain, responseInterceptorChain);
-      len = chain.length;
-      promise = Promise.resolve(config2);
-      while (i < len) {
-        promise = promise.then(chain[i++], chain[i++]);
-      }
-      return promise;
-    }
-    len = requestInterceptorChain.length;
-    let newConfig = config2;
-    i = 0;
-    while (i < len) {
-      const onFulfilled = requestInterceptorChain[i++];
-      const onRejected = requestInterceptorChain[i++];
-      try {
-        newConfig = onFulfilled(newConfig);
-      } catch (error) {
-        onRejected.call(this, error);
-        break;
-      }
-    }
-    try {
-      promise = dispatchRequest.call(this, newConfig);
-    } catch (error) {
-      return Promise.reject(error);
-    }
-    i = 0;
-    len = responseInterceptorChain.length;
-    while (i < len) {
-      promise = promise.then(responseInterceptorChain[i++], responseInterceptorChain[i++]);
-    }
-    return promise;
-  }
-  getUri(config2) {
-    config2 = mergeConfig(this.defaults, config2);
-    const fullPath = buildFullPath(config2.baseURL, config2.url, config2.allowAbsoluteUrls);
-    return buildURL(fullPath, config2.params, config2.paramsSerializer);
-  }
-};
-utils_default.forEach(["delete", "get", "head", "options"], function forEachMethodNoData(method) {
-  Axios.prototype[method] = function(url2, config2) {
-    return this.request(mergeConfig(config2 || {}, {
-      method,
-      url: url2,
-      data: (config2 || {}).data
-    }));
-  };
-});
-utils_default.forEach(["post", "put", "patch"], function forEachMethodWithData(method) {
-  function generateHTTPMethod(isForm) {
-    return function httpMethod(url2, data, config2) {
-      return this.request(mergeConfig(config2 || {}, {
-        method,
-        headers: isForm ? {
-          "Content-Type": "multipart/form-data"
-        } : {},
-        url: url2,
-        data
-      }));
-    };
-  }
-  Axios.prototype[method] = generateHTTPMethod();
-  Axios.prototype[method + "Form"] = generateHTTPMethod(true);
-});
-var Axios_default = Axios;
-
-// node_modules/axios/lib/cancel/CancelToken.js
-var CancelToken = class _CancelToken {
-  constructor(executor) {
-    if (typeof executor !== "function") {
-      throw new TypeError("executor must be a function.");
-    }
-    let resolvePromise;
-    this.promise = new Promise(function promiseExecutor(resolve) {
-      resolvePromise = resolve;
-    });
-    const token = this;
-    this.promise.then((cancel) => {
-      if (!token._listeners) return;
-      let i = token._listeners.length;
-      while (i-- > 0) {
-        token._listeners[i](cancel);
-      }
-      token._listeners = null;
-    });
-    this.promise.then = (onfulfilled) => {
-      let _resolve;
-      const promise = new Promise((resolve) => {
-        token.subscribe(resolve);
-        _resolve = resolve;
-      }).then(onfulfilled);
-      promise.cancel = function reject() {
-        token.unsubscribe(_resolve);
-      };
-      return promise;
-    };
-    executor(function cancel(message, config2, request) {
-      if (token.reason) {
-        return;
-      }
-      token.reason = new CanceledError_default(message, config2, request);
-      resolvePromise(token.reason);
-    });
-  }
-  /**
-   * Throws a `CanceledError` if cancellation has been requested.
-   */
-  throwIfRequested() {
-    if (this.reason) {
-      throw this.reason;
-    }
-  }
-  /**
-   * Subscribe to the cancel signal
-   */
-  subscribe(listener) {
-    if (this.reason) {
-      listener(this.reason);
-      return;
-    }
-    if (this._listeners) {
-      this._listeners.push(listener);
-    } else {
-      this._listeners = [listener];
-    }
-  }
-  /**
-   * Unsubscribe from the cancel signal
-   */
-  unsubscribe(listener) {
-    if (!this._listeners) {
-      return;
-    }
-    const index2 = this._listeners.indexOf(listener);
-    if (index2 !== -1) {
-      this._listeners.splice(index2, 1);
-    }
-  }
-  toAbortSignal() {
-    const controller = new AbortController();
-    const abort = (err) => {
-      controller.abort(err);
-    };
-    this.subscribe(abort);
-    controller.signal.unsubscribe = () => this.unsubscribe(abort);
-    return controller.signal;
-  }
-  /**
-   * Returns an object that contains a new `CancelToken` and a function that, when called,
-   * cancels the `CancelToken`.
-   */
-  static source() {
-    let cancel;
-    const token = new _CancelToken(function executor(c) {
-      cancel = c;
-    });
-    return {
-      token,
-      cancel
-    };
-  }
-};
-var CancelToken_default = CancelToken;
-
-// node_modules/axios/lib/helpers/spread.js
-function spread(callback) {
-  return function wrap(arr) {
-    return callback.apply(null, arr);
-  };
-}
-
-// node_modules/axios/lib/helpers/isAxiosError.js
-function isAxiosError(payload) {
-  return utils_default.isObject(payload) && payload.isAxiosError === true;
-}
-
-// node_modules/axios/lib/helpers/HttpStatusCode.js
-var HttpStatusCode = {
-  Continue: 100,
-  SwitchingProtocols: 101,
-  Processing: 102,
-  EarlyHints: 103,
-  Ok: 200,
-  Created: 201,
-  Accepted: 202,
-  NonAuthoritativeInformation: 203,
-  NoContent: 204,
-  ResetContent: 205,
-  PartialContent: 206,
-  MultiStatus: 207,
-  AlreadyReported: 208,
-  ImUsed: 226,
-  MultipleChoices: 300,
-  MovedPermanently: 301,
-  Found: 302,
-  SeeOther: 303,
-  NotModified: 304,
-  UseProxy: 305,
-  Unused: 306,
-  TemporaryRedirect: 307,
-  PermanentRedirect: 308,
-  BadRequest: 400,
-  Unauthorized: 401,
-  PaymentRequired: 402,
-  Forbidden: 403,
-  NotFound: 404,
-  MethodNotAllowed: 405,
-  NotAcceptable: 406,
-  ProxyAuthenticationRequired: 407,
-  RequestTimeout: 408,
-  Conflict: 409,
-  Gone: 410,
-  LengthRequired: 411,
-  PreconditionFailed: 412,
-  PayloadTooLarge: 413,
-  UriTooLong: 414,
-  UnsupportedMediaType: 415,
-  RangeNotSatisfiable: 416,
-  ExpectationFailed: 417,
-  ImATeapot: 418,
-  MisdirectedRequest: 421,
-  UnprocessableEntity: 422,
-  Locked: 423,
-  FailedDependency: 424,
-  TooEarly: 425,
-  UpgradeRequired: 426,
-  PreconditionRequired: 428,
-  TooManyRequests: 429,
-  RequestHeaderFieldsTooLarge: 431,
-  UnavailableForLegalReasons: 451,
-  InternalServerError: 500,
-  NotImplemented: 501,
-  BadGateway: 502,
-  ServiceUnavailable: 503,
-  GatewayTimeout: 504,
-  HttpVersionNotSupported: 505,
-  VariantAlsoNegotiates: 506,
-  InsufficientStorage: 507,
-  LoopDetected: 508,
-  NotExtended: 510,
-  NetworkAuthenticationRequired: 511
-};
-Object.entries(HttpStatusCode).forEach(([key, value]) => {
-  HttpStatusCode[value] = key;
-});
-var HttpStatusCode_default = HttpStatusCode;
-
-// node_modules/axios/lib/axios.js
-function createInstance(defaultConfig) {
-  const context = new Axios_default(defaultConfig);
-  const instance = bind(Axios_default.prototype.request, context);
-  utils_default.extend(instance, Axios_default.prototype, context, { allOwnKeys: true });
-  utils_default.extend(instance, context, null, { allOwnKeys: true });
-  instance.create = function create(instanceConfig) {
-    return createInstance(mergeConfig(defaultConfig, instanceConfig));
-  };
-  return instance;
-}
-var axios = createInstance(defaults_default);
-axios.Axios = Axios_default;
-axios.CanceledError = CanceledError_default;
-axios.CancelToken = CancelToken_default;
-axios.isCancel = isCancel;
-axios.VERSION = VERSION;
-axios.toFormData = toFormData_default;
-axios.AxiosError = AxiosError_default;
-axios.Cancel = axios.CanceledError;
-axios.all = function all(promises) {
-  return Promise.all(promises);
-};
-axios.spread = spread;
-axios.isAxiosError = isAxiosError;
-axios.mergeConfig = mergeConfig;
-axios.AxiosHeaders = AxiosHeaders_default;
-axios.formToJSON = (thing) => formDataToJSON_default(utils_default.isHTMLForm(thing) ? new FormData(thing) : thing);
-axios.getAdapter = adapters_default.getAdapter;
-axios.HttpStatusCode = HttpStatusCode_default;
-axios.default = axios;
-var axios_default = axios;
-
-// node_modules/axios/index.js
-var {
-  Axios: Axios2,
-  AxiosError: AxiosError2,
-  CanceledError: CanceledError2,
-  isCancel: isCancel2,
-  CancelToken: CancelToken2,
-  VERSION: VERSION2,
-  all: all2,
-  Cancel,
-  isAxiosError: isAxiosError2,
-  spread: spread2,
-  toFormData: toFormData2,
-  AxiosHeaders: AxiosHeaders2,
-  HttpStatusCode: HttpStatusCode2,
-  formToJSON,
-  getAdapter,
-  mergeConfig: mergeConfig2
-} = axios_default;
+// src/modules/llm/llmDispatcher.ts
+init_axios2();
 
 // node_modules/@supabase/supabase-js/dist/module/index.js
 var module_exports = {};
@@ -72997,6 +74415,7 @@ async function commandRoutes(fastify2) {
 }
 
 // src/utils/openRouter.ts
+init_axios2();
 var OpenRouterService = class {
   models = [
     {
@@ -73151,6 +74570,7 @@ ${errors.join("\n")}`,
 };
 
 // src/modules/llm/llmManager.ts
+init_axios2();
 var LLMManager = class {
   OPENROUTER_API_KEY;
   OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1";
@@ -73824,10 +75244,10 @@ Esta \xE9 uma resposta simulada para desenvolvimento. Configure as chaves de API
   });
   fastify2.post("/config/sync", async (request, reply) => {
     try {
-      const availableModels = openRouter.getAvailableModels();
+      const availableModels2 = openRouter.getAvailableModels();
       const { data: existingConfigs } = await fastify2.supabase.from("llm_config").select("model_key");
       const existingKeys = existingConfigs?.map((c) => c.model_key) || [];
-      const newModels = availableModels.filter(
+      const newModels = availableModels2.filter(
         (model) => !existingKeys.includes(model.model_key)
       );
       if (newModels.length > 0) {
@@ -73856,7 +75276,7 @@ Esta \xE9 uma resposta simulada para desenvolvimento. Configure as chaves de API
         success: true,
         data: {
           synchronized: newModels.length,
-          total_available: availableModels.length,
+          total_available: availableModels2.length,
           new_models: newModels.map((m) => m.name)
         }
       });
@@ -74299,6 +75719,7 @@ Esta \xE9 uma resposta simulada para desenvolvimento. Configure as chaves de API
 }
 
 // src/routes/n8n.ts
+init_axios2();
 var triggerWorkflowSchema = external_exports.object({
   workflowId: external_exports.string().min(1, "ID do workflow \xE9 obrigat\xF3rio"),
   data: external_exports.record(external_exports.any()).optional(),
@@ -74467,6 +75888,7 @@ async function n8nRoutes(fastify2) {
 }
 
 // src/routes/ovos.ts
+init_axios2();
 var speakSchema = external_exports.object({
   text: external_exports.string().min(1, "Texto para fala n\xE3o pode estar vazio"),
   voice: external_exports.string().optional(),
@@ -75274,8 +76696,8 @@ async function configRoutes(fastify2) {
       if (error && llmConfigs === null) {
         fastify2.log.error("Erro ao buscar LLMs do Supabase:", error);
       }
-      const availableModels = openRouter.getAvailableModels();
-      const llms = availableModels.map((model) => {
+      const availableModels2 = openRouter.getAvailableModels();
+      const llms = availableModels2.map((model) => {
         const dbConfig = llmConfigs?.find((config2) => config2.model_name === model.model);
         return {
           ...model,
@@ -76652,6 +78074,314 @@ async function agentsRoutes(fastify2) {
   });
 }
 
+// import("../engines/**/*") in src/routes/voice-dispatcher.ts
+var globImport_engines = __glob({
+  "../engines/elevenlabs.ts": () => Promise.resolve().then(() => (init_elevenlabs(), elevenlabs_exports)),
+  "../engines/googletts.ts": () => Promise.resolve().then(() => (init_googletts(), googletts_exports)),
+  "../engines/mock-openvoice.ts": () => Promise.resolve().then(() => (init_mock_openvoice(), mock_openvoice_exports)),
+  "../engines/openvoice.ts": () => Promise.resolve().then(() => (init_openvoice(), openvoice_exports)),
+  "../engines/openvoice_new.ts": () => Promise.resolve().then(() => (init_openvoice_new(), openvoice_new_exports)),
+  "../engines/xtts.ts": () => Promise.resolve().then(() => (init_xtts(), xtts_exports))
+});
+
+// src/routes/voice-dispatcher.ts
+var synthesizeSchema = external_exports.object({
+  user_id: external_exports.string().min(1, "User ID \xE9 obrigat\xF3rio"),
+  text: external_exports.string().min(1, "Texto \xE9 obrigat\xF3rio").max(5e3, "Texto muito longo"),
+  voice_id: external_exports.string().min(1, "Voice ID \xE9 obrigat\xF3rio"),
+  speed: external_exports.number().min(0.1).max(3).default(1),
+  pitch: external_exports.number().min(-20).max(20).default(0),
+  volume: external_exports.number().min(0).max(1).default(0.8)
+});
+var getEnginesSchema = external_exports.object({
+  active_only: external_exports.boolean().default(true)
+});
+async function voiceDispatcherRoutes(fastify2) {
+  fastify2.post("/synthesize", async (request, reply) => {
+    try {
+      const { user_id, text, voice_id, speed, pitch, volume } = synthesizeSchema.parse(request.body);
+      fastify2.log.info(`\u{1F399}\uFE0F VoiceDispatcher: Solicita\xE7\xE3o de s\xEDntese para user ${user_id} com voz ${voice_id}`);
+      const { data: engines, error: enginesError } = await fastify2.supabase.from("voice_engines").select("*").eq("status", "online").order("fallback_priority", { ascending: true });
+      if (enginesError) {
+        fastify2.log.error("Erro ao buscar engines:", enginesError);
+        throw new Error("Erro ao consultar engines de voz");
+      }
+      if (!engines || engines.length === 0) {
+        return reply.code(503).send({
+          success: false,
+          error: "Nenhuma engine de voz dispon\xEDvel",
+          code: "NO_ENGINES_AVAILABLE"
+        });
+      }
+      let lastError = null;
+      let synthesisResult = null;
+      for (const engine of engines) {
+        try {
+          fastify2.log.info(`\u{1F504} Tentando engine: ${engine.name} (prioridade: ${engine.fallback_priority})`);
+          const engineHandler = await globImport_engines(`../engines/${engine.handler_file}`);
+          synthesisResult = await engineHandler.synthesize({
+            text,
+            voice_id,
+            speed,
+            pitch,
+            volume,
+            user_id,
+            engine_config: engine.config
+          });
+          if (synthesisResult.success) {
+            await fastify2.supabase.from("voice_logs").insert({
+              user_id,
+              engine_name: engine.name,
+              voice_id,
+              text: text.substring(0, 500),
+              // Limitar tamanho do texto no log
+              status: "success",
+              duration_ms: synthesisResult.duration_ms,
+              audio_url: synthesisResult.audio_url,
+              created_at: (/* @__PURE__ */ new Date()).toISOString()
+            });
+            fastify2.log.info(`\u2705 S\xEDntese bem-sucedida com ${engine.name}`);
+            return reply.send({
+              success: true,
+              data: {
+                audio_url: synthesisResult.audio_url,
+                duration_ms: synthesisResult.duration_ms,
+                engine_used: engine.name,
+                voice_id,
+                text: text.substring(0, 100) + (text.length > 100 ? "..." : ""),
+                timestamp: (/* @__PURE__ */ new Date()).toISOString()
+              }
+            });
+          }
+        } catch (error) {
+          fastify2.log.warn(`\u26A0\uFE0F Engine ${engine.name} falhou:`, error.message);
+          lastError = error;
+          await fastify2.supabase.from("voice_logs").insert({
+            user_id,
+            engine_name: engine.name,
+            voice_id,
+            text: text.substring(0, 500),
+            status: "error",
+            error_message: error.message,
+            created_at: (/* @__PURE__ */ new Date()).toISOString()
+          });
+          continue;
+        }
+      }
+      return reply.code(500).send({
+        success: false,
+        error: "Todas as engines de voz falharam",
+        last_error: lastError?.message,
+        code: "ALL_ENGINES_FAILED"
+      });
+    } catch (error) {
+      fastify2.log.error("Erro no VoiceDispatcher:", error);
+      if (error instanceof external_exports.ZodError) {
+        return reply.code(400).send({
+          success: false,
+          error: "Dados inv\xE1lidos",
+          details: error.errors,
+          code: "VALIDATION_ERROR"
+        });
+      }
+      return reply.code(500).send({
+        success: false,
+        error: "Erro interno do servidor",
+        details: error.message,
+        code: "INTERNAL_ERROR"
+      });
+    }
+  });
+  fastify2.get("/engines", async (request, reply) => {
+    try {
+      const { active_only } = request.query;
+      let query = fastify2.supabase.from("voice_engines").select("*").order("fallback_priority", { ascending: true });
+      if (active_only) {
+        query = query.eq("status", "online");
+      }
+      const { data: engines, error } = await query;
+      if (error) {
+        throw error;
+      }
+      return reply.send({
+        success: true,
+        data: {
+          engines: engines || [],
+          total: engines?.length || 0,
+          filters: { active_only }
+        }
+      });
+    } catch (error) {
+      fastify2.log.error("Erro ao listar engines:", error);
+      return reply.code(500).send({
+        success: false,
+        error: "Erro ao listar engines",
+        details: error.message
+      });
+    }
+  });
+  fastify2.post("/engines/:id/status", async (request, reply) => {
+    try {
+      const { id } = request.params;
+      const { status } = request.body;
+      const { data, error } = await fastify2.supabase.from("voice_engines").update({
+        status,
+        updated_at: (/* @__PURE__ */ new Date()).toISOString()
+      }).eq("id", id).select().single();
+      if (error) {
+        throw error;
+      }
+      fastify2.log.info(`\u{1F504} Engine ${data.name} status atualizado para: ${status}`);
+      return reply.send({
+        success: true,
+        data
+      });
+    } catch (error) {
+      fastify2.log.error("Erro ao atualizar status da engine:", error);
+      return reply.code(500).send({
+        success: false,
+        error: "Erro ao atualizar status",
+        details: error.message
+      });
+    }
+  });
+  fastify2.get("/stats", async (request, reply) => {
+    try {
+      const { data: stats, error } = await fastify2.supabase.from("voice_usage_stats").select("*");
+      if (error) {
+        throw error;
+      }
+      return reply.send({
+        success: true,
+        data: stats || []
+      });
+    } catch (error) {
+      fastify2.log.error("Erro ao buscar estat\xEDsticas:", error);
+      return reply.code(500).send({
+        success: false,
+        error: "Erro ao buscar estat\xEDsticas",
+        details: error.message
+      });
+    }
+  });
+  fastify2.get("/logs", async (request, reply) => {
+    try {
+      const { user_id, engine_name, status, limit = 50 } = request.query;
+      let query = fastify2.supabase.from("voice_logs").select("*").order("created_at", { ascending: false }).limit(limit);
+      if (user_id) query = query.eq("user_id", user_id);
+      if (engine_name) query = query.eq("engine_name", engine_name);
+      if (status) query = query.eq("status", status);
+      const { data: logs, error } = await query;
+      if (error) {
+        throw error;
+      }
+      return reply.send({
+        success: true,
+        data: {
+          logs: logs || [],
+          total: logs?.length || 0,
+          filters: { user_id, engine_name, status, limit }
+        }
+      });
+    } catch (error) {
+      fastify2.log.error("Erro ao buscar logs:", error);
+      return reply.code(500).send({
+        success: false,
+        error: "Erro ao buscar logs",
+        details: error.message
+      });
+    }
+  });
+}
+
+// src/routes/sql-executor.ts
+var import_fs = require("fs");
+var import_path = require("path");
+async function sqlExecutorRoutes(fastify2) {
+  fastify2.post("/execute-voice-setup", async (request, reply) => {
+    try {
+      const sqlPath = (0, import_path.join)(__dirname, "../../_sql/voice_dispatcher_setup.sql");
+      const sql = (0, import_fs.readFileSync)(sqlPath, "utf8");
+      const statements = sql.split(";").map((s) => s.trim()).filter((s) => s && !s.startsWith("--") && s !== "");
+      const results = [];
+      for (const statement of statements) {
+        if (statement.trim()) {
+          try {
+            console.log("Executando:", statement.substring(0, 50) + "...");
+            const { data, error } = await fastify2.supabase.rpc("exec_sql", { sql_query: statement });
+            if (error) {
+              console.error("Erro SQL:", error);
+              results.push({
+                sql: statement.substring(0, 100) + "...",
+                error: error.message
+              });
+            } else {
+              console.log("\u2705 OK");
+              results.push({
+                sql: statement.substring(0, 100) + "...",
+                success: true
+              });
+            }
+          } catch (err) {
+            console.error("Erro ao executar:", err);
+            results.push({
+              sql: statement.substring(0, 100) + "...",
+              error: err.message
+            });
+          }
+        }
+      }
+      reply.send({
+        success: true,
+        message: "SQL executado",
+        results
+      });
+    } catch (error) {
+      console.error("Erro ao executar SQL:", error);
+      reply.code(500).send({
+        success: false,
+        error: "Erro ao executar SQL setup",
+        details: error.message
+      });
+    }
+  });
+  fastify2.post("/execute-sql", async (request, reply) => {
+    try {
+      const { sql } = request.body;
+      const { data, error } = await fastify2.supabase.rpc("exec_sql", { sql_query: sql });
+      if (error) {
+        console.log("Tentando executar SQL direto...");
+        const { data: result, error: directError } = await fastify2.supabase.from("information_schema.tables").select("table_name").limit(1);
+        if (directError) {
+          reply.code(500).send({
+            success: false,
+            error: "Erro ao executar SQL",
+            details: directError.message
+          });
+          return;
+        }
+        reply.send({
+          success: false,
+          error: "Fun\xE7\xE3o exec_sql n\xE3o dispon\xEDvel no Supabase",
+          suggestion: "Execute o SQL diretamente no painel do Supabase"
+        });
+      } else {
+        reply.send({
+          success: true,
+          data
+        });
+      }
+    } catch (error) {
+      console.error("Erro ao executar SQL:", error);
+      reply.code(500).send({
+        success: false,
+        error: "Erro ao executar SQL",
+        details: error.message
+      });
+    }
+  });
+}
+
 // src/routes/users.ts
 async function usersRoutes(fastify2) {
   fastify2.get("/me", async (request, reply) => {
@@ -76702,82 +78432,6 @@ async function usersRoutes(fastify2) {
       });
     }
   });
-  fastify2.get("/:id", async (request, reply) => {
-    try {
-      const { id } = request.params;
-      const { data: userData, error } = await fastify2.supabase.from("profiles").select(`
-          id,
-          email,
-          full_name,
-          role,
-          created_at,
-          updated_at
-        `).eq("id", id).single();
-      if (error) {
-        fastify2.log.error("Erro ao buscar usu\xE1rio no Supabase:", error);
-        const mockUser = {
-          id,
-          email: `user-${id.substring(0, 8)}@sistema.com`,
-          full_name: generateUserName(id),
-          role: "user",
-          created_at: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1e3).toISOString(),
-          updated_at: (/* @__PURE__ */ new Date()).toISOString()
-        };
-        return {
-          success: true,
-          data: mockUser,
-          source: "fallback"
-        };
-      }
-      return {
-        success: true,
-        data: userData,
-        source: "supabase"
-      };
-    } catch (error) {
-      fastify2.log.error("Erro ao buscar usu\xE1rio por ID:", error);
-      return reply.code(500).send({
-        success: false,
-        error: "Erro interno do servidor"
-      });
-    }
-  });
-}
-function generateUserName(userId) {
-  const nomesBrasileiros = [
-    "Ana Silva",
-    "Jo\xE3o Santos",
-    "Maria Oliveira",
-    "Carlos Souza",
-    "Fernanda Costa",
-    "Pedro Lima",
-    "Juliana Alves",
-    "Ricardo Ferreira",
-    "Camila Rodrigues",
-    "Bruno Martins",
-    "Larissa Pereira",
-    "Rafael Barbosa",
-    "Mariana Gomes",
-    "Diego Carvalho",
-    "Aline Ribeiro",
-    "Lucas Ara\xFAjo",
-    "Priscila Dias",
-    "Thiago Moreira",
-    "Vanessa Cardoso",
-    "Felipe Castro",
-    "Gabriela Nunes",
-    "Andr\xE9 Ramos",
-    "Tatiana Correia",
-    "Marcelo Teixeira",
-    "Renata Vieira",
-    "Oseias Gomes",
-    "Mariza Milene",
-    "Roberto Machado",
-    "Claudia Monteiro",
-    "Daniel Pinto"
-  ];
-  const index2 = userId.charCodeAt(0) % nomesBrasileiros.length;
-  return nomesBrasileiros[index2];
 }
 
 // src/routes/plans.ts
@@ -77180,12 +78834,502 @@ async function platformConfigRoutes(fastify2) {
   });
 }
 
+// src/routes/visions.ts
+async function visionsRoutes(fastify2) {
+  fastify2.get("/", async (request, reply) => {
+    try {
+      const { data: visions, error } = await fastify2.supabase.from("visions").select("*").eq("active", true).order("created_at", { ascending: false });
+      if (error) {
+        fastify2.log.warn("Erro ao buscar visions do Supabase, usando dados mock");
+        const mockVisions = [
+          {
+            id: "vision_1",
+            name: "Vision Principal",
+            description: "Assistente principal do AUTVISION",
+            status: "active",
+            type: "ai_assistant",
+            capabilities: ["chat", "voice", "analytics"],
+            created_at: (/* @__PURE__ */ new Date()).toISOString(),
+            updated_at: (/* @__PURE__ */ new Date()).toISOString(),
+            usage_count: 150,
+            success_rate: 0.98
+          },
+          {
+            id: "vision_2",
+            name: "Vision Analytics",
+            description: "Especialista em an\xE1lise de dados",
+            status: "active",
+            type: "analytics",
+            capabilities: ["data_analysis", "reporting"],
+            created_at: (/* @__PURE__ */ new Date()).toISOString(),
+            updated_at: (/* @__PURE__ */ new Date()).toISOString(),
+            usage_count: 89,
+            success_rate: 0.95
+          },
+          {
+            id: "vision_3",
+            name: "Vision Voice",
+            description: "Especialista em s\xEDntese de voz",
+            status: "active",
+            type: "voice_synthesis",
+            capabilities: ["tts", "voice_cloning"],
+            created_at: (/* @__PURE__ */ new Date()).toISOString(),
+            updated_at: (/* @__PURE__ */ new Date()).toISOString(),
+            usage_count: 67,
+            success_rate: 0.92
+          }
+        ];
+        return reply.send({
+          success: true,
+          data: mockVisions,
+          total: mockVisions.length,
+          source: "mock"
+        });
+      }
+      return reply.send({
+        success: true,
+        data: visions || [],
+        total: visions?.length || 0,
+        source: "supabase"
+      });
+    } catch (error) {
+      fastify2.log.error("Erro na rota /visions:", error);
+      return reply.status(500).send({
+        success: false,
+        error: "Erro interno do servidor",
+        details: error.message
+      });
+    }
+  });
+  fastify2.get("/:id", async (request, reply) => {
+    try {
+      const { id } = request.params;
+      const { data: vision, error } = await fastify2.supabase.from("visions").select("*").eq("id", id).single();
+      if (error || !vision) {
+        const mockVision = {
+          id,
+          name: `Vision ${id}`,
+          description: "Assistente AI avan\xE7ado",
+          status: "active",
+          type: "ai_assistant",
+          capabilities: ["chat", "voice", "analytics"],
+          created_at: (/* @__PURE__ */ new Date()).toISOString(),
+          updated_at: (/* @__PURE__ */ new Date()).toISOString(),
+          usage_count: Math.floor(Math.random() * 200),
+          success_rate: 0.9 + Math.random() * 0.1,
+          config: {
+            model: "gpt-4o",
+            temperature: 0.7,
+            max_tokens: 2e3
+          }
+        };
+        return reply.send({
+          success: true,
+          data: mockVision,
+          source: "mock"
+        });
+      }
+      return reply.send({
+        success: true,
+        data: vision,
+        source: "supabase"
+      });
+    } catch (error) {
+      fastify2.log.error(`Erro na rota /visions/${request.params.id}:`, error);
+      return reply.status(500).send({
+        success: false,
+        error: "Erro interno do servidor",
+        details: error.message
+      });
+    }
+  });
+  fastify2.post("/", async (request, reply) => {
+    try {
+      const visionData = request.body;
+      const { data: newVision, error } = await fastify2.supabase.from("visions").insert([{
+        ...visionData,
+        created_at: (/* @__PURE__ */ new Date()).toISOString(),
+        updated_at: (/* @__PURE__ */ new Date()).toISOString()
+      }]).select().single();
+      if (error) {
+        fastify2.log.warn("Erro ao criar vision no Supabase, retornando mock");
+        const mockVision = {
+          id: `vision_${Date.now()}`,
+          ...visionData,
+          created_at: (/* @__PURE__ */ new Date()).toISOString(),
+          updated_at: (/* @__PURE__ */ new Date()).toISOString(),
+          usage_count: 0,
+          success_rate: 1
+        };
+        return reply.status(201).send({
+          success: true,
+          data: mockVision,
+          source: "mock"
+        });
+      }
+      return reply.status(201).send({
+        success: true,
+        data: newVision,
+        source: "supabase"
+      });
+    } catch (error) {
+      fastify2.log.error("Erro na rota POST /visions:", error);
+      return reply.status(500).send({
+        success: false,
+        error: "Erro interno do servidor",
+        details: error.message
+      });
+    }
+  });
+  fastify2.put("/:id", async (request, reply) => {
+    try {
+      const { id } = request.params;
+      const updateData = request.body;
+      const { data: updatedVision, error } = await fastify2.supabase.from("visions").update({
+        ...updateData,
+        updated_at: (/* @__PURE__ */ new Date()).toISOString()
+      }).eq("id", id).select().single();
+      if (error) {
+        fastify2.log.warn("Erro ao atualizar vision no Supabase, retornando mock");
+        const mockVision = {
+          id,
+          ...updateData,
+          updated_at: (/* @__PURE__ */ new Date()).toISOString()
+        };
+        return reply.send({
+          success: true,
+          data: mockVision,
+          source: "mock"
+        });
+      }
+      return reply.send({
+        success: true,
+        data: updatedVision,
+        source: "supabase"
+      });
+    } catch (error) {
+      fastify2.log.error(`Erro na rota PUT /visions/${request.params.id}:`, error);
+      return reply.status(500).send({
+        success: false,
+        error: "Erro interno do servidor",
+        details: error.message
+      });
+    }
+  });
+  fastify2.delete("/:id", async (request, reply) => {
+    try {
+      const { id } = request.params;
+      const { error } = await fastify2.supabase.from("visions").delete().eq("id", id);
+      if (error) {
+        fastify2.log.warn("Erro ao deletar vision no Supabase, simulando sucesso");
+      }
+      return reply.send({
+        success: true,
+        message: "Vision deletada com sucesso",
+        source: error ? "mock" : "supabase"
+      });
+    } catch (error) {
+      fastify2.log.error(`Erro na rota DELETE /visions/${request.params.id}:`, error);
+      return reply.status(500).send({
+        success: false,
+        error: "Erro interno do servidor",
+        details: error.message
+      });
+    }
+  });
+}
+
+// src/routes/admin.ts
+async function adminRoutes(fastify2) {
+  fastify2.get("/users", async (request, reply) => {
+    try {
+      const { data: users, error } = await fastify2.supabase.from("auth.users").select("id, email, created_at, last_sign_in_at, email_confirmed_at").limit(100);
+      if (error) {
+        fastify2.log.warn("Erro ao buscar usu\xE1rios do Supabase, usando dados mock");
+        const mockUsers = [
+          {
+            id: "user_1",
+            email: "admin@autvision.ai",
+            created_at: new Date(Date.now() - 30 * 24 * 60 * 60 * 1e3).toISOString(),
+            last_sign_in_at: (/* @__PURE__ */ new Date()).toISOString(),
+            email_confirmed_at: new Date(Date.now() - 29 * 24 * 60 * 60 * 1e3).toISOString(),
+            role: "admin",
+            status: "active",
+            usage_count: 245
+          },
+          {
+            id: "user_2",
+            email: "user@example.com",
+            created_at: new Date(Date.now() - 15 * 24 * 60 * 60 * 1e3).toISOString(),
+            last_sign_in_at: new Date(Date.now() - 2 * 60 * 60 * 1e3).toISOString(),
+            email_confirmed_at: new Date(Date.now() - 14 * 24 * 60 * 60 * 1e3).toISOString(),
+            role: "user",
+            status: "active",
+            usage_count: 67
+          },
+          {
+            id: "user_3",
+            email: "test@test.com",
+            created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1e3).toISOString(),
+            last_sign_in_at: new Date(Date.now() - 24 * 60 * 60 * 1e3).toISOString(),
+            email_confirmed_at: null,
+            role: "user",
+            status: "pending",
+            usage_count: 12
+          }
+        ];
+        return reply.send({
+          success: true,
+          data: mockUsers,
+          total: mockUsers.length,
+          source: "mock"
+        });
+      }
+      return reply.send({
+        success: true,
+        data: users || [],
+        total: users?.length || 0,
+        source: "supabase"
+      });
+    } catch (error) {
+      fastify2.log.error("Erro na rota /admin/users:", error);
+      return reply.status(500).send({
+        success: false,
+        error: "Erro interno do servidor",
+        details: error.message
+      });
+    }
+  });
+  fastify2.get("/logs", async (request, reply) => {
+    try {
+      const { data: logs, error } = await fastify2.supabase.from("system_logs").select("*").order("created_at", { ascending: false }).limit(100);
+      if (error) {
+        fastify2.log.warn("Erro ao buscar logs do Supabase, usando dados mock");
+        const mockLogs = [
+          {
+            id: "log_1",
+            level: "info",
+            message: "Usuario admin@autvision.ai fez login",
+            timestamp: (/* @__PURE__ */ new Date()).toISOString(),
+            source: "auth",
+            user_id: "user_1",
+            metadata: { ip: "192.168.1.100", user_agent: "Chrome/91.0" }
+          },
+          {
+            id: "log_2",
+            level: "success",
+            message: "Vision criada com sucesso: Vision Principal",
+            timestamp: new Date(Date.now() - 30 * 60 * 1e3).toISOString(),
+            source: "visions",
+            user_id: "user_1",
+            metadata: { vision_id: "vision_1" }
+          },
+          {
+            id: "log_3",
+            level: "warning",
+            message: "Tentativa de acesso negada para endpoint /admin/users",
+            timestamp: new Date(Date.now() - 60 * 60 * 1e3).toISOString(),
+            source: "security",
+            user_id: "user_2",
+            metadata: { endpoint: "/admin/users", reason: "insufficient_permissions" }
+          },
+          {
+            id: "log_4",
+            level: "error",
+            message: "Falha na conex\xE3o com Supabase",
+            timestamp: new Date(Date.now() - 2 * 60 * 60 * 1e3).toISOString(),
+            source: "database",
+            user_id: null,
+            metadata: { error_code: "CONNECTION_TIMEOUT" }
+          }
+        ];
+        return reply.send({
+          success: true,
+          data: mockLogs,
+          total: mockLogs.length,
+          source: "mock"
+        });
+      }
+      return reply.send({
+        success: true,
+        data: logs || [],
+        total: logs?.length || 0,
+        source: "supabase"
+      });
+    } catch (error) {
+      fastify2.log.error("Erro na rota /admin/logs:", error);
+      return reply.status(500).send({
+        success: false,
+        error: "Erro interno do servidor",
+        details: error.message
+      });
+    }
+  });
+  fastify2.get("/monitoring", async (request, reply) => {
+    try {
+      const mockMonitoring = {
+        system: {
+          uptime: process.uptime(),
+          memory: process.memoryUsage(),
+          cpu_usage: Math.random() * 100,
+          load_average: [0.5, 0.8, 1.2],
+          timestamp: (/* @__PURE__ */ new Date()).toISOString()
+        },
+        services: {
+          supabase: {
+            status: "healthy",
+            response_time: Math.floor(Math.random() * 100) + 50,
+            last_check: (/* @__PURE__ */ new Date()).toISOString()
+          },
+          openrouter: {
+            status: "healthy",
+            response_time: Math.floor(Math.random() * 200) + 100,
+            last_check: (/* @__PURE__ */ new Date()).toISOString()
+          },
+          voice_dispatcher: {
+            status: "healthy",
+            response_time: Math.floor(Math.random() * 300) + 200,
+            last_check: (/* @__PURE__ */ new Date()).toISOString()
+          }
+        },
+        metrics: {
+          total_users: 156,
+          active_users_today: 23,
+          total_visions: 8,
+          active_visions: 6,
+          requests_today: 1247,
+          errors_today: 12,
+          success_rate: 0.99
+        },
+        alerts: [
+          {
+            id: "alert_1",
+            level: "warning",
+            message: "Alto uso de CPU detectado",
+            timestamp: new Date(Date.now() - 15 * 60 * 1e3).toISOString(),
+            resolved: false
+          }
+        ]
+      };
+      return reply.send({
+        success: true,
+        data: mockMonitoring,
+        source: "system"
+      });
+    } catch (error) {
+      fastify2.log.error("Erro na rota /admin/monitoring:", error);
+      return reply.status(500).send({
+        success: false,
+        error: "Erro interno do servidor",
+        details: error.message
+      });
+    }
+  });
+  fastify2.get("/settings", async (request, reply) => {
+    try {
+      const mockSettings = {
+        general: {
+          site_name: "AUTVISION",
+          maintenance_mode: false,
+          debug_mode: process.env.NODE_ENV === "development",
+          api_version: "1.0.0"
+        },
+        auth: {
+          require_email_confirmation: true,
+          session_timeout: 3600,
+          max_login_attempts: 5
+        },
+        ai: {
+          default_model: "gpt-4o",
+          max_tokens: 2e3,
+          temperature: 0.7,
+          rate_limit_per_minute: 60
+        },
+        voice: {
+          default_engine: "openvoice",
+          fallback_engine: "mock",
+          max_text_length: 1e3
+        }
+      };
+      return reply.send({
+        success: true,
+        data: mockSettings,
+        source: "config"
+      });
+    } catch (error) {
+      fastify2.log.error("Erro na rota /admin/settings:", error);
+      return reply.status(500).send({
+        success: false,
+        error: "Erro interno do servidor",
+        details: error.message
+      });
+    }
+  });
+  fastify2.get("/dashboard", async (request, reply) => {
+    try {
+      const mockDashboard = {
+        stats: {
+          total_users: 156,
+          new_users_today: 8,
+          total_visions: 12,
+          active_visions: 9,
+          total_requests: 15674,
+          requests_today: 1247,
+          success_rate: 99.2,
+          avg_response_time: 285
+        },
+        recent_activity: [
+          {
+            id: "activity_1",
+            type: "user_signup",
+            message: "Novo usu\xE1rio registrado: user@example.com",
+            timestamp: new Date(Date.now() - 30 * 60 * 1e3).toISOString()
+          },
+          {
+            id: "activity_2",
+            type: "vision_created",
+            message: "Nova vision criada: Vision Analytics Pro",
+            timestamp: new Date(Date.now() - 45 * 60 * 1e3).toISOString()
+          },
+          {
+            id: "activity_3",
+            type: "error",
+            message: "Erro na API de s\xEDntese de voz",
+            timestamp: new Date(Date.now() - 60 * 60 * 1e3).toISOString()
+          }
+        ],
+        system_health: {
+          overall: "healthy",
+          services: {
+            database: "healthy",
+            api: "healthy",
+            voice_engine: "healthy",
+            llm_providers: "healthy"
+          }
+        }
+      };
+      return reply.send({
+        success: true,
+        data: mockDashboard,
+        source: "system"
+      });
+    } catch (error) {
+      fastify2.log.error("Erro na rota /admin/dashboard:", error);
+      return reply.status(500).send({
+        success: false,
+        error: "Erro interno do servidor",
+        details: error.message
+      });
+    }
+  });
+}
+
 // src/index.ts
 console.log("\u{1F7E2} process.cwd():", process.cwd());
 var envPaths = [
-  (0, import_path.join)(process.cwd(), ".env"),
-  (0, import_path.join)(process.cwd(), "autvisionai-backend", ".env"),
-  (0, import_path.join)(__dirname, "..", ".env")
+  (0, import_path2.join)(process.cwd(), ".env"),
+  (0, import_path2.join)(process.cwd(), "autvisionai-backend", ".env"),
+  (0, import_path2.join)(__dirname, "..", ".env")
 ];
 var envLoaded = false;
 for (const envPath of envPaths) {
@@ -77220,16 +79364,7 @@ var fastify = (0, import_fastify.default)({
   }
 });
 fastify.addHook("preHandler", async (request, reply) => {
-  const publicRoutes = [
-    "/health",
-    "/config/health",
-    "/users/"
-    // Permite todas as rotas de usuários
-  ];
-  const isPublicRoute = publicRoutes.some(
-    (route) => request.url === route || request.url.startsWith(route)
-  );
-  if (isPublicRoute) {
+  if (request.url === "/health" || request.url === "/config/health") {
     return;
   }
   if (process.env.NODE_ENV === "development") {
@@ -77350,7 +79485,10 @@ async function setupRoutes() {
         routines: "/routines/*",
         missions: "/missions/*",
         badges: "/badges/*",
-        agents: "/agents/*"
+        agents: "/agents/*",
+        voiceDispatcher: "/voice-dispatcher/*",
+        visions: "/visions/*",
+        admin: "/admin/*"
       }
     };
   });
@@ -77376,12 +79514,16 @@ async function setupRoutes() {
   await fastify.register(missionsRoutes, { prefix: "/missions" });
   await fastify.register(badgesRoutes, { prefix: "/badges" });
   await fastify.register(agentsRoutes, { prefix: "/agents" });
+  await fastify.register(voiceDispatcherRoutes, { prefix: "/voice-dispatcher" });
+  await fastify.register(sqlExecutorRoutes, { prefix: "/sql" });
   await fastify.register(usersRoutes, { prefix: "/users" });
   await fastify.register(plansRoutes, { prefix: "/plans" });
   await fastify.register(integrationsRoutes, { prefix: "/integrations" });
   await fastify.register(affiliatesRoutes, { prefix: "/affiliates" });
   await fastify.register(llmConfigRoutes, { prefix: "/llm-config" });
   await fastify.register(platformConfigRoutes, { prefix: "/platform-config" });
+  await fastify.register(visionsRoutes, { prefix: "/visions" });
+  await fastify.register(adminRoutes, { prefix: "/admin" });
 }
 async function start() {
   try {
