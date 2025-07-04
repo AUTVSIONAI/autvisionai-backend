@@ -81,10 +81,25 @@ import platformConfigRoutes from './routes/platform-config';
 import visionsRoutes from './routes/visions';
 import adminRoutes from './routes/admin';
 
+// Criar um endpoint básico ANTES de qualquer configuração complexa
 const fastify = Fastify({
-  logger: {
-    level: process.env.NODE_ENV === 'production' ? 'info' : 'debug'
-  }
+  logger: true
+});
+
+// ⚡ CORS IMEDIATO - ANTES DE TUDO!
+fastify.register(cors, {
+  origin: true, // Permitir todas as origens temporariamente
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key']
+});
+
+// ENDPOINT DE TESTE BÁSICO - SEM DEPS
+fastify.get('/ping', async (request, reply) => {
+  return { 
+    status: 'ok', 
+    timestamp: new Date().toISOString(),
+    env: process.env.NODE_ENV 
+  };
 });
 
 /**
