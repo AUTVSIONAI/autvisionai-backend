@@ -86,13 +86,6 @@ const fastify = Fastify({
   logger: true
 });
 
-// ⚡ CORS IMEDIATO - ANTES DE TUDO!
-fastify.register(cors, {
-  origin: true, // Permitir todas as origens temporariamente
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key']
-});
-
 // ENDPOINT DE TESTE BÁSICO - SEM DEPS
 fastify.get('/ping', async (request, reply) => {
   return { 
@@ -300,34 +293,7 @@ async function setupRoutes() {
     reply.code(204).send();
   });
 
-  // Config health check público (sem autenticação)
-  fastify.get('/config/health', async (request, reply) => {
-    try {
-      return {
-        success: true,
-        status: 'healthy',
-        service: 'AUTVISION Backend',
-        uptime: process.uptime(),
-        memory: process.memoryUsage(),
-        timestamp: new Date().toISOString(),
-        environment: process.env.NODE_ENV || 'development',
-        supabase: {
-          configured: !!process.env.SUPABASE_URL,
-          url: process.env.SUPABASE_URL ? '✅ Configurado' : '❌ Não configurado'
-        },
-        llm: {
-          openrouter: process.env.OPENROUTER_API_KEY ? '✅ Configurado' : '❌ Não configurado',
-          together: process.env.TOGETHER_API_KEY ? '✅ Configurado' : '❌ Não configurado'
-        }
-      };
-    } catch (error) {
-      return reply.status(500).send({
-        success: false,
-        status: 'error',
-        error: error.message
-      });
-    }
-  });  // Registro das rotas principais
+  // Registro das rotas principais
   await fastify.register(commandRoutes, { prefix: '/command' });
   await fastify.register(llmRoutes, { prefix: '/llm' });
   await fastify.register(n8nRoutes, { prefix: '/n8n' });

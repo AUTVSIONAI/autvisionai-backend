@@ -2,14 +2,14 @@
   "version": 2,
   "builds": [
     {
-      "src": "dist/minimal.cjs",
+      "src": "dist/index.cjs",
       "use": "@vercel/node"
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "dist/minimal.cjs"
+      "dest": "dist/index.cjs"
     }
   ],
   "env": {
