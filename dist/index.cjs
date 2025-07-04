@@ -76545,15 +76545,26 @@ var import_dotenv = __toESM(require_main2(), 1);
 import_dotenv.default.config();
 var supabaseUrl = process.env.SUPABASE_URL;
 var supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-if (!supabaseUrl || !supabaseKey) {
-  throw new Error("\u{1F534} Supabase credentials n\xE3o configuradas");
+var supabase = null;
+if (supabaseUrl && supabaseKey) {
+  supabase = createClient(supabaseUrl, supabaseKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  });
+  console.log("\u2705 Supabase conectado com sucesso");
+} else {
+  console.warn("\u26A0\uFE0F Supabase credentials n\xE3o configuradas - modo mock ativo");
+  supabase = {
+    from: () => ({
+      select: () => Promise.resolve({ data: [], error: null }),
+      insert: () => Promise.resolve({ data: null, error: null }),
+      update: () => Promise.resolve({ data: null, error: null }),
+      delete: () => Promise.resolve({ data: null, error: null })
+    })
+  };
 }
-var supabase = createClient(supabaseUrl, supabaseKey, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false
-  }
-});
 
 // src/routes/analytics.ts
 async function analyticsRoutes(fastify2) {

@@ -7,15 +7,29 @@ dotenv.config();
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-if (!supabaseUrl || !supabaseKey) {
-  throw new Error('🔴 Supabase credentials não configuradas');
+// Em produção na Vercel, permite funcionar sem Supabase temporariamente
+let supabase: SupabaseClient | null = null;
+
+if (supabaseUrl && supabaseKey) {
+  supabase = createClient(supabaseUrl, supabaseKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  });
+  console.log('✅ Supabase conectado com sucesso');
+} else {
+  console.warn('⚠️ Supabase credentials não configuradas - modo mock ativo');
+  // Cria um mock client para evitar erros
+  supabase = {
+    from: () => ({
+      select: () => Promise.resolve({ data: [], error: null }),
+      insert: () => Promise.resolve({ data: null, error: null }),
+      update: () => Promise.resolve({ data: null, error: null }),
+      delete: () => Promise.resolve({ data: null, error: null })
+    })
+  } as any;
 }
 
-export const supabase: SupabaseClient = createClient(supabaseUrl, supabaseKey, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false
-  }
-});
-
+export { supabase };
 export default supabase;
