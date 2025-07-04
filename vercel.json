@@ -15,19 +15,7 @@
   "env": {
     "NODE_ENV": "production",
     "PORT": "3001",
-    "API_KEY": "autvision-secure-2024",
-    "SUPABASE_URL": "https://woooqlznapzfhmjlyyll.supabase.co",
-    "SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indvb29xbHpuYXB6Zmhtamx5eWxsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk4OTYyNTUsImV4cCI6MjA2NTQ3MjI1NX0.Mdeir5LYY8IFzoEKl8hQoK9FW4WCM119MBeCKNTbHvY",
-    "SUPABASE_SERVICE_ROLE_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indvb29xbHpuYXB6Zmhtamx5eWxsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0OTg5NjI1NSwiZXhwIjoyMDY1NDcyMjU1fQ.vF2P7JU_9bR_7vlYC29U5I9StzRJlNW-g7g6xE2LqOE",
-    "OPENROUTER_API_KEY": "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",
-    "LLM_DEEPSEEK_R1_KEY": "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",
-    "LLM_MISTRAL_SMALL_KEY": "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",
-    "LLM_KIMI_DEV_KEY": "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",
-    "LLM_LLAMA3_8B_KEY": "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",
-    "LLM_DEEPSEEK_PROVER_KEY": "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",
-    "LLM_DEVSTRAL_KEY": "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",
-    "LLM_QWEN3_KEY": "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",
-    "LLM_LLAMA4_KEY": "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"
+    "API_KEY": "autvision-secure-2024"
   },
   "public": true
 }
