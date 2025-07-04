@@ -91,8 +91,21 @@ const fastify = Fastify({
  * 🔐 MIDDLEWARE DE AUTENTICAÇÃO
  */
 fastify.addHook('preHandler', async (request, reply) => {
-  // Pula autenticação para rotas de health check
-  if (request.url === '/health' || request.url === '/config/health') {
+  // Pula autenticação para rotas públicas
+  const publicRoutes = [
+    '/health', 
+    '/config/health', 
+    '/favicon.ico',
+    '/',
+    '/visions',
+    '/admin/dashboard',
+    '/admin/users',
+    '/admin/logs',
+    '/admin/monitoring',
+    '/admin/settings'
+  ];
+  
+  if (publicRoutes.some(route => request.url === route || request.url.startsWith(route))) {
     return;
   }
 
@@ -167,14 +180,21 @@ async function setupSecurity() {
       /\.vercel\.app$/
     ],
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH', 'HEAD'],
     allowedHeaders: [
       'Content-Type',
       'Authorization', 
       'x-api-key',
       'Origin',
       'Accept',
-      'Access-Control-Allow-Origin'
+      'Access-Control-Allow-Origin',
+      'Access-Control-Allow-Headers',
+      'Access-Control-Allow-Methods',
+      'Access-Control-Allow-Credentials'
+    ],
+    exposedHeaders: [
+      'Access-Control-Allow-Origin',
+      'Access-Control-Allow-Headers'
     ],
     optionsSuccessStatus: 200,
     preflightContinue: false
@@ -258,6 +278,11 @@ async function setupRoutes() {
       memory: process.memoryUsage(),
       timestamp: new Date().toISOString()
     };
+  });
+
+  // Favicon (evita erro 500)
+  fastify.get('/favicon.ico', async (request, reply) => {
+    reply.code(204).send();
   });
 
   // Config health check público (sem autenticação)
