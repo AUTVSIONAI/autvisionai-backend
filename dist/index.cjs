@@ -79452,6 +79452,7 @@ async function setupSecurity() {
       "https://autvision.ai",
       "https://www.autvision.ai",
       "https://autvisionai.com",
+      "https://www.autvisionai.com",
       "https://autvisionai-real-kdt1okwaj-maumautremeterra-gmailcoms-projects.vercel.app",
       "https://autvisionai-real-l4qsyx5h9-maumautremeterra-gmailcoms-projects.vercel.app",
       "https://autvisionai-real-qnbo9afel-maumautremeterra-gmailcoms-projects.vercel.app",
