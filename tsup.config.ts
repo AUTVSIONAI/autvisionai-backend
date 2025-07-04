@@ -1,7 +1,7 @@
 import { defineConfig } from 'tsup'
 
 export default defineConfig({
-  entry: ['src/index.ts'],
+  entry: ['src/minimal.ts'],
   format: ['cjs'],
   target: 'node18',
   splitting: false,

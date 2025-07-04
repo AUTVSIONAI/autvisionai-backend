@@ -2,20 +2,19 @@
   "version": 2,
   "builds": [
     {
-      "src": "dist/index.cjs",
+      "src": "dist/minimal.cjs",
       "use": "@vercel/node"
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "dist/index.cjs"
+      "dest": "dist/minimal.cjs"
     }
   ],
   "env": {
     "NODE_ENV": "production",
-    "PORT": "3001",
-    "API_KEY": "autvision-secure-2024"
+    "PORT": "3001"
   },
   "public": true
 }
