@@ -7,19 +7,26 @@ dotenv.config();
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-// Em produção na Vercel, permite funcionar sem Supabase temporariamente
+// Em produção na Vercel, tenta usar as credenciais
 let supabase: SupabaseClient | null = null;
 
 if (supabaseUrl && supabaseKey) {
-  supabase = createClient(supabaseUrl, supabaseKey, {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false
-    }
-  });
-  console.log('✅ Supabase conectado com sucesso');
-} else {
-  console.warn('⚠️ Supabase credentials não configuradas - modo mock ativo');
+  try {
+    supabase = createClient(supabaseUrl, supabaseKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      }
+    });
+    console.log('✅ Supabase conectado com sucesso');
+  } catch (error) {
+    console.error('❌ Erro ao conectar com Supabase:', error);
+    supabase = null;
+  }
+}
+
+if (!supabase) {
+  console.warn('⚠️ Usando Supabase mock - funcionalidade limitada');
   // Cria um mock client para evitar erros
   supabase = {
     from: () => ({

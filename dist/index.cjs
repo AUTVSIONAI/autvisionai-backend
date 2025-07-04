@@ -76547,15 +76547,21 @@ var supabaseUrl = process.env.SUPABASE_URL;
 var supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 var supabase = null;
 if (supabaseUrl && supabaseKey) {
-  supabase = createClient(supabaseUrl, supabaseKey, {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false
-    }
-  });
-  console.log("\u2705 Supabase conectado com sucesso");
-} else {
-  console.warn("\u26A0\uFE0F Supabase credentials n\xE3o configuradas - modo mock ativo");
+  try {
+    supabase = createClient(supabaseUrl, supabaseKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      }
+    });
+    console.log("\u2705 Supabase conectado com sucesso");
+  } catch (error) {
+    console.error("\u274C Erro ao conectar com Supabase:", error);
+    supabase = null;
+  }
+}
+if (!supabase) {
+  console.warn("\u26A0\uFE0F Usando Supabase mock - funcionalidade limitada");
   supabase = {
     from: () => ({
       select: () => Promise.resolve({ data: [], error: null }),
